@@ -296,7 +296,7 @@ Your fortune: Fear itself isn’t dangerous; what you do because of it is.""",
 Texting his boss that he quit, the dauntless worker ended the message with a smiling emoji.
 
 I see another word. Imperious -- Bossy and arrogantly commanding.
-The imperious mustard told the relish and mayonnaise -- 'the coldest spot in the refrigerator is mine!'
+The imperious mustard told the relish and mayonnaise -- "the coldest spot in the refrigerator is mine!"
 
 A final word. Demagogue -- A leader who gains support by manipulating emotions or fears.
 Vote for the devil, the demagogue said, or every angel loses its wings.
