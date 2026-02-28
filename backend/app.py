@@ -661,7 +661,14 @@ def start(response: Response):
     st = new_session()
     st["sid"] = sid
     SESSIONS[sid] = st
-    response.set_cookie("wp_sid", sid, httponly=False, samesite="Lax")
+    response.set_cookie(
+    "wp_sid",
+    sid,
+    httponly=True,
+    secure=True,
+    samesite="none",
+    path="/",
+)
 
     guidance = (
         "Do you wish to summon the Word Psychic, who through the meanings of words deciphers your fortune?\n"
