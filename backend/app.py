@@ -134,11 +134,11 @@ CLUSTERS = [
         "continue_q": "Shall we journey further with this word?",
         "script": (
             "Antipathy means a strong dislike.\n"
-            "The rooster showed antipathy toward his alarm clock.\n\n"
+            "Anipathy is what the rooster felt toward his alarm clock.\n\n"
             "I see another word. Vilify -- To attack someone’s reputation.\n"
             "Busted with a stolen ten percent off coupon for a nuclear reactor, the thief vilified the detective online.\n\n"
             "A final word. Annihilate -- To utterly destroy.\n"
-            "After annihilating the town, the hurricane wondered if it should cut back on the caffeine.\n\n"
+            "After annihilating the town, "maybe I should cut back on the caffeine,"wondered the hurricane.\n\n"
             "Antipathy. Vilify. Annihilate.\n"
             "Your fortune: Ill will destroys quietly, guarding against it leaves room for peace."
         ),
@@ -149,7 +149,7 @@ CLUSTERS = [
         "continue_q": "Shall we journey further with this word?",
         "script": (
             "Prudent means being careful and wise.\n"
-            "The demanding CEO wants a prudent business plan -- now!\n\n"
+            "The demanding CEO wants a prudent business plan -- right now!\n\n"
             "I see a second word. Revere -- To respect and honor deeply.\n"
             "Pizza was revered among the dogs for calming their hysterical disagreements.\n\n"
             "A final word. Venerate -- To hold as sacred.\n"
@@ -179,7 +179,7 @@ CLUSTERS = [
         "continue_q": "Shall we journey further with this word?",
         "script": (
             "Minuscule means extremely small.\n"
-            "Victory seemed minuscule thought the grass as it battled the weeds.\n\n"
+            "Victory seemed minuscule weighed the grass as it battled the weeds.\n\n"
             "I see another word. Nominal -- Small in name or importance.\n"
             "A nominal error unbeleivably ruined the mosquitos' family chicken dinner.\n\n"
             "A final word. Insignificant -- Too small or unimportant to matter.\n"
@@ -211,7 +211,7 @@ CLUSTERS = [
             "Benevolence means kindness. Inclination to do good.\n"
             "My dog showed great benevolence -- he only ate half of my sandwich lying on the counter.\n\n"
             "I see another word.  Philanthropy. Love of humankind as expressed by doing good deeds.\n"
-            "The particpant at The Three Stooges Festical performed his own unique philanthropy -- on stage burping to the song, 'Pop Goes The Weasel.'\n\n"
+            "The particpant at The Three Stooges Festival performed his own unique philanthropy on stage -- burping to the song, 'Pop Goes The Weasel.'\n\n"
             "A final word. Largess -- Generosity on a big scale. The gift itself.\n"
             "Giving the Earth a second moon was surprising largess, especially coming from the Plutonians.\n\n"
             "Benevolence. Philanthropy. Largess.\n"
@@ -243,7 +243,7 @@ CLUSTERS = [
             "I see another word.  Perfunctory --  Lacking interest or enthusiasm.\n"
             "In 100-degree heat, the sled dogs grew perfunctory pulling the obese man up the hill.\n\n"
             "A final word. Concise -- Brief and to the point.\n"
-            "Instead of going on about moisturizer benefits, the pinky was concise and told the thumb “it’s just good for you.”\n\n"
+            "Instead of going on and on about moisturizer benefits, the pinky was concise and told the thumb “it’s just good for you.”\n\n"
             "Laconic. Perfunctory. Concise.\n"
             "Your fortune: Interest and directness are often welcomed."
         ),
@@ -256,7 +256,7 @@ CLUSTERS = [
             "Copious means abundant. Plentiful.\n"
             "The selfish violinist took copious notes, leaving the rest of the orchestra with hardly any music to play.\n\n"
             "I see another word. Protract -- To prolong. To lengthen.\n"
-            "Hoping to increase popcorn sales, the theatre protracted the movie’s third act by playing it in slow motion.\n\n"
+            "Hoping to increase popcorn sales, the movie’s third act was protracted by the theatre -- it played it in slow motion.\n\n"
             "A final word. Ponderous -- Slow, heavy, or dull, especially in speech or thought.\n"
             "His ponderous speech on why he should be president of the Pie Eaters Club killed everyone’s appetite for electing him.\n\n"
             "Copious. Protract. Ponderous.\n"
@@ -316,7 +316,7 @@ CLUSTERS = [
             "Debilitate means to weaken or cripple.\n"
             "The vampire was debilitated when the garlic-eating man said “hello.”\n\n"
             "I see another word. Subjugate -- To bring under control. To dominate.\n"
-            "Boss Johnson subjugated his workers when he converted their breakroom into his own personal office man cave.\n\n"
+            "Boss Johnson thought he subjugated his workers when he converted their breakroom into his own personal office man cave.\n\n"
             "A final word. Anguish -- Severe mental or emotional pain.\n"
             "Hearing “maybe” caused the amoeba some anguish when it was the paramecium's reply to a date.\n\n"
             "Debilitate. Subjugate. Anguish.\n"
@@ -329,7 +329,7 @@ CLUSTERS = [
         "continue_q": "Shall we journey further with this word?",
         "script": (
             "Verisimilitude means the appearance of being true or real.\n"
-            "The anteater thought his painting of the cowhad verisimilitude –- except for the long tubular snout.\n\n"
+            "The anteater thought his painting of the cow had verisimilitude -- "I can hear it moo.\n\n"
             "I see another word. Apocryphal -- Of doubtful authenticity.\n"
             'Pointing to the Mona Lisa with a goatee and horns, "It is definitely apocryphal," uttered the counterfeiter.\n\n'
             "A final word. Spurious -- False or fake.\n"
@@ -350,7 +350,7 @@ CLUSTERS = [
             "A final word. Precept -- A rule or principle guiding behavior.\n"
             "The aardvark lived by a twisted precept – do unto him before he does unto you.\n\n"
             "Postulate. Veracity. Precept.\n"
-            "Your fortune: Finding truth is like striking gold."
+            "Your fortune: Finding truth is like striking gold, and to some even be more valuable."
         ),
     },
     {
@@ -455,7 +455,7 @@ CLUSTERS = [
             "A final word. Cryptic -- To be mystifying. Mysterious. Puzzling.\n"
             "Decoding the message of the cryptic creaking door, the ghost hunter said, “It wants oil.”\n\n"
             "Abstruse. Bemused. Cryptic.\n"
-            "Your fortune: When life is puzzling, look for the  missing piece – it’s  out there."
+            "Your fortune: When life is puzzling, look for the  missing piece – it’s out there."
         ),
     },
     {
@@ -464,10 +464,10 @@ CLUSTERS = [
         "continue_q": "Shall we journey further with this word?",
         "script": (
             "Blatant means unpleasantly loud or obvious.\n"
-            "At the town hall meeting discussing the school’s curriculum, the blatant man shouted, “When do we eat?”\n\n"
+            "At the town hall meeting discussing the school’s curriculum, the blatant man shouted, “When do we eat??!!!”\n\n"
             "I see another word. Salient -- Jutting out. Conspicuous.\n"
             "When it heard the vacuum cleaner in the other room, the salient hair ball hid under the bed.\n\n"
-            "A final word. Ostentatious -- Excessively conspicuous. Showy.\n"
+            "A final word. Ostentatious -- Extremely conspicuous. Showy.\n"
             "“It’s not ostentatious,” said the buck to the bullfrog, wearing his new bull's eye sweater during hunting season.”\n\n"
             "Blatant. Salient. Ostentatious.\n"
             "Your fortune: Drawing attention to yourself isn’t always the advantage you think it is."
