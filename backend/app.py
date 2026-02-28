@@ -455,7 +455,7 @@ CLUSTERS = [
             "A final word. Cryptic -- To be mystifying. Mysterious. Puzzling.\n"
             "Decoding the message of the cryptic creaking door, the ghost hunter said, “It wants oil.”\n\n"
             "Abstruse. Bemused. Cryptic.\n"
-            "Your fortune: When life is puzzling, look for the  missing piece – it’s out there."
+            "Your fortune: When life is puzzling, look for the  missing piece. It’s out there."
         ),
     },
     {
