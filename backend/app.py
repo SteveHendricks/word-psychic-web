@@ -168,7 +168,7 @@ Your fortune: Choose carefully, cherish quality, and your name will inspire.""",
 A dearth of thrown darts made the target feel neglected.
 
 I see another word. Paucity -- A small amount.
-Not surprisingly, a paucity of snacks irritated the couch potatoes.
+Not surprisingly, snack paucity irritated the couch potatoes.
 
 A final word. Penury -- Extreme poverty.
 The novel's hero escaped penury through grit and kindness.
