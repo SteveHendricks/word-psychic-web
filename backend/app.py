@@ -28,10 +28,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional, Tuple
 from uuid import uuid4
-
 import random
 
 app = FastAPI(title="Word Psychic API (Yes/No/End + Confirm)")
+
 origins = [
     "https://word-psychic-frontend.onrender.com",
     "http://localhost:5500",
@@ -40,7 +40,6 @@ origins = [
     "http://127.0.0.1:8000",
 ]
 
-# Allow frontend on 127.0.0.1:5500 to call the API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
