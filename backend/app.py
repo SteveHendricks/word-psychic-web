@@ -181,7 +181,7 @@ Your fortune: Be mindful of waste, and you will prosper.""",
         "intro_line": "Your word is “minuscule.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Minuscule means extremely small.
-Victory seemed minuscule when weighed against the grass as it battled the weeds.
+Victory seemed minuscule, weighed the grass, as it battled the weeds.
 
 I see another word. Nominal -- Small in name or importance.
 A nominal error unbelievably ruined the mosquitoes' family chicken dinner.
