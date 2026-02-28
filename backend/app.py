@@ -216,7 +216,7 @@ Your fortune: Excess always makes itself known. Sometimes at inconvenient moment
 My dog showed great benevolence -- he only ate half of my sandwich lying on the counter.
 
 I see another word. Philanthropy -- Love of humankind as expressed by doing good deeds.
-The participant at The Three Stooges Festival performed his own unique philanthropy on stage -- burping to the song, 'Pop Goes The Weasel.'
+The participant at The Three Stooges Festival performed his own unique philanthropy on stage -- burping to the song, "Pop Goes The Weasel."
 
 A final word. Largess -- Generosity on a big scale. The gift itself.
 Giving the Earth a second moon was surprising largess, especially coming from the Plutonians.
