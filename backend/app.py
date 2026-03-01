@@ -139,7 +139,7 @@ I see another word. Vilify -- To attack someone’s reputation.
 Busted with a stolen ten percent off coupon for a nuclear reactor, the thief vilified the detective online.
 
 A final word. Annihilate -- To utterly destroy.
-After annihilating the town, "Maybe I should cut back on the caffeine,"reflected the hurricane.
+After annihilating the town, "Maybe I should cut back on the caffeine," reflected the hurricane.
 
 Antipathy. Vilify. Annihilate.
 Your fortune: Ill will destroys quietly; guarding against it leaves room for peace.""",
