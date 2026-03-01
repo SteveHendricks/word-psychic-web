@@ -1454,12 +1454,17 @@ async function sendChoice(answer){
     currentFetchController = new AbortController();
 
     const res = await fetch(`${API}/choose`, {
-      method:"POST",
-      credentials:"include",
-      signal: currentFetchController.signal,
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ answer, context:{ session_id: sessionId } })
-    });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  credentials: 'include', // IMPORTANT for cookies cross-site
+  body: JSON.stringify({
+    answer: answer,                 // or whatever variable holds "yes"/"no"/"end session"
+    context: { session_id: sessionId } // IMPORTANT to prevent “new session” + repeats
+  }),
+  signal: currentFetchController?.signal,
+});
     if(!res.ok) throw new Error(`Choose failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
     if (!isTokenLive(token)) return;
