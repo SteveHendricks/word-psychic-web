@@ -196,8 +196,6 @@
   }
   .icon-label{ font-size: 14px; letter-spacing:.02em; }
 
-  .ico{ width: 22px; height: 22px; opacity:.9; fill: #cfe7ff; }
-
   .ico-img{
     width: 52px;
     height: 52px;
@@ -885,28 +883,23 @@ let voiceReady = false;
 let chosenVoice = null;
 let startBound = false;
 let titleShown = false;
-let inSummonStep = true;
 
 /* =========================
    Hard guards / tokens
    ========================= */
 let runToken = 0;                 // increments to cancel old typing loops
 let startInFlight = false;        // prevents double Start
-let chooseInFlight = false;       // prevents double Yes/No/Stop
+let chooseInFlight = false;       // prevents double Yes/No
 let sessionDone = false;          // prevents multiple end-session responses
 let currentFetchController = null;
 
-function bumpRunToken(){
-  runToken++;
-  return runToken;
-}
+function bumpRunToken(){ runToken++; return runToken; }
 function isTokenLive(t){ return t === runToken; }
 
 function abortInFlightFetch(){
   try{ currentFetchController?.abort(); }catch(e){}
   currentFetchController = null;
 }
-/* ========================= */
 
 const screenEl = document.getElementById("screen");
 const statusEl = document.getElementById("status");
@@ -923,15 +916,12 @@ const titleEl = document.getElementById("titleText");
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>r())); }
 
-function trimLeadingNewlines(s){
-  return (s ?? "").replace(/^\s*\n+/, "");
-}
+function trimLeadingNewlines(s){ return (s ?? "").replace(/^\s*\n+/, ""); }
 
 function tightenQuestionSpacing(s){
   let t = (s ?? "");
   t = t.replace(/\r\n/g, "\n");
   t = t.replace(/\n{3,}/g, "\n\n");
-
   const qStart = "(Do you\\b|Would you\\b|Shall we\\b|Shall I\\b)";
   t = t.replace(new RegExp(`([^\\n])\\n(?=\\s*${qStart})`, "gi"), "$1\n\n");
   t = t.replace(new RegExp(`\\n{3,}(?=\\s*${qStart})`, "gi"), "\n\n");
@@ -1068,15 +1058,11 @@ function updateSpeakingFromEngine(){
   }catch(e){}
 }
 
-function showStopButton(show){
-  stopBtn.classList.toggle("placeholder", !show);
-  stopBtn.disabled = !show;
-  stopBtn.setAttribute("aria-hidden", (!show).toString());
-}
-
 function setButtonsEnabled(on){
   yesBtn.disabled = noBtn.disabled = !on;
-  if (inSummonStep) stopBtn.disabled = true;
+}
+function setStartEnabled(on){
+  startBtn.disabled = !on;
 }
 
 function paceFactor(){
@@ -1381,39 +1367,52 @@ async function speakAndTypePerSentence(text, token){
 }
 
 /* =========================
-   UI state helpers
+   PANIC BUTTON: instant End Session
    ========================= */
-function setStartEnabled(on){ startBtn.disabled = !on; }
-function setActionEnabled(on){ setButtonsEnabled(on); }
+async function forceEndSession(){
+  // Cancel any typing loops immediately
+  const token = bumpRunToken();
 
-/* =========================
-   INSTANT END SESSION (UI)
-   ========================= */
-function instantEndSessionUI(){
-  // cancel any typing loops immediately
-  bumpRunToken();
-
-  // stop voice + beats immediately
+  // Stop voice/beat immediately
   hardStopAllAudioAndBeats();
 
-  // kill any in-flight network request
+  // Abort any in-flight fetch immediately
   abortInFlightFetch();
 
-  // lock UI
+  // Mark ended and release locks
   sessionDone = true;
   chooseInFlight = false;
+  startInFlight = false;
+
+  // Lock buttons
   yesBtn.disabled = true;
   noBtn.disabled = true;
   stopBtn.disabled = true;
 
-  // show goodbye instantly
-  screenEl.textContent =
+  // Clear and show goodbye via teletype + speech
+  screenEl.textContent = "";
+  autoScrollScreen();
+
+  const goodbye =
 `Sorry to see you go.
 Come back another time…
 The words will be waiting for your call.`;
 
+  await speakAndTypePerSentence(goodbye, token);
+
   statusEl.textContent = "Session ended. Press Start to begin again.";
   setStartEnabled(true);
+
+  // Best-effort notify backend (non-blocking)
+  try{
+    fetch(`${API}/choose`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ answer: "stop", context: { session_id: sessionId } }),
+      keepalive: true
+    }).catch(()=>{});
+  }catch(e){}
 }
 
 /* ========================= */
@@ -1421,10 +1420,12 @@ The words will be waiting for your call.`;
 async function startSession(token){
   try{
     statusEl.textContent = "";
-    inSummonStep = true;
     sessionDone = false;
-    showStopButton(false);
-    setActionEnabled(false);
+
+    // allow End session as soon as the session starts
+    stopBtn.disabled = false;
+
+    setButtonsEnabled(false);
 
     await gentleResetAndClear(token);
     if (!isTokenLive(token)) return;
@@ -1436,57 +1437,38 @@ async function startSession(token){
       credentials:"include",
       signal: currentFetchController.signal
     });
-
     if(!res.ok) throw new Error(`Start failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
     if (!isTokenLive(token)) return;
 
-    // supports either backend style
-    sessionId = data.session_id || data.context?.session_id || sessionId;
+    sessionId = data.session_id || sessionId;
 
-    // FIX: no duplicate guidance; show prompt if provided
+    // IMPORTANT: your backend returns guidance/prompt in some versions.
+    // We support either.
     if (data.prompt)   await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.prompt)), token);
     if (data.guidance) await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.guidance)), token);
 
     if (!isTokenLive(token)) return;
-    setActionEnabled(true);
+    setButtonsEnabled(true);
   }catch(err){
     if (!isTokenLive(token)) return;
     screenEl.textContent = `⚠️ Could not reach backend at ${API}/start\n${String(err)}`;
-    setActionEnabled(false);
+    setButtonsEnabled(false);
+    stopBtn.disabled = true;
     setStartEnabled(true);
   }
 }
 
 async function sendChoice(answer){
+  // Anti-double-click for Yes/No only
   if (chooseInFlight) return;
   if (sessionDone) return;
-
-  // INSTANT END SESSION
-  if (answer === "stop"){
-    instantEndSessionUI();
-
-    // best-effort notify backend (doesn't block UI)
-    try{
-      fetch(`${API}/choose`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          answer: "stop",
-          context: { session_id: sessionId }
-        }),
-        keepalive: true
-      }).catch(()=>{});
-    }catch(e){}
-    return;
-  }
 
   chooseInFlight = true;
   const token = runToken;
 
   try{
-    setActionEnabled(false);
+    setButtonsEnabled(false);
 
     await gentleResetAndClear(token);
     if (!isTokenLive(token)) return;
@@ -1499,10 +1481,10 @@ async function sendChoice(answer){
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
-        answer: answer,
-        context: { session_id: sessionId }
+        answer,
+        context: { session_id: sessionId } // critical to prevent repeats
       }),
-      signal: currentFetchController.signal,
+      signal: currentFetchController.signal
     });
 
     if(!res.ok) throw new Error(`Choose failed: ${res.status} ${res.statusText}`);
@@ -1511,8 +1493,6 @@ async function sendChoice(answer){
 
     if (data.context?.session_id) sessionId = data.context.session_id;
 
-    if (inSummonStep){ inSummonStep = false; showStopButton(true); }
-
     if (data.text) await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.text)), token);
 
     if (!isTokenLive(token)) return;
@@ -1520,15 +1500,23 @@ async function sendChoice(answer){
     const done = !!data.done;
     sessionDone = done;
 
-    setActionEnabled(!done);
     if (done){
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      stopBtn.disabled = true;
       statusEl.textContent = "Session ended. Press Start to begin again.";
       setStartEnabled(true);
+    }else{
+      setButtonsEnabled(true);
+      stopBtn.disabled = false; // keep end session available at all times
     }
   }catch(err){
     if (!isTokenLive(runToken)) return;
     screenEl.textContent = `⚠️ Request failed to ${API}/choose\n${String(err)}`;
-    if (!sessionDone) setActionEnabled(true);
+    if (!sessionDone){
+      setButtonsEnabled(true);
+      stopBtn.disabled = false;
+    }
   }finally{
     chooseInFlight = false;
   }
@@ -1540,24 +1528,28 @@ function bindStartOnce(){
 
   startBtn.addEventListener("click", async (e)=>{
     e.preventDefault();
+
     if (startInFlight) return;
     startInFlight = true;
 
     const token = bumpRunToken();
 
+    // lock UI
     setStartEnabled(false);
-    setActionEnabled(false);
-    showStopButton(false);
+    setButtonsEnabled(false);
+    stopBtn.disabled = true;
     statusEl.textContent = "";
 
+    // stop any existing noise
     abortInFlightFetch();
     hardStopAllAudioAndBeats();
 
+    // reset session state
     sessionId = null;
-    inSummonStep = true;
     sessionDone = false;
     chooseInFlight = false;
 
+    // title + whoosh once
     if (!titleShown){
       titleShown = true;
       playGhostlyWhoosh();
@@ -1572,6 +1564,7 @@ function bindStartOnce(){
     if (!isTokenLive(token)){ startInFlight = false; return; }
 
     await startSession(token);
+
     startInFlight = false;
   });
 }
@@ -1579,14 +1572,16 @@ function bindStartOnce(){
 bindStartOnce();
 yesBtn.addEventListener("click", (e)=>{ e.preventDefault(); sendChoice("yes"); });
 noBtn.addEventListener("click",  (e)=>{ e.preventDefault(); sendChoice("no");  });
-stopBtn.addEventListener("click",(e)=>{ e.preventDefault(); sendChoice("stop"); });
+
+// ✅ End session is now a true panic button (works even mid-typing / mid-speech / mid-fetch)
+stopBtn.addEventListener("click", (e)=>{ e.preventDefault(); forceEndSession(); });
 
 speakWhileTyping.addEventListener("change", syncVoiceLabel);
 
 // initial UI state
-showStopButton(false);
-setActionEnabled(false);
+setButtonsEnabled(false);
 setStartEnabled(true);
+stopBtn.disabled = true;
 syncVoiceLabel();
 </script>
 </body>
