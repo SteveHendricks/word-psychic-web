@@ -1581,29 +1581,96 @@ function bindStartOnce(){
   });
 }
 
+/* ===== Intro gating for End Session ===== */
+let introAnswered = false;
+
+function revealEndSessionAfterIntro(){
+  if (introAnswered) return;
+  introAnswered = true;
+  showStopButton(true);
+  stopBtn.disabled = false;
+}
+
+/* ===== Bind Start once ===== */
+function bindStartOnce(){
+  if (startBound) return;
+  startBound = true;
+
+  startBtn.addEventListener("click", async (e)=>{
+    e.preventDefault();
+
+    if (startInFlight) return;
+    startInFlight = true;
+
+    const token = bumpRunToken();
+
+    // lock UI
+    setStartEnabled(false);
+    setButtonsEnabled(false);
+    stopBtn.disabled = true;
+    statusEl.textContent = "";
+
+    // stop any existing noise
+    abortInFlightFetch();
+    hardStopAllAudioAndBeats();
+
+    // reset session state
+    sessionId = null;
+    sessionDone = false;
+    chooseInFlight = false;
+
+    // reset intro gating
+    introAnswered = false;
+    showStopButton(false);
+
+    // title + whoosh once
+    if (!titleShown){
+      titleShown = true;
+      playGhostlyWhoosh();
+      if (titleEl) titleEl.classList.add("visible");
+    }
+
+    await sleep(WHOOSH_MS + WHOOSH_BUFFER_MS);
+    if (!isTokenLive(token)){ startInFlight = false; return; }
+
+    unlockVoice();
+    await ensureVoiceSelected();
+    if (!isTokenLive(token)){ startInFlight = false; return; }
+
+    await startSession(token);
+
+    startInFlight = false;
+  });
+}
+
+/* ===== Initial UI state ===== */
+setButtonsEnabled(false);
+setStartEnabled(true);
+showStopButton(false);
+syncVoiceLabel();
+
+/* ===== Attach handlers ===== */
 bindStartOnce();
-// reset session state("click", (e)=>{
+
+yesBtn.addEventListener("click", (e)=>{
   e.preventDefault();
-  revealEndSessionAfterIntro();   // <-- NEW
+  revealEndSessionAfterIntro();
   sendChoice("yes");
 });
 
 noBtn.addEventListener("click", (e)=>{
   e.preventDefault();
-  revealEndSessionAfterIntro();   // <-- NEW
+  revealEndSessionAfterIntro();
   sendChoice("no");
 });
 
-// ✅ End session is now a true panic button (works even mid-typing / mid-speech / mid-fetch)
-stopBtn.addEventListener("click", (e)=>{ e.preventDefault(); forceEndSession(); });
+// End session is a true panic button
+stopBtn.addEventListener("click", (e)=>{
+  e.preventDefault();
+  forceEndSession();
+});
 
 speakWhileTyping.addEventListener("change", syncVoiceLabel);
-
-// initial UI state
-setButtonsEnabled(false);
-setStartEnabled(true);
-showStopButton(false);
-syncVoiceLabel();
 </script>
 </body>
 </html>
