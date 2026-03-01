@@ -341,10 +341,10 @@ Your fortune: It’s wise to save your strength for truly oppressive days.""",
         "intro_line": "Your word is “verisimilitude.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Verisimilitude means the appearance of being true or real.
-The anteater thought his painting of the cow had verisimilitude -- "I can hear it moo."
+The anteater thought his painting of the cow had verisimilitude -- "To me, it says moo!"
 
 I see another word. Apocryphal -- Of doubtful authenticity.
-Pointing to the Mona Lisa with a goatee and horns, "It is definitely apocryphal," uttered the counterfeiter.
+As big as a suitcase, the counterfeiter tried to convince everyone that the smartphone wasn't apocryphal. 
 
 A final word. Spurious -- False or fake.
 “Totally spurious,” replied the ice box to the toaster’s claim that it could keep pickles cold.
