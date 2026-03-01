@@ -1065,6 +1065,12 @@ function setStartEnabled(on){
   startBtn.disabled = !on;
 }
 
+function showStopButton(show){
+  stopBtn.classList.toggle("placeholder", !show);
+  stopBtn.disabled = !show;
+  stopBtn.setAttribute("aria-hidden", (!show).toString());
+}
+  
 function paceFactor(){
   const v = speedSel.value;
   return v==="slow" ? 1.35 : v==="fast" ? 0.75 : 1.0;
@@ -1421,7 +1427,7 @@ async function startSession(token){
   try{
     statusEl.textContent = "";
     sessionDone = false;
-
+    showStopButton(true);   // ← ADD THIS LINE
     // allow End session as soon as the session starts
     stopBtn.disabled = false;
 
@@ -1581,7 +1587,7 @@ speakWhileTyping.addEventListener("change", syncVoiceLabel);
 // initial UI state
 setButtonsEnabled(false);
 setStartEnabled(true);
-stopBtn.disabled = true;
+showStopButton(false);
 syncVoiceLabel();
 </script>
 </body>
