@@ -883,7 +883,6 @@ let chosenVoice = null;
 let startBound = false;
 let titleShown = false;
 
-
 /* =========================
    Hard guards / tokens
    ========================= */
@@ -1071,13 +1070,6 @@ function showStopButton(show){
   stopBtn.setAttribute("aria-hidden", (!show).toString());
 }
 
-function revealEndSessionAfterIntro(){
-  if (introAnswered) return;
-  introAnswered = true;
-  showStopButton(true);
-  stopBtn.disabled = false;
-}
-  
 function paceFactor(){
   const v = speedSel.value;
   return v==="slow" ? 1.35 : v==="fast" ? 0.75 : 1.0;
@@ -1383,26 +1375,18 @@ async function speakAndTypePerSentence(text, token){
    PANIC BUTTON: instant End Session
    ========================= */
 async function forceEndSession(){
-  // Cancel any typing loops immediately
   const token = bumpRunToken();
-
-  // Stop voice/beat immediately
   hardStopAllAudioAndBeats();
-
-  // Abort any in-flight fetch immediately
   abortInFlightFetch();
 
-  // Mark ended and release locks
   sessionDone = true;
   chooseInFlight = false;
   startInFlight = false;
 
-  // Lock buttons
   yesBtn.disabled = true;
   noBtn.disabled = true;
   stopBtn.disabled = true;
 
-  // Clear and show goodbye via teletype + speech
   screenEl.textContent = "";
   autoScrollScreen();
 
@@ -1416,7 +1400,6 @@ The words will be waiting for your call.`;
   statusEl.textContent = "Session ended. Press Start to begin again.";
   setStartEnabled(true);
 
-  // Best-effort notify backend (non-blocking)
   try{
     fetch(`${API}/choose`, {
       method: "POST",
@@ -1453,8 +1436,6 @@ async function startSession(token){
 
     sessionId = data.session_id || sessionId;
 
-    // IMPORTANT: your backend returns guidance/prompt in some versions.
-    // We support either.
     if (data.prompt)   await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.prompt)), token);
     if (data.guidance) await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.guidance)), token);
 
@@ -1470,7 +1451,6 @@ async function startSession(token){
 }
 
 async function sendChoice(answer){
-  // Anti-double-click for Yes/No only
   if (chooseInFlight) return;
   if (sessionDone) return;
 
@@ -1492,7 +1472,7 @@ async function sendChoice(answer){
       credentials: "include",
       body: JSON.stringify({
         answer,
-        context: { session_id: sessionId } // critical to prevent repeats
+        context: { session_id: sessionId }
       }),
       signal: currentFetchController.signal
     });
@@ -1518,7 +1498,7 @@ async function sendChoice(answer){
       setStartEnabled(true);
     }else{
       setButtonsEnabled(true);
-      stopBtn.disabled = false; // keep end session available at all times
+      stopBtn.disabled = false;
     }
   }catch(err){
     if (!isTokenLive(runToken)) return;
@@ -1532,58 +1512,8 @@ async function sendChoice(answer){
   }
 }
 
-function bindStartOnce(){
-  if (startBound) return;
-  startBound = true;
-
-  startBtn.addEventListener("click", async (e)=>{
-    e.preventDefault();
-
-    if (startInFlight) return;
-    startInFlight = true;
-
-    const token = bumpRunToken();
-
-    // lock UI
-    setStartEnabled(false);
-    setButtonsEnabled(false);
-    stopBtn.disabled = true;
-    statusEl.textContent = "";
-
-    // stop any existing noise
-    abortInFlightFetch();
-    hardStopAllAudioAndBeats();
-
-    // reset session state
-    sessionId = null;
-    sessionDone = false;
-    chooseInFlight = false;
-    introAnswered = false;
-    showStopButton(false);
-
-    // title + whoosh once
-    if (!titleShown){
-      titleShown = true;
-      playGhostlyWhoosh();
-      if (titleEl) titleEl.classList.add("visible");
-    }
-
-    await sleep(WHOOSH_MS + WHOOSH_BUFFER_MS);
-    if (!isTokenLive(token)){ startInFlight = false; return; }
-
-    unlockVoice();
-    await ensureVoiceSelected();
-    if (!isTokenLive(token)){ startInFlight = false; return; }
-
-    await startSession(token);
-
-    startInFlight = false;
-  });
-}
-
 /* ===== Intro gating for End Session ===== */
 let introAnswered = false;
-
 function revealEndSessionAfterIntro(){
   if (introAnswered) return;
   introAnswered = true;
@@ -1604,17 +1534,14 @@ function bindStartOnce(){
 
     const token = bumpRunToken();
 
-    // lock UI
     setStartEnabled(false);
     setButtonsEnabled(false);
     stopBtn.disabled = true;
     statusEl.textContent = "";
 
-    // stop any existing noise
     abortInFlightFetch();
     hardStopAllAudioAndBeats();
 
-    // reset session state
     sessionId = null;
     sessionDone = false;
     chooseInFlight = false;
@@ -1664,7 +1591,6 @@ noBtn.addEventListener("click", (e)=>{
   sendChoice("no");
 });
 
-// End session is a true panic button
 stopBtn.addEventListener("click", (e)=>{
   e.preventDefault();
   forceEndSession();
