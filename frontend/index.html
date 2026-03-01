@@ -1423,11 +1423,11 @@ The words will be waiting for your call.`;
 
 /* ========================= */
 
-async function startSession(token){
+async function sendChoice(answer){
   try{
     statusEl.textContent = "";
     sessionDone = false;
-    showStopButton(true);   // ← ADD THIS LINE
+    
     // allow End session as soon as the session starts
     stopBtn.disabled = false;
 
@@ -1471,6 +1471,7 @@ async function sendChoice(answer){
   if (sessionDone) return;
 
   chooseInFlight = true;
+  showStopButton(true);
   const token = runToken;
 
   try{
