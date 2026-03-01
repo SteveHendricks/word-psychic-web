@@ -848,7 +848,6 @@
       <div class="buttons">
         <button id="yesBtn" class="action">Yes</button>
         <button id="noBtn"  class="action">No</button>
-        
         <button id="stopBtn" class="action quiet">End session</button>
       </div>
     </section>
@@ -889,7 +888,7 @@ let titleShown = false;
 let inSummonStep = true;
 
 /* =========================
-   NEW: hard guards / tokens
+   Hard guards / tokens
    ========================= */
 let runToken = 0;                 // increments to cancel old typing loops
 let startInFlight = false;        // prevents double Start
@@ -1382,18 +1381,41 @@ async function speakAndTypePerSentence(text, token){
 }
 
 /* =========================
-   NEW: UI state helpers
+   UI state helpers
    ========================= */
-function setStartEnabled(on){
-  startBtn.disabled = !on;
-}
-function setActionEnabled(on){
-  setButtonsEnabled(on);
-}
-function setEndGuarded(){
-  // lock End-session immediately
+function setStartEnabled(on){ startBtn.disabled = !on; }
+function setActionEnabled(on){ setButtonsEnabled(on); }
+
+/* =========================
+   INSTANT END SESSION (UI)
+   ========================= */
+function instantEndSessionUI(){
+  // cancel any typing loops immediately
+  bumpRunToken();
+
+  // stop voice + beats immediately
+  hardStopAllAudioAndBeats();
+
+  // kill any in-flight network request
+  abortInFlightFetch();
+
+  // lock UI
+  sessionDone = true;
+  chooseInFlight = false;
+  yesBtn.disabled = true;
+  noBtn.disabled = true;
   stopBtn.disabled = true;
+
+  // show goodbye instantly
+  screenEl.textContent =
+`Sorry to see you go.
+Come back another time…
+The words will be waiting for your call.`;
+
+  statusEl.textContent = "Session ended. Press Start to begin again.";
+  setStartEnabled(true);
 }
+
 /* ========================= */
 
 async function startSession(token){
@@ -1414,12 +1436,15 @@ async function startSession(token){
       credentials:"include",
       signal: currentFetchController.signal
     });
+
     if(!res.ok) throw new Error(`Start failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
     if (!isTokenLive(token)) return;
 
-    sessionId = data.session_id || sessionId;
+    // supports either backend style
+    sessionId = data.session_id || data.context?.session_id || sessionId;
 
+    // FIX: no duplicate guidance; show prompt if provided
     if (data.prompt)   await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.prompt)), token);
     if (data.guidance) await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.guidance)), token);
 
@@ -1429,24 +1454,39 @@ async function startSession(token){
     if (!isTokenLive(token)) return;
     screenEl.textContent = `⚠️ Could not reach backend at ${API}/start\n${String(err)}`;
     setActionEnabled(false);
+    setStartEnabled(true);
   }
 }
 
 async function sendChoice(answer){
-  // NEW: hard idempotency / anti-double-click
   if (chooseInFlight) return;
   if (sessionDone) return;
-  chooseInFlight = true;
 
+  // INSTANT END SESSION
+  if (answer === "stop"){
+    instantEndSessionUI();
+
+    // best-effort notify backend (doesn't block UI)
+    try{
+      fetch(`${API}/choose`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          answer: "stop",
+          context: { session_id: sessionId }
+        }),
+        keepalive: true
+      }).catch(()=>{});
+    }catch(e){}
+    return;
+  }
+
+  chooseInFlight = true;
   const token = runToken;
 
   try{
     setActionEnabled(false);
-
-    // If End session is clicked, lock it immediately so it cannot be sent twice.
-    if (answer === "stop"){
-      setEndGuarded();
-    }
 
     await gentleResetAndClear(token);
     if (!isTokenLive(token)) return;
@@ -1455,17 +1495,16 @@ async function sendChoice(answer){
     currentFetchController = new AbortController();
 
     const res = await fetch(`${API}/choose`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  credentials: 'include', // IMPORTANT for cookies cross-site
-  body: JSON.stringify({
-    answer: answer,                 // or whatever variable holds "yes"/"no"/"end session"
-    context: { session_id: sessionId } // IMPORTANT to prevent “new session” + repeats
-  }),
-  signal: currentFetchController?.signal,
-});
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        answer: answer,
+        context: { session_id: sessionId }
+      }),
+      signal: currentFetchController.signal,
+    });
+
     if(!res.ok) throw new Error(`Choose failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
     if (!isTokenLive(token)) return;
@@ -1484,13 +1523,11 @@ async function sendChoice(answer){
     setActionEnabled(!done);
     if (done){
       statusEl.textContent = "Session ended. Press Start to begin again.";
-      // NEW: allow Start again after a clean end
       setStartEnabled(true);
     }
   }catch(err){
     if (!isTokenLive(runToken)) return;
     screenEl.textContent = `⚠️ Request failed to ${API}/choose\n${String(err)}`;
-    // If we failed mid-flight, re-enable actions unless we already ended.
     if (!sessionDone) setActionEnabled(true);
   }finally{
     chooseInFlight = false;
@@ -1503,38 +1540,30 @@ function bindStartOnce(){
 
   startBtn.addEventListener("click", async (e)=>{
     e.preventDefault();
-
-    // NEW: ignore double Start while starting/running
     if (startInFlight) return;
     startInFlight = true;
 
-    // NEW: new run token cancels any old typing loops immediately
     const token = bumpRunToken();
 
-    // lock UI quickly
     setStartEnabled(false);
     setActionEnabled(false);
     showStopButton(false);
     statusEl.textContent = "";
 
-    // Stop all async noise (prevents “gibberish” + repeated voice)
     abortInFlightFetch();
     hardStopAllAudioAndBeats();
 
-    // reset session-scoped flags
     sessionId = null;
     inSummonStep = true;
     sessionDone = false;
     chooseInFlight = false;
 
-    // title + whoosh once
     if (!titleShown){
       titleShown = true;
       playGhostlyWhoosh();
       if (titleEl) titleEl.classList.add("visible");
     }
 
-    // keep the cinematic delay (but still cancellable via token)
     await sleep(WHOOSH_MS + WHOOSH_BUFFER_MS);
     if (!isTokenLive(token)){ startInFlight = false; return; }
 
@@ -1543,13 +1572,6 @@ function bindStartOnce(){
     if (!isTokenLive(token)){ startInFlight = false; return; }
 
     await startSession(token);
-
-    // If session failed to start, allow Start again
-    if (isTokenLive(token)){
-      // actions enabled inside startSession on success
-      // start stays disabled until session ends; re-enabled on done
-    }
-
     startInFlight = false;
   });
 }
