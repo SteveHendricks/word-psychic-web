@@ -453,10 +453,10 @@ Your fortune: Manipulation thrives in secrecy – exposure changes everything.""
         "intro_line": "Your word is “autonomous.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Autonomous means independent. Self-governing.
-Eager to be autonomous, the toddler walked off –- then fell and cried “mommy.”
+Eager to be autonomous, the toddler walked off, fell, and then cried “mommy.”
 
 I see another word. Reclusive -- Withdrawn from society. Avoiding contact.
-Peace and quiet were what the reclusive snake valued –- until a wandering foot came by.
+What the reclusive snake valued was peace and quiet –- until a wandering foot came by.
 
 A final word. Sequester -- To set or keep apart.
 Tormented by drip, drip, drip, the sink longed to sequester the leaky faucet.
