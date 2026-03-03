@@ -139,7 +139,7 @@ I see another word. Vilify -- To attack someone’s reputation.
 Busted with a stolen ten percent off coupon for a nuclear reactor, the thief vilified the detective online.
 
 A final word. Annihilate -- To utterly destroy.
-After annihilating the town, "Maybe I should cut back on the caffeine," reflected the hurricane.
+After annihilating the town, the hurricane reflected, "Maybe I should cut back on the caffeine."
 
 Antipathy. Vilify. Annihilate.
 Your fortune: Ill will destroys quietly; guarding against it leaves room for peace.""",
@@ -264,7 +264,7 @@ Your fortune: Interest and directness are often welcomed.""",
 The selfish violinist took copious notes, leaving the rest of the orchestra with hardly any music to play.
 
 I see another word. Protract -- To prolong. To lengthen.
-Hoping to increase popcorn sales, the movie’s third act was protracted by the theatre -- it played it in slow motion.
+Hoping to increase popcorn sales, the movie’s third act was protracted by the theatre by playing it in slow motion.
 
 A final word. Ponderous -- Slow, heavy, or dull, especially in speech or thought.
 His ponderous speech on why he should be president of the Pie Eaters Club killed everyone’s appetite for electing him.
@@ -309,7 +309,7 @@ Your fortune: Self-confidence can be admired, but bullying, not so much.""",
         "intro_line": "Your word is “reparation.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Reparation means compensation for a wrong.
-For stealing the twinkie, the Court of Sweets ruled that the reparation would be a pint of fudge.
+For stealing the twinkie, the Court of Sweets ruled that the shoplifter's reparation would be a pint of fudge.
 
 I see another word. Respite -- A short period of rest or relief.
 The veterinarian ordered the tense turtle to take a month-long respite so he could slow down.
