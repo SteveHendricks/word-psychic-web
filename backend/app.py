@@ -715,13 +715,16 @@ def start(response: Response):
 from fastapi import Response
 
 @app.options("/choose")
+@app.options("/choose/")
 def options_choose():
     return Response(status_code=200)
     
 @app.post("/choose")
+@app.post("/choose/")
 def choose(req: YesNoRequest, request: Request):
     sid, st = get_session(request, req.context)
     a = normalize(req.answer)
+    ...
 
     # Always-available end: ALWAYS return closing (with summary if any)
     if a in {"quit", "stop"}:
