@@ -34,14 +34,8 @@ app = FastAPI(title="Word Psychic API (Yes/No/End + Confirm)")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://wordpsychic.com",
-        "https://www.wordpsychic.com",
-        "http://wordpsychic.com",
-        "http://www.wordpsychic.com",
-        "https://word-psychic-frontend.onrender.com",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
