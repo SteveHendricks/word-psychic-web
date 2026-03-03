@@ -37,6 +37,8 @@ app.add_middleware(
     allow_origins=[
         "https://wordpsychic.com",
         "https://www.wordpsychic.com",
+        "http://wordpsychic.com",
+        "http://www.wordpsychic.com",
         "https://word-psychic-frontend.onrender.com",
     ],
     allow_credentials=True,
