@@ -31,7 +31,6 @@ from uuid import uuid4
 import random
 
 app = FastAPI(title="Word Psychic API (Yes/No/End + Confirm)")
-from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
@@ -711,7 +710,12 @@ def start(response: Response):
     )
     st["phase"] = "intro"
     return {"session_id": sid, "prompt": "", "guidance": guidance}
+from fastapi import Response
 
+@app.options("/choose")
+def options_choose():
+    return Response(status_code=200)
+    
 @app.post("/choose")
 def choose(req: YesNoRequest, request: Request):
     sid, st = get_session(request, req.context)
