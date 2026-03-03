@@ -1427,7 +1427,6 @@ async function startSession(token){
     currentFetchController = new AbortController();
 
     const res = await fetch(`${API}/start`, {
-      credentials:"include",
       signal: currentFetchController.signal
     });
     if(!res.ok) throw new Error(`Start failed: ${res.status} ${res.statusText}`);
@@ -1469,7 +1468,6 @@ async function sendChoice(answer){
     const res = await fetch(`${API}/choose`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({
         answer,
         context: { session_id: sessionId }
