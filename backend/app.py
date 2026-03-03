@@ -31,7 +31,19 @@ from uuid import uuid4
 import random
 
 app = FastAPI(title="Word Psychic API (Yes/No/End + Confirm)")
+from fastapi.middleware.cors import CORSMiddleware
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://wordpsychic.com",
+        "https://www.wordpsychic.com",
+        "https://word-psychic-frontend.onrender.com",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 origins = [
     "https://word-psychic-frontend.onrender.com",
     "http://localhost:5500",
