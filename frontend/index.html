@@ -1196,50 +1196,49 @@ function unlockVoice(){
 
 function selectVoice(){
   // Get all voices available on this device
-const voices = speechSynthesis.getVoices();
+  const voices = speechSynthesis.getVoices() || [];
 
-// Preferred voices (best first)
-const preferred = [
-  "Isha",
-  "Samantha",
-  "Victoria",
-  "Serena",
-  "Moira",
-  "Fiona",
-  "Tessa",
-  "Google UK English Female",
-  "Google US English",
-  "Microsoft Aria",
-  "Microsoft Zira"
-];
+  // Preferred voices (best first)
+  const preferred = [
+    "Isha",
+    "Samantha",
+    "Victoria",
+    "Serena",
+    "Moira",
+    "Fiona",
+    "Tessa",
+    "Google UK English Female",
+    "Google US English",
+    "Microsoft Aria",
+    "Microsoft Zira"
+  ];
 
-let chosenVoice = null;
+  // IMPORTANT: use the global chosenVoice you already have at the top
+  chosenVoice = null;
 
-// Try to match preferred voices
-for (let name of preferred) {
-  const match = voices.find(v => v.name === name);
-  if (match) {
-    chosenVoice = match;
-    break;
+  // Try to match preferred voices
+  for (const name of preferred) {
+    const match = voices.find(v => v.name === name);
+    if (match) { chosenVoice = match; break; }
   }
-}
 
-// Fallback if none matched
-if (!chosenVoice) {
-  chosenVoice = voices.find(v => v.lang && v.lang.startsWith("en")) || voices[0];
-}
-
-if (speechSynthesis.onvoiceschanged !== undefined){
-  speechSynthesis.onvoiceschanged = () => selectVoice();
+  // Fallback if none matched
+  if (!chosenVoice) {
+    chosenVoice = voices.find(v => v.lang && v.lang.startsWith("en")) || voices[0] || null;
+  }
 }
 
 async function ensureVoiceSelected(timeoutMs = 1500){
   const start = performance.now();
+
+  // call selectVoice at least once
+  selectVoice();
+
   while ((!chosenVoice || !voiceReady) && (performance.now() - start) < timeoutMs){
     await sleep(50);
+    selectVoice();
   }
 }
-
 function styleParams(){
   const base = baseSpeechRate();
   return { pitch: 1.02, rate: base * 0.95 };
