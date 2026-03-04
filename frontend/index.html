@@ -1188,18 +1188,38 @@ function unlockVoice(){
 }
 
 function selectVoice(){
-  const voices = speechSynthesis.getVoices();
-  if (!voices || !voices.length) return;
+  // Get all voices available on this device
+const voices = speechSynthesis.getVoices();
 
-  let v = voices.find(x => /isha/i.test(x.name || ""));
-  if (!v){
-    const preferred = ["Samantha","Victoria","Allison","Ava","Anna","Serena","Zoey","Jenny","Aria","Emma","Olivia","Sara"];
-    v =
-      voices.find(x => preferred.some(n => (x.name||"").toLowerCase().includes(n.toLowerCase())) && (x.lang||"").toLowerCase().startsWith("en"))
-      || voices.find(x => (x.lang||"").toLowerCase().startsWith("en"))
-      || voices[0];
+// Preferred voices (best first)
+const preferred = [
+  "Isha",
+  "Samantha",
+  "Victoria",
+  "Serena",
+  "Moira",
+  "Fiona",
+  "Tessa",
+  "Google UK English Female",
+  "Google US English",
+  "Microsoft Aria",
+  "Microsoft Zira"
+];
+
+let chosenVoice = null;
+
+// Try to match preferred voices
+for (let name of preferred) {
+  const match = voices.find(v => v.name === name);
+  if (match) {
+    chosenVoice = match;
+    break;
   }
-  chosenVoice = v;
+}
+
+// Fallback if none matched
+if (!chosenVoice) {
+  chosenVoice = voices.find(v => v.lang && v.lang.startsWith("en")) || voices[0];
 }
 
 if (speechSynthesis.onvoiceschanged !== undefined){
