@@ -877,6 +877,11 @@
   </main>
 
 <script>
+// Ensure browser voices are fully loaded
+speechSynthesis.onvoiceschanged = () => {
+  speechSynthesis.getVoices();
+};
+  
 const API = "https://word-psychic-web.onrender.com";
 const LIVE_SYNC = true;
 
