@@ -1401,7 +1401,7 @@ async function speakAndTypePerSentence(text, token){
 
     if (!LIVE_SYNC || !canSpeak){
       await typeChunkClassic(chunk, token);
-      await speech.done;
+      await Promise.race([speech.done, sleep(8000)]);
       updateSpeakingFromEngine();
       await sleep(SENTENCE_PAUSE_MS * paceFactor());
       continue;
@@ -1409,7 +1409,7 @@ async function speakAndTypePerSentence(text, token){
 
     await Promise.race([speech.started, sleep(600)]);
     await typeChunkOverMs(chunk, estimateSpeechMs(chunk, speech.rateUsed), token);
-    await speech.done;
+    await Promise.race([speech.done, sleep(8000)]);
     updateSpeakingFromEngine();
     await sleep(SENTENCE_PAUSE_MS * paceFactor());
   }
