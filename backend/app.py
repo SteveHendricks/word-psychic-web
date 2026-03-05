@@ -344,7 +344,7 @@ Your fortune: It’s wise to save your strength for truly oppressive days.""",
 The anteater thought his painting of the cow had verisimilitude -- "To me, it says moo!"
 
 I see another word. Apocryphal -- Of doubtful authenticity.
-As big as a suitcase, the counterfeiter tried to convince everyone that the smartphone wasn't apocryphal. 
+Even though the smartphone was as big as a suitcase, the counterfeiter tried to convince everyone that it wasn't apocryphal.
 
 A final word. Spurious -- False or fake.
 “Totally spurious,” replied the ice box to the toaster’s claim that it could keep pickles cold.
@@ -504,7 +504,7 @@ Your fortune: Drawing attention to yourself isn’t always the advantage you thi
 Jimmy stayed steadfast, refusing to rat out his friend even when bribed with a Snickers bar.
 
 I see another word. Tenacious -- To be persistent. Stubborn.
-The tenacious cat kept trying to convince the dog the floor was more comfortable than the couch.
+The tenacious cat kept trying to persuade the dog the floor was more comfortable than the couch.
 
 A final word. Dogmatic -- Stubbornly assertive of unproven ideas.
 The bag of sugar was dogmatic, exclaiming that cavities make life better.
