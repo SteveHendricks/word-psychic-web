@@ -1248,9 +1248,8 @@ async function ensureVoiceSelected(timeoutMs = 1500){
 }
 function styleParams(){
   const base = baseSpeechRate();
-
-  let pitch = 0.96;
-  let rateMult = 1.0;
+  return { pitch: 1.02, rate: base * 0.95 * voiceRateMult };
+}
 
   if (chosenVoice && chosenVoice.name.toLowerCase().includes("veena")) {
     pitch = 0.92;     // warmer tone
