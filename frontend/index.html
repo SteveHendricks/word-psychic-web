@@ -1195,11 +1195,8 @@ function unlockVoice(){
 }
 
 function selectVoice(){
-
-  // Get all voices available on this device
   const voices = speechSynthesis.getVoices() || [];
 
-  // Preferred voices (best first)
   const preferred = [
     "Isha",
     "Veena",
@@ -1216,29 +1213,34 @@ function selectVoice(){
     "Microsoft Zira"
   ];
 
-  // Try to find preferred voice
+  // Try preferred
   for (const name of preferred) {
-    const match = voices.find(v => v.name.includes(name));
-    if (match) return match;
+    const match = voices.find(v => v && v.name && v.name.includes(name));
+    if (match){
+      chosenVoice = match;     // <-- THIS IS THE KEY
+      return chosenVoice;
+    }
   }
 
   // Fallback: first English voice
-  const englishVoice = voices.find(v => v.lang && v.lang.startsWith("en"));
-  if (englishVoice) return englishVoice;
+  const englishVoice = voices.find(v => v && v.lang && v.lang.startsWith("en"));
+  if (englishVoice){
+    chosenVoice = englishVoice;
+    return chosenVoice;
+  }
 
   // Last resort
-  return voices[0] || null;
+  chosenVoice = voices[0] || null;
+  return chosenVoice;
 }
-
 async function ensureVoiceSelected(timeoutMs = 1500){
   const start = performance.now();
 
-  // call selectVoice at least once
-  selectVoice();
+  chosenVoice = selectVoice();
 
   while ((!chosenVoice || !voiceReady) && (performance.now() - start) < timeoutMs){
     await sleep(50);
-    selectVoice();
+    chosenVoice = selectVoice();
   }
 }
 function styleParams(){
