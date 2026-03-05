@@ -1255,7 +1255,7 @@ function styleParams(){
     pitch = 0.92;   // slightly deeper tone for Veena
   }
 
-  return { pitch: pitch, rate: base * 0.95 * voiceRateMult };
+  return { pitch: pitch, rate: base * 0.95 };
 }
 
 function isEllipsisOnly(text){ return text.trim().replace(/[.\u2026]/g, "") === ""; }
