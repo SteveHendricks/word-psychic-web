@@ -6,17 +6,18 @@
 <title>Word Psychic – A Fun Vocabulary Fortune Game</title>
 <meta name="description" content="Word Psychic is a fun interactive vocabulary game where a mystical psychic reveals powerful English words and meanings. Discover new vocabulary through playful fortune-style readings." />
 <link rel="canonical" href="https://www.wordpsychic.com/" />
-  
+
 <meta property="og:title" content="Word Psychic – A Fun Vocabulary Fortune Game">
 <meta property="og:description" content="A mystical interactive vocabulary game where a psychic reveals powerful English words and meanings.">
 <meta property="og:url" content="https://www.wordpsychic.com/">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://www.wordpsychic.com/word-psychic-preview.jpg">  
-  
+<meta property="og:image" content="https://www.wordpsychic.com/word-psychic-preview.jpg">
+
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Word Psychic – A Fun Vocabulary Fortune Game">
 <meta name="twitter:description" content="Discover powerful English vocabulary through mystical fortune-style readings.">
 <meta name="twitter:image" content="https://www.wordpsychic.com/word-psychic-preview.jpg">
+
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -855,13 +856,14 @@
       </div>
     </section>
 
-   <section class="action-bar" aria-label="Actions">
-  <div class="buttons">
-    <button id="yesBtn" class="action">Yes</button>
-    <button id="noBtn"  class="action">No</button>
-    <button id="stopBtn" class="action quiet placeholder" disabled aria-hidden="true">End session</button>
-  </div>
-</section>
+    <section class="action-bar" aria-label="Actions">
+      <div class="buttons">
+        <button id="yesBtn" class="action">Yes</button>
+        <button id="noBtn"  class="action">No</button>
+        <button id="stopBtn" class="action quiet placeholder" disabled aria-hidden="true">End session</button>
+      </div>
+    </section>
+
     <section class="console" aria-label="Reading console">
       <div id="screen" class="screen">Tap “Start” to summon the Word Psychic…</div>
     </section>
@@ -883,7 +885,7 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
     window.speechSynthesis.getVoices();
   };
 }
-  
+
 const API = "https://word-psychic-web.onrender.com";
 const LIVE_SYNC = true;
 
@@ -1246,18 +1248,26 @@ async function ensureVoiceSelected(timeoutMs = 1500){
     selectVoice();
   }
 }
+
+/* =========================
+   FIXED STYLE PARAMS (safe)
+   ========================= */
 function styleParams(){
   const base = baseSpeechRate();
-  return { pitch: 1.02, rate: base * 0.95 * voiceRateMult };
-}
 
-  if (chosenVoice && chosenVoice.name.toLowerCase().includes("veena")) {
-    pitch = 0.92;     // warmer tone
-    rateMult = 0.60;  // slightly slower
+  // defaults (Isha + others)
+  let pitch = 1.02;
+  let rateMult = 1.0;
+
+  // Veena only: warmer + slightly slower
+  if (chosenVoice && chosenVoice.name && chosenVoice.name.toLowerCase().includes("veena")) {
+    pitch = 0.92;
+    rateMult = 0.88;
   }
 
-  return { pitch: pitch, rate: base * 0.95 * rateMult };
+  return { pitch, rate: base * 0.95 * rateMult };
 }
+
 function isEllipsisOnly(text){ return text.trim().replace(/[.\u2026]/g, "") === ""; }
 function textForSpeech(text){
   let t = text.replace(/\u2026/g, "").replace(/\.{3,}/g, "");
@@ -1299,6 +1309,7 @@ function splitChunks(full){
 function speakSentenceWithStart(text){
   const immediate = { started: Promise.resolve(), done: Promise.resolve(), rateUsed: baseSpeechRate() };
   if (!voiceReady) return immediate;
+
   const part = (text || "").trim();
   if (!part) return immediate;
 
