@@ -1252,14 +1252,13 @@ function styleParams(){
   let pitch = 0.96;
   let rateMult = 1.0;
 
-  if (chosenVoice && chosenVoice.name.includes("Veena")) {
+  if (chosenVoice && chosenVoice.name.toLowerCase().includes("veena")) {
     pitch = 0.92;     // warmer tone
-    rateMult = 0.70;  // slow Veena slightly
+    rateMult = 0.85;  // slightly slower
   }
 
-  return { pitch: pitch, rate: base * 0.95 };
+  return { pitch: pitch, rate: base * 0.95 * rateMult };
 }
-
 function isEllipsisOnly(text){ return text.trim().replace(/[.\u2026]/g, "") === ""; }
 function textForSpeech(text){
   let t = text.replace(/\u2026/g, "").replace(/\.{3,}/g, "");
