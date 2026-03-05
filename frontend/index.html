@@ -1605,7 +1605,7 @@ function bindStartOnce(){
     if (!isTokenLive(token)){ startInFlight = false; return; }
 
     unlockVoice();
-    ensureVoiceSelected().catch(()=>{});
+    await ensureVoiceSelected(1200);
     if (!isTokenLive(token)){ startInFlight = false; return; }
 
     await startSession(token);
