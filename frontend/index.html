@@ -1248,7 +1248,12 @@ async function ensureVoiceSelected(timeoutMs = 1500){
 }
 function styleParams(){
   const base = baseSpeechRate();
-  return { pitch: 1.02, rate: base * 0.95 };
+
+  // Voice-specific rate tuning (so Veena can be slower without affecting Isha)
+  const name = (chosenVoice && chosenVoice.name) ? chosenVoice.name : "";
+  const voiceRateMult = name.includes("Veena") ? 0.85 : 1.00;
+
+  return { pitch: 1.02, rate: base * 0.95 * voiceRateMult };
 }
 
 function isEllipsisOnly(text){ return text.trim().replace(/[.\u2026]/g, "") === ""; }
