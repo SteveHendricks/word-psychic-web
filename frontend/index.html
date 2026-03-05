@@ -1291,13 +1291,13 @@ function splitChunks(full){
 
 function speakSentenceWithStart(text){
   const immediate = { started: Promise.resolve(), done: Promise.resolve(), rateUsed: baseSpeechRate() };
-  if (!voiceReady || !chosenVoice) return immediate;
+  if (!voiceReady) return immediate;
   const part = (text || "").trim();
   if (!part) return immediate;
 
   const u = new SpeechSynthesisUtterance(textForSpeech(part));
   const style = styleParams();
-  u.voice = chosenVoice;
+  if (chosenVoice) u.voice = chosenVoice;
   u.pitch = style.pitch;
   u.rate  = style.rate;
   u.volume = 1.0;
