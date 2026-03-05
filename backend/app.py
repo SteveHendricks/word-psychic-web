@@ -279,7 +279,7 @@ Your fortune: Going one step too far can be fatal when you’re already at the e
         "script": """Apprehensive means uneasy or anxious about what may happen.
 The worm felt apprehensive about crawling around at dawn –- the early bird might be out there.
 
-I see another word. Diffident -- Timid or lacking self-confidence. Shy.
+I see another word. Diffident -- Timid or lacking self-confidence.
 He stepped forward, ready to answer, but then the diffident boy quickly stepped back.
 
 A final word. Capitulate -- To give up or surrender.
