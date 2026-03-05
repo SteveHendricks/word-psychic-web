@@ -1251,7 +1251,7 @@ function styleParams(){
 
   // Voice-specific rate tuning (so Veena can be slower without affecting Isha)
   const name = (chosenVoice && chosenVoice.name) ? chosenVoice.name : "";
-  const voiceRateMult = name.includes("Veena") ? 0.75 : 1.00;
+  const voiceRateMult = name.includes("Veena") ? 0.80 : 1.00;
 
   return { pitch: 1.02, rate: base * 0.95 * voiceRateMult };
 }
