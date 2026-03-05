@@ -1216,19 +1216,18 @@ function selectVoice(){
     "Microsoft Zira"
   ];
 
-  // IMPORTANT: use the global chosenVoice you already have at the top
-  chosenVoice = null;
-
-  // Try to match preferred voices
+  // Try to find preferred voice
   for (const name of preferred) {
-    const match = voices.find(v => v.name === name);
-    if (match) { chosenVoice = match; break; }
+    const match = voices.find(v => v.name.includes(name));
+    if (match) return match;
   }
 
-  // Fallback if none matched
-  if (!chosenVoice) {
-    chosenVoice = voices.find(v => v.lang && v.lang.startsWith("en")) || voices[0] || null;
-  }
+  // Fallback: first English voice
+  const englishVoice = voices.find(v => v.lang && v.lang.startsWith("en"));
+  if (englishVoice) return englishVoice;
+
+  // Last resort
+  return voices[0] || null;
 }
 
 async function ensureVoiceSelected(timeoutMs = 1500){
