@@ -1195,12 +1195,15 @@ function unlockVoice(){
 }
 
 function selectVoice(){
+
   // Get all voices available on this device
   const voices = speechSynthesis.getVoices() || [];
 
   // Preferred voices (best first)
   const preferred = [
     "Isha",
+    "Veena",
+    "Sangeeta",
     "Samantha",
     "Victoria",
     "Serena",
