@@ -1249,11 +1249,16 @@ async function ensureVoiceSelected(timeoutMs = 1500){
 function styleParams(){
   const base = baseSpeechRate();
 
-  let pitch = 0.96; // default (works well for Isha)
+  let pitch = 0.96;
+  let rateMult = 1.0;
 
   if (chosenVoice && chosenVoice.name.includes("Veena")) {
-    pitch = 0.92;   // slightly deeper tone for Veena
+    pitch = 0.92;     // warmer tone
+    rateMult = 0.85;  // slow Veena slightly
   }
+
+  return { pitch: pitch, rate: base * 0.95 * rateMult };
+}
 
   return { pitch: pitch, rate: base * 0.95 };
 }
