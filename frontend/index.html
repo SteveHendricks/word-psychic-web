@@ -1259,11 +1259,10 @@ function styleParams(){
   let pitch = 1.02;
   let rateMult = 1.0;
 
-  // Veena only: warmer + slightly slower
   if (chosenVoice && chosenVoice.name && chosenVoice.name.toLowerCase().includes("veena")) {
-    pitch = 0.92;
-    rateMult = 0.88;
-  }
+  pitch = 0.90;     // a touch warmer/deeper (optional)
+  rateMult = 0.78;  // slower Veena to reduce "robot tail"
+}
 
   return { pitch, rate: base * 0.95 * rateMult };
 }
