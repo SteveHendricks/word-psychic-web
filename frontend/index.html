@@ -36,7 +36,6 @@
 
     --panelEdge: rgba(210,230,255,.18);
 
-    /* purple bias */
     --violetA: rgba(190,120,255,.14);
     --violetB: rgba(140, 90,255,.10);
     --violetC: rgba(220,140,255,.08);
@@ -227,7 +226,6 @@
 
   .stage{ width: 100%; display:flex; justify-content:center; align-items:center; }
 
-  /* ===== CRYSTAL ===== */
   #ballWrap{
     position:relative;
     width: 320px;
@@ -502,7 +500,6 @@
   @keyframes drift{ from{transform:translateY(-8px)} to{transform:translateY(8px)} }
   @keyframes drift2{ from{transform:translateX(-10px)} to{transform:translateX(10px)} }
 
-  /* ===== BASE ===== */
   .ground-glow{
     position:absolute;
     left:50%;
@@ -631,7 +628,6 @@
     opacity:.92;
   }
 
-  /* ===== Glow states ===== */
   #ballWrap.idle .radiate{ opacity:.18; filter: blur(34px); }
   #ballWrap.idle .aura{    opacity:.12; filter: blur(28px); }
   #ballWrap.idle .aura2{   opacity:.10; filter: blur(42px); }
@@ -647,7 +643,6 @@
   #ballWrap.beat .aura2{ opacity:.78; filter: blur(32px); }
   #ballWrap.beat .ground-glow{ opacity:1.00; filter: blur(22px); }
 
-  /* ===== ACTION BAR ===== */
   .action-bar{
     width:min(1040px, 100%);
     margin: 8px auto 6px;
@@ -689,7 +684,6 @@
   button.action.quiet{ background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.11); color: rgba(232,243,255,.86); }
   button.action.placeholder{ opacity: 0; pointer-events: none; }
 
-  /* ===== CONSOLE ===== */
   .console{
     width:min(1040px, 100%);
     margin: 0 auto;
@@ -908,10 +902,10 @@ let titleShown = false;
 /* =========================
    Hard guards / tokens
    ========================= */
-let runToken = 0;                 // increments to cancel old typing loops
-let startInFlight = false;        // prevents double Start
-let chooseInFlight = false;       // prevents double Yes/No
-let sessionDone = false;          // prevents multiple end-session responses
+let runToken = 0;
+let startInFlight = false;
+let chooseInFlight = false;
+let sessionDone = false;
 let currentFetchController = null;
 
 function bumpRunToken(){ runToken++; return runToken; }
@@ -963,7 +957,6 @@ function autoScrollScreen(){
   try { screenEl.scrollTop = screenEl.scrollHeight; } catch(e){}
 }
 
-/* ===== gentle reset of inner screen only ===== */
 let clearing = false;
 
 function smoothScrollToTop(el, duration = 420){
@@ -1008,7 +1001,6 @@ async function gentleResetAndClear(token){
   await nextFrame();
   clearing = false;
 }
-/* ===== end ===== */
 
 /* === Speech-synced beat system === */
 let beatOffTimer = null;
@@ -1196,42 +1188,126 @@ function unlockVoice(){
   }
 }
 
+/* =========================
+   VOICE HIERARCHY + TUNING
+   ========================= */
+
+const MAC_PREFERRED_VOICES = [
+  "Isha Premium",
+  "Isha Advanced",
+  "Isha",
+  "Veena Enhanced",
+  "Veena",
+  "Sangeeta Enhanced",
+  "Sangeeta",
+  "Karen Premium",
+  "Karen Enhanced",
+  "Karen",
+  "Matilda Premium",
+  "Matilda Advanced",
+  "Matilda",
+  "Moira Enhanced",
+  "Moira",
+  "Fiona Enhanced",
+  "Fiona",
+  "Tessa Enhanced",
+  "Tessa",
+  "Kate Enhanced",
+  "Kate",
+  "Serena Premium",
+  "Serena Enhanced",
+  "Serena",
+  "Stephanie Enhanced",
+  "Stephanie",
+  "Samantha Enhanced",
+  "Samantha",
+  "Victoria Enhanced",
+  "Victoria"
+];
+
+const PC_FALLBACK_VOICES = [
+  "Microsoft Aria",
+  "Microsoft Jenny",
+  "Microsoft Sonia",
+  "Microsoft Ava",
+  "Microsoft Emma",
+  "Microsoft Ana",
+  "Microsoft Zira",
+  "Google UK English Female",
+  "Google US English"
+];
+
+const ALL_PREFERRED_VOICES = [
+  ...MAC_PREFERRED_VOICES,
+  ...PC_FALLBACK_VOICES
+];
+
+function normVoiceName(s){
+  return String(s || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isEnglishVoice(v){
+  return !!(v && v.lang && /^en([-_]|$)/i.test(v.lang));
+}
+
+function scoreGenericEnglishVoice(v){
+  const name = normVoiceName(v?.name || "");
+  let score = 0;
+
+  if (/(female|woman|aria|jenny|sonia|ava|emma|ana|zira|samantha|victoria|serena|moira|fiona|tessa|kate|karen|matilda|isha|veena|sangeeta|stephanie)/i.test(name)) {
+    score += 12;
+  }
+  if (/(premium|enhanced|advanced)/i.test(name)) score += 6;
+  if (/google/.test(name)) score += 4;
+  if (/microsoft/.test(name)) score += 4;
+  if (/(en-us|en-gb|en-au|en-ie)/i.test(v?.lang || "")) score += 2;
+
+  return score;
+}
+
 function selectVoice(){
   const voices = speechSynthesis.getVoices() || [];
+  if (!voices.length){
+    chosenVoice = null;
+    return chosenVoice;
+  }
 
-  const preferred = [
-    "Isha",
-    "Veena",
-    "Sangeeta",
-    "Samantha",
-    "Victoria",
-    "Serena",
-    "Moira",
-    "Fiona",
-    "Tessa",
-    "Google UK English Female",
-    "Google US English",
-    "Microsoft Aria",
-    "Microsoft Zira"
-  ];
+  const byExactName = new Map(
+    voices
+      .filter(v => v && v.name)
+      .map(v => [normVoiceName(v.name), v])
+  );
 
-  // Preferred match (use includes to catch "Enhanced" variants)
-  for (const name of preferred){
-    const match = voices.find(v => v && v.name && v.name.includes(name));
-    if (match){
-      chosenVoice = match;
+  for (const preferred of ALL_PREFERRED_VOICES){
+    const exact = byExactName.get(normVoiceName(preferred));
+    if (exact){
+      chosenVoice = exact;
       return chosenVoice;
     }
   }
 
-  // Fallback: any English voice
-  const english = voices.find(v => v && v.lang && v.lang.startsWith("en"));
-  if (english){
-    chosenVoice = english;
+  for (const preferred of ALL_PREFERRED_VOICES){
+    const wanted = normVoiceName(preferred);
+    const partial = voices.find(v => {
+      const n = normVoiceName(v?.name || "");
+      return n === wanted || n.includes(wanted) || wanted.includes(n);
+    });
+    if (partial){
+      chosenVoice = partial;
+      return chosenVoice;
+    }
+  }
+
+  const englishVoices = voices.filter(isEnglishVoice);
+  if (englishVoices.length){
+    englishVoices.sort((a, b) => scoreGenericEnglishVoice(b) - scoreGenericEnglishVoice(a));
+    chosenVoice = englishVoices[0];
     return chosenVoice;
   }
 
-  // Last resort
   chosenVoice = voices[0] || null;
   return chosenVoice;
 }
@@ -1239,32 +1315,155 @@ function selectVoice(){
 async function ensureVoiceSelected(timeoutMs = 1500){
   const start = performance.now();
 
-  // Attempt immediately
   selectVoice();
 
-  // Wait briefly for voices to populate
   while ((!chosenVoice || !voiceReady) && (performance.now() - start) < timeoutMs){
     await sleep(50);
     selectVoice();
   }
 }
 
-/* =========================
-   FIXED STYLE PARAMS (safe)
-   ========================= */
 function styleParams(){
   const base = baseSpeechRate();
+  const name = normVoiceName(chosenVoice?.name || "");
 
-  // defaults (Isha + others)
-  let pitch = 1.02;
-  let rateMult = 1.0;
+  let pitch = 1.00;
+  let rateMult = 0.90;
 
-  if (chosenVoice && chosenVoice.name && chosenVoice.name.toLowerCase().includes("veena")) {
-  pitch = 0.90;     // a touch warmer/deeper (optional)
-  rateMult = 0.72;  // slower Veena to reduce "robot tail"
-}
+  if (name.includes("isha premium")) {
+    pitch = 1.00;
+    rateMult = 0.96;
+  } else if (name.includes("isha advanced")) {
+    pitch = 1.00;
+    rateMult = 0.95;
+  } else if (name.includes("isha")) {
+    pitch = 1.01;
+    rateMult = 0.95;
 
-  return { pitch, rate: base * 0.95 * rateMult };
+  } else if (name.includes("veena enhanced")) {
+    pitch = 0.92;
+    rateMult = 0.78;
+  } else if (name.includes("veena")) {
+    pitch = 0.91;
+    rateMult = 0.76;
+
+  } else if (name.includes("sangeeta enhanced")) {
+    pitch = 0.97;
+    rateMult = 0.84;
+  } else if (name.includes("sangeeta")) {
+    pitch = 0.96;
+    rateMult = 0.82;
+
+  } else if (name.includes("karen premium")) {
+    pitch = 0.98;
+    rateMult = 0.90;
+  } else if (name.includes("karen enhanced")) {
+    pitch = 0.98;
+    rateMult = 0.89;
+  } else if (name.includes("karen")) {
+    pitch = 0.99;
+    rateMult = 0.88;
+
+  } else if (name.includes("matilda premium")) {
+    pitch = 0.99;
+    rateMult = 0.91;
+  } else if (name.includes("matilda advanced")) {
+    pitch = 0.99;
+    rateMult = 0.90;
+  } else if (name.includes("matilda")) {
+    pitch = 1.00;
+    rateMult = 0.89;
+
+  } else if (name.includes("moira enhanced")) {
+    pitch = 0.98;
+    rateMult = 0.92;
+  } else if (name.includes("moira")) {
+    pitch = 0.98;
+    rateMult = 0.91;
+
+  } else if (name.includes("fiona enhanced")) {
+    pitch = 0.99;
+    rateMult = 0.91;
+  } else if (name.includes("fiona")) {
+    pitch = 1.00;
+    rateMult = 0.90;
+
+  } else if (name.includes("tessa enhanced")) {
+    pitch = 1.01;
+    rateMult = 0.90;
+  } else if (name.includes("tessa")) {
+    pitch = 1.01;
+    rateMult = 0.89;
+
+  } else if (name.includes("kate enhanced")) {
+    pitch = 0.99;
+    rateMult = 0.90;
+  } else if (name.includes("kate")) {
+    pitch = 1.00;
+    rateMult = 0.88;
+
+  } else if (name.includes("serena premium")) {
+    pitch = 1.00;
+    rateMult = 0.91;
+  } else if (name.includes("serena enhanced")) {
+    pitch = 1.00;
+    rateMult = 0.90;
+  } else if (name.includes("serena")) {
+    pitch = 1.00;
+    rateMult = 0.89;
+
+  } else if (name.includes("stephanie enhanced")) {
+    pitch = 1.01;
+    rateMult = 0.90;
+  } else if (name.includes("stephanie")) {
+    pitch = 1.01;
+    rateMult = 0.89;
+
+  } else if (name.includes("samantha enhanced")) {
+    pitch = 1.05;
+    rateMult = 0.82;
+  } else if (name.includes("samantha")) {
+    pitch = 1.06;
+    rateMult = 0.80;
+
+  } else if (name.includes("victoria enhanced")) {
+    pitch = 1.00;
+    rateMult = 0.89;
+  } else if (name.includes("victoria")) {
+    pitch = 1.00;
+    rateMult = 0.88;
+
+  } else if (
+    name.includes("microsoft aria") ||
+    name.includes("microsoft jenny") ||
+    name.includes("microsoft sonia") ||
+    name.includes("microsoft ava") ||
+    name.includes("microsoft emma") ||
+    name.includes("microsoft ana")
+  ) {
+    pitch = 1.00;
+    rateMult = 0.88;
+
+  } else if (name.includes("microsoft zira")) {
+    pitch = 1.01;
+    rateMult = 0.84;
+
+  } else if (name.includes("google uk english female")) {
+    pitch = 1.00;
+    rateMult = 0.89;
+  } else if (name.includes("google us english")) {
+    pitch = 1.00;
+    rateMult = 0.87;
+
+  } else if (isEnglishVoice(chosenVoice)) {
+    pitch = 1.00;
+    rateMult = 0.88;
+  }
+
+  return {
+    pitch,
+    rate: base * rateMult
+  };
 }
 
 function isEllipsisOnly(text){ return text.trim().replace(/[.\u2026]/g, "") === ""; }
@@ -1474,8 +1673,6 @@ The words will be waiting for your call.`;
   }catch(e){}
 }
 
-/* ========================= */
-
 async function startSession(token){
   try{
     statusEl.textContent = "";
@@ -1607,11 +1804,9 @@ function bindStartOnce(){
     sessionDone = false;
     chooseInFlight = false;
 
-    // reset intro gating
     introAnswered = false;
     showStopButton(false);
 
-    // title + whoosh once
     if (!titleShown){
       titleShown = true;
       playGhostlyWhoosh();
