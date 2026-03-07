@@ -1270,6 +1270,7 @@ function scoreGenericEnglishVoice(v){
 
 function selectVoice(){
   const voices = speechSynthesis.getVoices() || [];
+  console.log("Available voices:", voices.map(v => `${v.name} [${v.lang}]`));
   if (!voices.length){
     chosenVoice = null;
     return chosenVoice;
