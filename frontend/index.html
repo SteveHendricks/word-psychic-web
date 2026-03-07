@@ -1271,8 +1271,10 @@ function scoreGenericEnglishVoice(v){
 function selectVoice(){
   const voices = speechSynthesis.getVoices() || [];
   console.log("Available voices:", voices.map(v => `${v.name} [${v.lang}]`));
+
   if (!voices.length){
     chosenVoice = null;
+    console.log("Chosen voice:", "none");
     return chosenVoice;
   }
 
@@ -1286,6 +1288,7 @@ function selectVoice(){
     const exact = byExactName.get(normVoiceName(preferred));
     if (exact){
       chosenVoice = exact;
+      console.log("Chosen voice:", `${chosenVoice.name} [${chosenVoice.lang}]`);
       return chosenVoice;
     }
   }
@@ -1298,6 +1301,7 @@ function selectVoice(){
     });
     if (partial){
       chosenVoice = partial;
+      console.log("Chosen voice:", `${chosenVoice.name} [${chosenVoice.lang}]`);
       return chosenVoice;
     }
   }
@@ -1306,10 +1310,12 @@ function selectVoice(){
   if (englishVoices.length){
     englishVoices.sort((a, b) => scoreGenericEnglishVoice(b) - scoreGenericEnglishVoice(a));
     chosenVoice = englishVoices[0];
+    console.log("Chosen voice:", `${chosenVoice.name} [${chosenVoice.lang}]`);
     return chosenVoice;
   }
 
   chosenVoice = voices[0] || null;
+  console.log("Chosen voice:", chosenVoice ? `${chosenVoice.name} [${chosenVoice.lang}]` : "none");
   return chosenVoice;
 }
 
