@@ -1190,39 +1190,17 @@ function unlockVoice(){
 
 /* =========================
    VOICE HIERARCHY + TUNING
+   Browser-accurate version
    ========================= */
 
-const MAC_PREFERRED_VOICES = [
-  "Isha Premium",
-  "Isha Advanced",
+const MAC_BROWSER_VOICES = [
   "Isha",
-  "Veena Enhanced",
   "Veena",
-  "Sangeeta Enhanced",
   "Sangeeta",
-  "Karen Premium",
-  "Karen Enhanced",
   "Karen",
-  "Matilda Premium",
-  "Matilda Advanced",
-  "Matilda",
-  "Moira Enhanced",
   "Moira",
-  "Fiona Enhanced",
   "Fiona",
-  "Tessa Enhanced",
-  "Tessa",
-  "Kate Enhanced",
-  "Kate",
-  "Serena Premium",
-  "Serena Enhanced",
-  "Serena",
-  "Stephanie Enhanced",
-  "Stephanie",
-  "Samantha Enhanced",
-  "Samantha",
-  "Victoria Enhanced",
-  "Victoria"
+  "Samantha"
 ];
 
 const PC_FALLBACK_VOICES = [
@@ -1238,7 +1216,7 @@ const PC_FALLBACK_VOICES = [
 ];
 
 const ALL_PREFERRED_VOICES = [
-  ...MAC_PREFERRED_VOICES,
+  ...MAC_BROWSER_VOICES,
   ...PC_FALLBACK_VOICES
 ];
 
@@ -1257,13 +1235,12 @@ function scoreGenericEnglishVoice(v){
   const name = normVoiceName(v?.name || "");
   let score = 0;
 
-  if (/(female|woman|aria|jenny|sonia|ava|emma|ana|zira|samantha|victoria|serena|moira|fiona|tessa|kate|karen|matilda|isha|veena|sangeeta|stephanie)/i.test(name)) {
+  if (/(female|woman|aria|jenny|sonia|ava|emma|ana|zira|isha|veena|sangeeta|karen|moira|fiona|samantha)/i.test(name)) {
     score += 12;
   }
-  if (/(premium|enhanced|advanced)/i.test(name)) score += 6;
   if (/google/.test(name)) score += 4;
   if (/microsoft/.test(name)) score += 4;
-  if (/(en-us|en-gb|en-au|en-ie)/i.test(v?.lang || "")) score += 2;
+  if (/(en-us|en-gb|en-au|en-ie|en-in)/i.test(v?.lang || "")) score += 2;
 
   return score;
 }
@@ -1284,6 +1261,7 @@ function selectVoice(){
       .map(v => [normVoiceName(v.name), v])
   );
 
+  // Exact match first
   for (const preferred of ALL_PREFERRED_VOICES){
     const exact = byExactName.get(normVoiceName(preferred));
     if (exact){
@@ -1293,6 +1271,7 @@ function selectVoice(){
     }
   }
 
+  // Partial match fallback
   for (const preferred of ALL_PREFERRED_VOICES){
     const wanted = normVoiceName(preferred);
     const partial = voices.find(v => {
@@ -1306,6 +1285,7 @@ function selectVoice(){
     }
   }
 
+  // Best generic English fallback
   const englishVoices = voices.filter(isEnglishVoice);
   if (englishVoices.length){
     englishVoices.sort((a, b) => scoreGenericEnglishVoice(b) - scoreGenericEnglishVoice(a));
@@ -1334,111 +1314,48 @@ function styleParams(){
   const base = baseSpeechRate();
   const name = normVoiceName(chosenVoice?.name || "");
 
+  // Safe default
   let pitch = 1.00;
   let rateMult = 0.90;
 
-  if (name.includes("isha premium")) {
+  /* ========= Confirmed Mac/browser voices ========= */
+
+  // Isha — your strongest performer
+  if (name.includes("isha")) {
     pitch = 1.00;
-    rateMult = 0.96;
-  } else if (name.includes("isha advanced")) {
-    pitch = 1.00;
-    rateMult = 0.95;
-  } else if (name.includes("isha")) {
-    pitch = 1.01;
     rateMult = 0.95;
 
-  } else if (name.includes("veena enhanced")) {
-    pitch = 0.92;
-    rateMult = 0.78;
+  // Veena — slow down more, slightly warm/deeper
   } else if (name.includes("veena")) {
     pitch = 0.91;
     rateMult = 0.76;
 
-  } else if (name.includes("sangeeta enhanced")) {
-    pitch = 0.97;
-    rateMult = 0.84;
+  // Sangeeta — calm and a little slower, but not as slow as Veena
   } else if (name.includes("sangeeta")) {
     pitch = 0.96;
     rateMult = 0.82;
 
-  } else if (name.includes("karen premium")) {
-    pitch = 0.98;
-    rateMult = 0.90;
-  } else if (name.includes("karen enhanced")) {
-    pitch = 0.98;
-    rateMult = 0.89;
+  // Karen (English (Australia)) — stately and clear
   } else if (name.includes("karen")) {
     pitch = 0.99;
     rateMult = 0.88;
 
-  } else if (name.includes("matilda premium")) {
-    pitch = 0.99;
-    rateMult = 0.91;
-  } else if (name.includes("matilda advanced")) {
-    pitch = 0.99;
-    rateMult = 0.90;
-  } else if (name.includes("matilda")) {
-    pitch = 1.00;
-    rateMult = 0.89;
-
-  } else if (name.includes("moira enhanced")) {
-    pitch = 0.98;
-    rateMult = 0.92;
+  // Moira — naturally theatrical, keep controlled
   } else if (name.includes("moira")) {
     pitch = 0.98;
     rateMult = 0.91;
 
-  } else if (name.includes("fiona enhanced")) {
-    pitch = 0.99;
-    rateMult = 0.91;
+  // Fiona — calm storyteller feel
   } else if (name.includes("fiona")) {
     pitch = 1.00;
     rateMult = 0.90;
 
-  } else if (name.includes("tessa enhanced")) {
-    pitch = 1.01;
-    rateMult = 0.90;
-  } else if (name.includes("tessa")) {
-    pitch = 1.01;
-    rateMult = 0.89;
-
-  } else if (name.includes("kate enhanced")) {
-    pitch = 0.99;
-    rateMult = 0.90;
-  } else if (name.includes("kate")) {
-    pitch = 1.00;
-    rateMult = 0.88;
-
-  } else if (name.includes("serena premium")) {
-    pitch = 1.00;
-    rateMult = 0.91;
-  } else if (name.includes("serena enhanced")) {
-    pitch = 1.00;
-    rateMult = 0.90;
-  } else if (name.includes("serena")) {
-    pitch = 1.00;
-    rateMult = 0.89;
-
-  } else if (name.includes("stephanie enhanced")) {
-    pitch = 1.01;
-    rateMult = 0.90;
-  } else if (name.includes("stephanie")) {
-    pitch = 1.01;
-    rateMult = 0.89;
-
-  } else if (name.includes("samantha enhanced")) {
-    pitch = 1.05;
-    rateMult = 0.82;
+  // Samantha — more robotic, so slower with slight lift
   } else if (name.includes("samantha")) {
     pitch = 1.06;
     rateMult = 0.80;
 
-  } else if (name.includes("victoria enhanced")) {
-    pitch = 1.00;
-    rateMult = 0.89;
-  } else if (name.includes("victoria")) {
-    pitch = 1.00;
-    rateMult = 0.88;
+  /* ========= Microsoft / PC ========= */
 
   } else if (
     name.includes("microsoft aria") ||
@@ -1455,12 +1372,16 @@ function styleParams(){
     pitch = 1.01;
     rateMult = 0.84;
 
+  /* ========= Google voices ========= */
+
   } else if (name.includes("google uk english female")) {
     pitch = 1.00;
     rateMult = 0.89;
   } else if (name.includes("google us english")) {
     pitch = 1.00;
     rateMult = 0.87;
+
+  /* ========= Generic English fallback ========= */
 
   } else if (isEnglishVoice(chosenVoice)) {
     pitch = 1.00;
@@ -1472,45 +1393,6 @@ function styleParams(){
     rate: base * rateMult
   };
 }
-
-function isEllipsisOnly(text){ return text.trim().replace(/[.\u2026]/g, "") === ""; }
-function textForSpeech(text){
-  let t = text.replace(/\u2026/g, "").replace(/\.{3,}/g, "");
-  t = t.replace(/ ?→ ?/g, ". ");
-  return t;
-}
-
-function splitChunks(full){
-  const out = [];
-  let buf = "";
-  for (let i = 0; i < full.length; i++){
-    if (full.slice(i, i+3) === "\n\n\n"){
-      if (buf) out.push(buf);
-      buf = "";
-      out.push("\n\n\n");
-      i += 2; continue;
-    }
-    if (full.slice(i, i+2) === "\n\n"){
-      if (buf) out.push(buf);
-      buf = "";
-      out.push("\n\n");
-      i += 1; continue;
-    }
-    const ch = full[i];
-    const next = full[i + 1];
-    buf += ch;
-
-    const isEndPunct = (ch==="."||ch==="!"||ch==="?") && (i+1>=full.length || /\s/.test(next));
-    const isColonBreak = (ch === ":" && next === "\n");
-    if (isEndPunct || isColonBreak){
-      out.push(buf);
-      buf = "";
-    }
-  }
-  if (buf) out.push(buf);
-  return out;
-}
-
 function speakSentenceWithStart(text){
   const immediate = { started: Promise.resolve(), done: Promise.resolve(), rateUsed: baseSpeechRate() };
   if (!voiceReady) return immediate;
