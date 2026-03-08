@@ -873,7 +873,7 @@
   </main>
 
 <script>
-// Ensure browser voices are fully loaded (safe on all browsers)
+// Ensure browser voices are fully loaded
 if (typeof window !== "undefined" && "speechSynthesis" in window) {
   window.speechSynthesis.onvoiceschanged = () => {
     window.speechSynthesis.getVoices();
@@ -899,9 +899,6 @@ let chosenVoice = null;
 let startBound = false;
 let titleShown = false;
 
-/* =========================
-   Hard guards / tokens
-   ========================= */
 let runToken = 0;
 let startInFlight = false;
 let chooseInFlight = false;
@@ -1002,7 +999,6 @@ async function gentleResetAndClear(token){
   clearing = false;
 }
 
-/* === Speech-synced beat system === */
 let beatOffTimer = null;
 let fallbackBeatTimer = null;
 
@@ -1119,7 +1115,6 @@ function hardStopAllAudioAndBeats(){
   clearTimeout(beatOffTimer);
 }
 
-/* Whoosh sound */
 function playGhostlyWhoosh(){
   try{
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1261,7 +1256,6 @@ function selectVoice(){
       .map(v => [normVoiceName(v.name), v])
   );
 
-  // Exact match first
   for (const preferred of ALL_PREFERRED_VOICES){
     const exact = byExactName.get(normVoiceName(preferred));
     if (exact){
@@ -1271,7 +1265,6 @@ function selectVoice(){
     }
   }
 
-  // Partial match fallback
   for (const preferred of ALL_PREFERRED_VOICES){
     const wanted = normVoiceName(preferred);
     const partial = voices.find(v => {
@@ -1285,7 +1278,6 @@ function selectVoice(){
     }
   }
 
-  // Best generic English fallback
   const englishVoices = voices.filter(isEnglishVoice);
   if (englishVoices.length){
     englishVoices.sort((a, b) => scoreGenericEnglishVoice(b) - scoreGenericEnglishVoice(a));
@@ -1301,7 +1293,6 @@ function selectVoice(){
 
 async function ensureVoiceSelected(timeoutMs = 1500){
   const start = performance.now();
-
   selectVoice();
 
   while ((!chosenVoice || !voiceReady) && (performance.now() - start) < timeoutMs){
@@ -1314,48 +1305,36 @@ function styleParams(){
   const base = baseSpeechRate();
   const name = normVoiceName(chosenVoice?.name || "");
 
-  // Safe default
   let pitch = 1.00;
   let rateMult = 0.90;
 
-  /* ========= Confirmed Mac/browser voices ========= */
-
-  // Isha — your strongest performer
   if (name.includes("isha")) {
     pitch = 1.00;
     rateMult = 0.95;
 
-  // Veena — slow down more, slightly warm/deeper
   } else if (name.includes("veena")) {
     pitch = 0.91;
     rateMult = 0.76;
 
-  // Sangeeta — calm and a little slower, but not as slow as Veena
   } else if (name.includes("sangeeta")) {
     pitch = 0.96;
     rateMult = 0.82;
 
-  // Karen (English (Australia)) — stately and clear
   } else if (name.includes("karen")) {
     pitch = 0.99;
     rateMult = 0.88;
 
-  // Moira — naturally theatrical, keep controlled
   } else if (name.includes("moira")) {
     pitch = 0.98;
     rateMult = 0.91;
 
-  // Fiona — calm storyteller feel
   } else if (name.includes("fiona")) {
     pitch = 1.00;
     rateMult = 0.90;
 
-  // Samantha — more robotic, so slower with slight lift
   } else if (name.includes("samantha")) {
     pitch = 1.06;
     rateMult = 0.80;
-
-  /* ========= Microsoft / PC ========= */
 
   } else if (
     name.includes("microsoft aria") ||
@@ -1372,16 +1351,13 @@ function styleParams(){
     pitch = 1.01;
     rateMult = 0.84;
 
-  /* ========= Google voices ========= */
-
   } else if (name.includes("google uk english female")) {
     pitch = 1.00;
     rateMult = 0.89;
+
   } else if (name.includes("google us english")) {
     pitch = 1.00;
     rateMult = 0.87;
-
-  /* ========= Generic English fallback ========= */
 
   } else if (isEnglishVoice(chosenVoice)) {
     pitch = 1.00;
@@ -1393,6 +1369,58 @@ function styleParams(){
     rate: base * rateMult
   };
 }
+
+function isEllipsisOnly(text){
+  return text.trim().replace(/[.\u2026]/g, "") === "";
+}
+
+function textForSpeech(text){
+  let t = text.replace(/\u2026/g, "").replace(/\.{3,}/g, "");
+  t = t.replace(/ ?→ ?/g, ". ");
+  return t;
+}
+
+function splitChunks(full){
+  const out = [];
+  let buf = "";
+
+  for (let i = 0; i < full.length; i++){
+    if (full.slice(i, i + 3) === "\n\n\n"){
+      if (buf) out.push(buf);
+      buf = "";
+      out.push("\n\n\n");
+      i += 2;
+      continue;
+    }
+
+    if (full.slice(i, i + 2) === "\n\n"){
+      if (buf) out.push(buf);
+      buf = "";
+      out.push("\n\n");
+      i += 1;
+      continue;
+    }
+
+    const ch = full[i];
+    const next = full[i + 1];
+    buf += ch;
+
+    const isEndPunct =
+      (ch === "." || ch === "!" || ch === "?") &&
+      (i + 1 >= full.length || /\s/.test(next));
+
+    const isColonBreak = (ch === ":" && next === "\n");
+
+    if (isEndPunct || isColonBreak){
+      out.push(buf);
+      buf = "";
+    }
+  }
+
+  if (buf) out.push(buf);
+  return out;
+}
+
 function speakSentenceWithStart(text){
   const immediate = { started: Promise.resolve(), done: Promise.resolve(), rateUsed: baseSpeechRate() };
   if (!voiceReady) return immediate;
@@ -1450,6 +1478,7 @@ async function typeChunkOverMs(chunk, totalMs, token){
     await sleep(perChar);
   }
 }
+
 async function typeChunkClassic(chunk, token){
   for (const ch of (chunk || "")){
     if (!isTokenLive(token)) return;
@@ -1522,9 +1551,6 @@ async function speakAndTypePerSentence(text, token){
   updateSpeakingFromEngine();
 }
 
-/* =========================
-   PANIC BUTTON: instant End Session
-   ========================= */
 async function forceEndSession(){
   const token = bumpRunToken();
   hardStopAllAudioAndBeats();
@@ -1591,7 +1617,7 @@ async function startSession(token){
     setButtonsEnabled(true);
   }catch(err){
     if (!isTokenLive(token)) return;
-    screenEl.textContent = `⚠️ Could not reach backend at ${API}/start\n${String(err)}`;
+    screenEl.textContent = `⚠️ Startup error\n${String(err)}`;
     setButtonsEnabled(false);
     stopBtn.disabled = true;
     setStartEnabled(true);
@@ -1649,7 +1675,7 @@ async function sendChoice(answer){
     }
   }catch(err){
     if (!isTokenLive(runToken)) return;
-    screenEl.textContent = `⚠️ Request failed to ${API}/choose\n${String(err)}`;
+    screenEl.textContent = `⚠️ Request error\n${String(err)}`;
     if (!sessionDone){
       setButtonsEnabled(true);
       stopBtn.disabled = false;
@@ -1659,7 +1685,6 @@ async function sendChoice(answer){
   }
 }
 
-/* ===== Intro gating for End Session ===== */
 let introAnswered = false;
 function revealEndSessionAfterIntro(){
   if (introAnswered) return;
@@ -1668,7 +1693,6 @@ function revealEndSessionAfterIntro(){
   stopBtn.disabled = false;
 }
 
-/* ===== Bind Start once ===== */
 function bindStartOnce(){
   if (startBound) return;
   startBound = true;
@@ -1715,13 +1739,11 @@ function bindStartOnce(){
   });
 }
 
-/* ===== Initial UI state ===== */
 setButtonsEnabled(false);
 setStartEnabled(true);
 showStopButton(false);
 syncVoiceLabel();
 
-/* ===== Attach handlers ===== */
 bindStartOnce();
 
 yesBtn.addEventListener("click", (e)=>{
