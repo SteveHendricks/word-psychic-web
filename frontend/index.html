@@ -27,15 +27,11 @@
   :root{
     --bg0:#050914;
     --bg1:#071024;
-
     --ink:#e9f3ff;
     --muted:#a8c1dc;
-
     --pill: rgba(14, 26, 54, .70);
     --pillEdge: rgba(210,230,255,.18);
-
     --panelEdge: rgba(210,230,255,.18);
-
     --violetA: rgba(190,120,255,.14);
     --violetB: rgba(140, 90,255,.10);
     --violetC: rgba(220,140,255,.08);
@@ -77,8 +73,15 @@
       0 18px 60px rgba(0,0,0,.50);
     width:min(1040px, 100%);
     justify-content:center;
+    flex-wrap: wrap;
   }
-  .controls label{ font-size: 16px; line-height: 1; gap: 10px; }
+  .controls label{
+    font-size: 16px;
+    line-height: 1;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
   .controls select{
     font-size: 16px;
     line-height: 1;
@@ -133,6 +136,16 @@
     opacity:.55;
     cursor:not-allowed;
     transform:none;
+  }
+  .voice-test-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .voice-select{
+    min-width: 240px !important;
+    max-width: 320px;
   }
 
   .title-wrap{ display:flex; justify-content:center; margin-top: 0; position:relative; z-index:9; }
@@ -299,7 +312,6 @@
         rgba(30,22,60,.12) 74%,
         rgba(0,0,0,0) 100%);
     border: none;
-
     box-shadow:
       0 0 0 1px rgba(240,255,255,.10),
       0 0 52px rgba(180,245,255,.18),
@@ -307,7 +319,6 @@
       inset 0 0 110px rgba(255,255,255,.10),
       inset 0 -130px 260px rgba(0,0,0,.18),
       inset 0 0 0 1px rgba(235,215,255,.10);
-
     transform-origin: 50% 102%;
     transform: scale(var(--beatScale));
     transition: transform 120ms ease-out;
@@ -772,6 +783,8 @@
     .console{ height: clamp(340px, 48vh, 440px); min-height: 320px; }
     .screen{ padding: 14px 20px; }
     .footerbar{ font-size: 13px; padding: 10px 12px; }
+    .controls{ justify-content:center; }
+    .voice-select{ min-width: 180px !important; max-width: 240px; }
   }
 </style>
 </head>
@@ -793,6 +806,21 @@
           <input type="checkbox" id="speakWhileTyping" checked>
           <span id="voiceLabel">Voice On</span>
         </label>
+
+        <div class="voice-test-wrap">
+          <label>Voice Mode
+            <select id="voiceMode">
+              <option value="auto" selected>Auto</option>
+              <option value="manual">Manual</option>
+            </select>
+          </label>
+
+          <label>Test Voice
+            <select id="voiceSelect" class="voice-select" disabled>
+              <option value="">Loading voices…</option>
+            </select>
+          </label>
+        </div>
 
         <button id="startBtn" class="start">Start</button>
       </div>
@@ -873,10 +901,9 @@
   </main>
 
 <script>
-// Ensure browser voices are fully loaded
 if (typeof window !== "undefined" && "speechSynthesis" in window) {
   window.speechSynthesis.onvoiceschanged = () => {
-    window.speechSynthesis.getVoices();
+    refreshVoiceList();
   };
 }
 
@@ -922,6 +949,8 @@ const startBtn = document.getElementById("startBtn");
 const speedSel = document.getElementById("speed");
 const speakWhileTyping = document.getElementById("speakWhileTyping");
 const voiceLabel = document.getElementById("voiceLabel");
+const voiceModeSel = document.getElementById("voiceMode");
+const voiceSelectEl = document.getElementById("voiceSelect");
 const ballWrap = document.getElementById("ballWrap");
 const titleEl = document.getElementById("titleText");
 
@@ -1105,6 +1134,10 @@ function syncVoiceLabel(){
   }
 }
 
+function syncVoiceModeUI(){
+  voiceSelectEl.disabled = voiceModeSel.value !== "manual";
+}
+
 function hardStopAllAudioAndBeats(){
   try { speechSynthesis.cancel(); } catch(e){}
   speakingCount = 0;
@@ -1177,7 +1210,10 @@ function unlockVoice(){
     const u = new SpeechSynthesisUtterance("");
     speechSynthesis.speak(u);
     voiceReady = true;
-    setTimeout(selectVoice, 250);
+    setTimeout(() => {
+      refreshVoiceList();
+      selectVoice();
+    }, 250);
   }catch(e){
     voiceReady = false;
   }
@@ -1185,7 +1221,6 @@ function unlockVoice(){
 
 /* =========================
    VOICE HIERARCHY + TUNING
-   Browser-accurate version
    ========================= */
 
 const MAC_BROWSER_VOICES = [
@@ -1240,6 +1275,51 @@ function scoreGenericEnglishVoice(v){
   return score;
 }
 
+function getManualVoice(){
+  const wanted = normVoiceName(voiceSelectEl.value);
+  if (!wanted) return null;
+  const voices = speechSynthesis.getVoices() || [];
+  return voices.find(v => normVoiceName(v.name) === wanted) || null;
+}
+
+function refreshVoiceList(){
+  const voices = speechSynthesis.getVoices() || [];
+  const englishVoices = voices
+    .filter(isEnglishVoice)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const currentValue = voiceSelectEl.value;
+  voiceSelectEl.innerHTML = "";
+
+  if (!englishVoices.length){
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "No voices found";
+    voiceSelectEl.appendChild(opt);
+    syncVoiceModeUI();
+    return;
+  }
+
+  for (const v of englishVoices){
+    const opt = document.createElement("option");
+    opt.value = normVoiceName(v.name);
+    opt.textContent = `${v.name} [${v.lang}]`;
+    voiceSelectEl.appendChild(opt);
+  }
+
+  if (currentValue && [...voiceSelectEl.options].some(o => o.value === currentValue)){
+    voiceSelectEl.value = currentValue;
+  } else {
+    const defaultTestVoice = englishVoices.find(v =>
+      ["veena", "sangeeta", "karen", "moira", "fiona", "samantha", "isha"]
+        .some(n => normVoiceName(v.name).includes(n))
+    );
+    voiceSelectEl.value = defaultTestVoice ? normVoiceName(defaultTestVoice.name) : voiceSelectEl.options[0].value;
+  }
+
+  syncVoiceModeUI();
+}
+
 function selectVoice(){
   const voices = speechSynthesis.getVoices() || [];
   console.log("Available voices:", voices.map(v => `${v.name} [${v.lang}]`));
@@ -1248,6 +1328,15 @@ function selectVoice(){
     chosenVoice = null;
     console.log("Chosen voice:", "none");
     return chosenVoice;
+  }
+
+  if (voiceModeSel.value === "manual"){
+    const manual = getManualVoice();
+    if (manual){
+      chosenVoice = manual;
+      console.log("Chosen voice (manual):", `${chosenVoice.name} [${chosenVoice.lang}]`);
+      return chosenVoice;
+    }
   }
 
   const byExactName = new Map(
@@ -1260,7 +1349,7 @@ function selectVoice(){
     const exact = byExactName.get(normVoiceName(preferred));
     if (exact){
       chosenVoice = exact;
-      console.log("Chosen voice:", `${chosenVoice.name} [${chosenVoice.lang}]`);
+      console.log("Chosen voice (auto):", `${chosenVoice.name} [${chosenVoice.lang}]`);
       return chosenVoice;
     }
   }
@@ -1273,7 +1362,7 @@ function selectVoice(){
     });
     if (partial){
       chosenVoice = partial;
-      console.log("Chosen voice:", `${chosenVoice.name} [${chosenVoice.lang}]`);
+      console.log("Chosen voice (auto):", `${chosenVoice.name} [${chosenVoice.lang}]`);
       return chosenVoice;
     }
   }
@@ -1282,7 +1371,7 @@ function selectVoice(){
   if (englishVoices.length){
     englishVoices.sort((a, b) => scoreGenericEnglishVoice(b) - scoreGenericEnglishVoice(a));
     chosenVoice = englishVoices[0];
-    console.log("Chosen voice:", `${chosenVoice.name} [${chosenVoice.lang}]`);
+    console.log("Chosen voice (fallback):", `${chosenVoice.name} [${chosenVoice.lang}]`);
     return chosenVoice;
   }
 
@@ -1293,10 +1382,12 @@ function selectVoice(){
 
 async function ensureVoiceSelected(timeoutMs = 1500){
   const start = performance.now();
+  refreshVoiceList();
   selectVoice();
 
   while ((!chosenVoice || !voiceReady) && (performance.now() - start) < timeoutMs){
     await sleep(50);
+    refreshVoiceList();
     selectVoice();
   }
 }
@@ -1743,6 +1834,8 @@ setButtonsEnabled(false);
 setStartEnabled(true);
 showStopButton(false);
 syncVoiceLabel();
+syncVoiceModeUI();
+refreshVoiceList();
 
 bindStartOnce();
 
@@ -1764,6 +1857,16 @@ stopBtn.addEventListener("click", (e)=>{
 });
 
 speakWhileTyping.addEventListener("change", syncVoiceLabel);
+voiceModeSel.addEventListener("change", () => {
+  syncVoiceModeUI();
+  refreshVoiceList();
+  selectVoice();
+});
+voiceSelectEl.addEventListener("change", () => {
+  if (voiceModeSel.value === "manual"){
+    selectVoice();
+  }
+});
 </script>
 </body>
 </html>
