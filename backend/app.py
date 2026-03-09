@@ -1,817 +1,1906 @@
-# =========================
-# BACKEND: app.py (FULL)
-# Option: End session button + decline confirm step
-# + Intro is Yes/No only
-# + Extra blank line before "another word?" for a longer post-fortune beat
-#
-# FIXES (for bigger cluster sets):
-# 1) NO repeats until ALL unseen clusters have been offered.
-#    - Uses "remaining" = never-offered indices only
-#    - "rejected" = previously offered & declined indices
-# 2) Re-offer rejected words ONLY after remaining is empty.
-# 3) Summary/closing ALWAYS appears when ending (No/Stop/Quit), if any words were accepted.
-# 4) If the session ends because the re-offer limit (2) is reached,
-#    and any words were accepted, we STILL return the closing summary.
-#
-# NEW NATURAL-LANGUAGE POLISH:
-# - DECLINE_CONFIRM_PROMPTS: varied “offer another word?” lines
-# - INVALID_YN_PROMPTS: varied “please choose Yes/No” lines
-# - INVALID_YNE_PROMPTS: varied “please choose Yes/No/End session” lines
-# - CONTINUE_Q_VARIANTS: varied “journey further?” question
-# - REOFFER_PROMPTS: varied “offer declined words again?” lines
-# =========================
-
-from __future__ import annotations
-
-from fastapi import FastAPI, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional, Tuple
-from uuid import uuid4
-import random
-
-app = FastAPI(title="Word Psychic API (Yes/No/End + Confirm)")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-origins = [
-    "https://word-psychic-frontend.onrender.com",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-]
-
-# ---------- Canonical strings ----------
-ANOTHER_WORD_PROMPTS = [
-    "Would you like another word?",
-    "Shall we draw another word?",
-    "Do you want to receive another word?",
-]
-GOODBYES = [
-    "Maybe another time.",
-    "Very well — until we meet again.",
-    "The veil closes. Come back when you’re ready.",
-]
-COURTEOUS_EXIT = [
-    "Travel well — and keep your words sharp and kind.",
-    "I wish you a fond goodbye. And may the words be with you.",
-    "Farewell. May your vocabulary grow brighter every day.",
-]
-
-# Startup is Yes/No only
-SHORT_HINT_OPENING = "Choose Yes or No."
-# Later prompts can mention End session
-SHORT_HINT = "Choose Yes, No, or End session."
-
-# ---------- NEW: Natural-language variation pools ----------
-DECLINE_CONFIRM_PROMPTS = [
-    "Very well. Shall I offer another word?",
-    "As you wish. Would you like another word?",
-    "Understood. Shall I reveal another word?",
-    "The word retreates into silence.  Shall I call forth another?",
-    "So be it.  Shall we draw again from the beyond?",
-    "Fair enough. Shall I offer you a new word?",
-]
-
-INVALID_YN_PROMPTS = [
-    "Please choose Yes or No.",
-    "A simple Yes or No will do.",
-    "Click Yes or No to proceed.",
-    "Yes opens the door, no keeps it shut.",
-    "A single Yes or No will guide us forward.",
-]
-
-INVALID_YNE_PROMPTS = [
-    "Please choose Yes, No, or End session.",
-    "Click Yes, No, or End session.",
-    "Choose Yes, No, or End session to continue.",
-    "Yes, No, or End session — your call.",
-    "The veil awaits: Yes, No, or End Session.",
-]
-
-CONTINUE_Q_VARIANTS = [
-    "Shall we journey further with this word?",
-    "Do you want to go deeper with this word?",
-    "Would you like to explore this word a little further?",
-    "Shall we go further with this word?",
-    "Do you wish to continue the journey with this word?",
-]
-
-REOFFER_PROMPTS = [
-    "You declined some words earlier. Shall I offer them again?",
-    "Some words were set aside. Would you like me to bring them back?",
-    "A few words still linger in the shadows. Shall I offer them again?",
-    "You passed on some words before. Shall we revisit them?",
-    "There are words you turned away. Would you like another chance at them?",
-]
-
-def choose_decline_confirm() -> str:
-    return random.choice(DECLINE_CONFIRM_PROMPTS)
-
-def choose_invalid_yn() -> str:
-    return random.choice(INVALID_YN_PROMPTS)
-
-def choose_invalid_yne() -> str:
-    return random.choice(INVALID_YNE_PROMPTS)
-
-def choose_continue_q() -> str:
-    return random.choice(CONTINUE_Q_VARIANTS)
-
-def choose_reoffer_prompt() -> str:
-    return random.choice(REOFFER_PROMPTS)
-
-# ---------- WORD CLUSTERS (safe + spelling/punctuation fixed) ----------
-CLUSTERS = [
-    {
-        "title": "Antipathy → Vilify → Annihilate",
-        "intro_line": "Your word is “antipathy.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Antipathy means a strong dislike.
-Antipathy is what the rooster felt toward his alarm clock.
-
-I see another word. Vilify -- To attack someone’s reputation.
-Busted with a stolen ten percent off coupon for a nuclear reactor, the thief vilified the detective online.
-
-A final word. Annihilate -- To utterly destroy.
-Having annihilated the town, the hurricane reflected, "Maybe I should cut back on the caffeine."
-
-Antipathy. Vilify. Annihilate.
-Your fortune: Ill will destroys quietly; guarding against it leaves room for peace.""",
-    },
-    {
-        "title": "Prudent → Revere → Venerate",
-        "intro_line": "Your word is “prudent.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Prudent means being careful and wise.
-The demanding CEO wants a prudent business plan -- right now!
-
-I see a second word. Revere -- To respect and honor deeply.
-Pizza was revered among the dogs for calming their hysterical disagreements.
-
-A final word. Venerate -- To hold as sacred.
-Because it thought its whistle sang wisdom, the frying pan venerated the old tea kettle.
-
-Prudent. Revere. Venerate.
-Your fortune: Choose carefully, cherish quality, and your name will inspire.""",
-    },
-    {
-        "title": "Dearth → Paucity → Penury",
-        "intro_line": "Your word is “dearth.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Dearth means a lack. A scarcity.
-A dearth of thrown darts made the target feel neglected.
-
-I see another word. Paucity -- A small amount.
-Not surprisingly, snack paucity irritated the couch potatoes.
-
-A final word. Penury -- Extreme poverty.
-The novel's hero escaped penury through grit and kindness.
-
-Dearth. Paucity. Penury.
-Your fortune: Be mindful of waste, and you will prosper.""",
-    },
-    {
-        "title": "Minuscule → Nominal → Insignificant",
-        "intro_line": "Your word is “minuscule.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Minuscule means extremely small.
-Victory seemed minuscule to the grass as it battled the weeds.
-
-I see another word. Nominal -- Small in name or importance.
-A nominal error unbelievably ruined the mosquitoes' family chicken dinner.
-
-A final word. Insignificant -- Too small or unimportant to matter.
-Looking up at the towering skyscrapers, even Godzilla felt insignificant.
-
-Minuscule. Nominal. Insignificant.
-Your fortune: Make your voice be heard. And the world leans in.""",
-    },
-    {
-        "title": "Aggregate → Plethora → Prodigious",
-        "intro_line": "Your word is “aggregate.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Aggregate means a collection, a sum, a total.
-The aggregate of the day’s sales had the calculator singing ka-ching, ka-ching.
-
-I see another word. Plethora -- An excess. More than enough.
-A plethora of lettuce-eating rabbits made the hungry groundhog hopping mad.
-
-A final word. Prodigious -- Extraordinary large.
-Having drunk a prodigious amount of water, the athlete thirsted for a restroom.
-
-Aggregate. Plethora. Prodigious.
-Your fortune: Excess always makes itself known. Sometimes at inconvenient moments.""",
-    },
-    {
-        "title": "Benevolence → Philanthropy → Largess",
-        "intro_line": "Your word is “benevolence.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Benevolence means kindness. Inclination to do good.
-My dog showed great benevolence -- he only ate half of my sandwich lying on the counter.
-
-I see another word. Philanthropy -- Love of humankind as expressed by doing good deeds.
-The participant at The Three Stooges Festival performed his own unique philanthropy on stage -- burping to the song, "Pop Goes The Weasel."
-
-A final word. Largess -- Generosity on a big scale. The gift itself.
-Giving the Earth a second moon was surprising largess, especially coming from the Plutonians.
-
-Benevolence. Philanthropy. Largess.
-Your fortune: Generosity may cost time and money, but its return can’t be bought.""",
-    },
-    {
-        "title": "Insidious → Belligerent → Vitriolic",
-        "intro_line": "Your word is “insidious.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Insidious means sneaky. Causing harm in a gradual way.
-The stomach’s insidious plan to grow larger was to ensure donuts were always next to the TV remote.
-
-I see another word. Belligerent -- Combative; Quarrelsome; Warlike.
-Driving a tank across a neighbor’s lawn is certainly belligerent, especially when there’s a posted sign that says “Keep Off The Grass.”
-
-A final word. Vitriolic -- Nasty; Venomous. Burning like acid.
-Big Foot found the campers calling him Big Foot vitriolic -- his name is “George” -- they only had to ask.
-
-Insidious. Belligerent. Vitriolic.
-Your fortune: Attacks can feel good momentarily. But the damage they cause is not easily mended.""",
-    },
-    {
-        "title": "Laconic → Perfunctory → Concise",
-        "intro_line": "Your word is “laconic.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Laconic means using few words to the point of rudeness.
-The teenager suddenly wasn’t laconic when explaining why he needed twenty dollars.
-
-I see another word. Perfunctory -- Lacking interest or enthusiasm.
-In 100-degree heat, the sled dogs grew perfunctory pulling the obese man up the hill.
-
-A final word. Concise -- Brief and to the point.
-Instead of going on and on about moisturizer benefits, the pinky was concise and told the thumb, “it’s just good for you.”
-
-Laconic. Perfunctory. Concise.
-Your fortune: Interest and directness are often welcomed.""",
-    },
-    {
-        "title": "Copious → Protract → Ponderous",
-        "intro_line": "Your word is “copious.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Copious means abundant. Plentiful.
-The selfish violinist took copious notes, leaving the rest of the orchestra with hardly any music to play.
-
-I see another word. Protract -- To prolong. To lengthen.
-Hoping to increase popcorn sales, the movie’s third act was protracted by the theatre by playing it in slow motion.
-
-A final word. Ponderous -- Slow, heavy, or dull, especially in speech or thought.
-His ponderous speech on why he should be president of the Pie Eaters Club killed everyone’s appetite for electing him.
-
-Copious. Protract. Ponderous.
-Your fortune: Going one step too far can be fatal when you’re already at the edge.""",
-    },
-    {
-        "title": "Apprehensive → Diffident → Capitulate",
-        "intro_line": "Your word is “apprehensive.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Apprehensive means uneasy or anxious about what may happen.
-The worm felt apprehensive about crawling around at dawn –- the early bird might be out there.
-
-I see another word. Diffident -- Timid or lacking self-confidence.
-He stepped forward, ready to answer, but then the diffident boy quickly stepped back.
-
-A final word. Capitulate -- To give up or surrender.
-Faced with a hungry mouth, the piece of cake capitulated and said, “Farewell.”
-
-Apprehensive. Diffident. Capitulate.
-Your fortune: Fear itself isn’t dangerous; what you do because of it is.""",
-    },
-    {
-        "title": "Dauntless → Imperious → Demagogue",
-        "intro_line": "Your word is “dauntless.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Dauntless means fearless and confident.
-Texting his boss that he quit, the dauntless worker ended the message with a smiling emoji.
-
-I see another word. Imperious -- Bossy and arrogantly commanding.
-The imperious mustard told the relish and mayonnaise -- "the coldest spot in the refrigerator is mine!"
-
-A final word. Demagogue -- A leader who gains support by manipulating emotions or fears.
-Vote for the devil, the demagogue said, or every angel loses its wings.
-
-Dauntless. Imperious. Demagogue.
-Your fortune: Self-confidence can be admired, but bullying, not so much.""",
-    },
-    {
-        "title": "Reparation → Respite → Salutary",
-        "intro_line": "Your word is “reparation.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Reparation means compensation for a wrong.
-For stealing the twinkie, the Court of Sweets ruled that the shoplifter's reparation would be a pint of fudge.
-
-I see another word. Respite -- A short period of rest or relief.
-The veterinarian ordered the tense turtle to take a month-long respite so he could slow down.
-
-A final word. Salutary -- Producing a beneficial or healing effect.
-Just hiding up in the attic for half-an-hour was salutary for the wife when the mother-in-law visited.
-
-Reparation. Respite. Salutary.
-Your fortune: Rest and relaxation calms the mind and soothes the body.""",
-    },
-    {
-        "title": "Debilitate → Subjugate → Anguish",
-        "intro_line": "Your word is “debilitate.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Debilitate means to weaken or cripple.
-The vampire was debilitated when the garlic-eating man said “hello.”
-
-I see another word. Subjugate -- To bring under control. To dominate.
-Boss Johnson thought he subjugated his workers when he converted their breakroom into his own personal office man cave.
-
-A final word. Anguish -- Severe mental or emotional pain.
-Hearing “maybe” caused the amoeba some anguish when it was the paramecium's reply to a date.
-
-Debilitate. Subjugate. Anguish.
-Your fortune: It’s wise to save your strength for truly oppressive days.""",
-    },
-    {
-        "title": "Verisimilitude → Apocryphal → Spurious",
-        "intro_line": "Your word is “verisimilitude.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Verisimilitude means the appearance of being true or real.
-The anteater thought his painting of the cow had verisimilitude -- "To me, it says moo!"
-
-I see another word. Apocryphal -- Of doubtful authenticity.
-Even though the smartphone was as big as a suitcase, the counterfeiter tried to convince everyone that it wasn't apocryphal.
-
-A final word. Spurious -- False or fake.
-“Totally spurious,” replied the ice box to the toaster’s claim that it could keep pickles cold.
-
-Verisimilitude. Apocryphal. Spurious.
-Your fortune: Examine carefully. There are tricks up some sleeves.""",
-    },
-    {
-        "title": "Postulate → Veracity → Precept",
-        "intro_line": "Your word is “postulate.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Postulate means to consider to be true without evidence. Assume.
-Despite the rat’s loud snoring, the scientist postulated that he was awake.
-
-I see another word. Veracity -- Truthfulness or accuracy.
-George Washington’s veracity about chopping down the cherry tree is admirable, but what about that peach tree?
-
-A final word. Precept -- A rule or principle guiding behavior.
-The aardvark lived by a twisted precept – do unto him before he does unto you.
-
-Postulate. Veracity. Precept.
-Your fortune: Finding truth is like striking gold, and to some even more valuable.""",
-    },
-    {
-        "title": "Inane → Awry → Quixotic",
-        "intro_line": "Your word is “inane.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Inane means silly. Lacking sense.
-The peanut butter was inane, thinking it could go it alone as a sandwich without the jelly.
-
-I see another word. Awry -- Off course. Twisted to one side.
-It went awry, and the golf ball landed in the sock factory -- putting a hole in one.
-
-A final word. Quixotic -- Romantic or idealistic to a foolish degree.
-Frankenstein’s quixotic notion to become a hair stylist was pure fantasy -- he had no training in cosmetology.
-
-Inane. Awry. Quixotic.
-Your fortune: Turning onto a dirt road can pave the way for an imaginative adventure.""",
-    },
-    {
-        "title": "Singular → Sublime → Apotheosis",
-        "intro_line": "Your word is “singular.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Singular means unique. Extraordinary. Exceptional.
-His singular talent walking barefoot on Legos with a smile amazed the parents.
-
-I see another word. Sublime -- Awe-inspiring. Extremely high, lofty, and majestic.
-The sublime beaver not only built the dam, but had it produce enough hydroelectricity to power the nearby city.
-
-A final word. Apotheosis -- Ideal. The perfect or divine version.
-All the appliances agreed the vintage blender on the counter was the apotheosis, since the mob once used it to dispose of a body.
-
-Singular. Sublime. Apotheosis.
-Your fortune: Individual talents are what make you unique and special.""",
-    },
-    {
-        "title": "Conventional → Adage → Renaissance",
-        "intro_line": "Your word is “conventional.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Conventional means common. Customary. Unexceptional.
-A conventional hen, Betty turned down the offer for the free tattoo, “Born to Cluck.”
-
-I see another word. Adage -- An old saying. A familiar bit of wisdom.
-The organic medicine man’s updated adage: to keep the doctor away, drink an apple smoothie a day.
-
-A final word. Renaissance -- A rebirth. Revitalization.
-When the old turntable saw there was a renaissance in vinyl records, he reminisced about the good old days when songs skipped.
-
-Conventional. Adage. Renaissance.
-Your fortune: The tried-and-true way of doing things can be boring -- but dependable.""",
-    },
-    {
-        "title": "Novel → Unprecedented → Visionary",
-        "intro_line": "Your word is “novel.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Novel means new and original.
-The banana’s novel idea was a genetically modified banana peel with a non-slip coating.
-
-I see another word. Unprecedented -- Not done before, entirely new.
-In an unprecedented ruling, the judge ordered the litterbug to pick up after all the teenagers in Oh No County.
-
-A final word. Visionary -- A dreamer. Idealistic and usually impractical.
-Sam the Seagull fancied himself a visionary, constructing all ocean jetties out of spicy chili fries.
-
-Novel. Unprecedented. Visionary.
-Your fortune: For those who benefit from it, the new is exciting. For others, not really.""",
-    },
-    {
-        "title": "Charisma → Complicity → Collusion",
-        "intro_line": "Your word is “charisma.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Charisma means personal magnetism.
-At first, the new fire hydrant thought its charisma was why the dogs were attracted to him.
-
-I see another word. Complicity -- Participation in wrongdoing.
-The raccoon denied complicity, but he did allow the cheese store robbers to lay low in his den for some cheddar.
-
-A final word. Collusion -- Secret cooperation.
-In collusion, the basketball cheerleaders cheered “offense,” instead of “defense,” to throw off the home team.
-
-Charisma. Complicity. Collusion.
-Your fortune: Manipulation thrives in secrecy – exposure changes everything.""",
-    },
-    {
-        "title": "Autonomous → Reclusive → Sequester",
-        "intro_line": "Your word is “autonomous.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Autonomous means independent. Self-governing.
-Eager to be autonomous, the toddler walked off, fell, and then cried “mommy.”
-
-I see another word. Reclusive -- Withdrawn from society. Avoiding contact.
-What the reclusive snake valued was peace and quiet –- until a wandering foot came by.
-
-A final word. Sequester -- To set or keep apart.
-Tormented by drip, drip, drip, the sink longed to sequester the leaky faucet.
-
-Autonomous. Reclusive. Sequester.
-Your fortune: A life alone has its advantages –- until help is needed.""",
-    },
-    {
-        "title": "Abstruse → Bemused → Cryptic",
-        "intro_line": "Your word is “abstruse.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Abstruse means difficult to understand.
-The duck’s quacking was so abstruse that the pig asked him to repeat it in English.
-
-I see another word. Bemused -- To be confused. Bewildered.
-Bemused, the workers had to think about the foreman’s order to work faster, not smarter.
-
-A final word. Cryptic -- To be mystifying. Mysterious. Puzzling.
-Decoding the message of the cryptic creaking door, the ghost hunter said, “It wants oil.”
-
-Abstruse. Bemused. Cryptic.
-Your fortune: When life is puzzling, look for the missing piece. It’s out there.""",
-    },
-    {
-        "title": "Blatant → Salient → Ostentatious",
-        "intro_line": "Your word is “blatant.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Blatant means unpleasantly loud or obvious.
-At the town hall meeting discussing the school’s curriculum, the blatant man shouted, “When do we eat??!!!”
-
-I see another word. Salient -- Jutting out. Conspicuous.
-When it heard the vacuum cleaner in the other room, the salient hair ball hid under the bed.
-
-A final word. Ostentatious -- Extremely conspicuous. Showy.
-“It’s not ostentatious,” said the buck to the bullfrog, wearing his new bull's-eye sweater during hunting season.
-
-Blatant. Salient. Ostentatious.
-Your fortune: Drawing attention to yourself isn’t always the advantage you think it is.""",
-    },
-    {
-        "title": "Steadfast → Tenacious  → Dogmatic",
-        "intro_line": "Your word is “steadfast.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Steadfast means unwaveringly loyal and faithful.
-Jimmy stayed steadfast, refusing to rat out his friend even when bribed with a Snickers bar.
-
-I see another word. Tenacious -- To be persistent. Stubborn.
-The tenacious cat kept trying to persuade the dog the floor was more comfortable than the couch.
-
-A final word. Dogmatic -- Stubbornly assertive of unproven ideas.
-The bag of sugar was dogmatic, exclaiming that cavities make life better.
-
-Steadfast. Tenacious. Dogmatic.
-Your fortune: Determination can be a strong ally –- if it listens as well as it pushes.""",
-    },
-    {
-        "title": "Capricious → Metamorphous  → Mercurial",
-        "intro_line": "Your word is “capricious.”\n\n",
-        "continue_q": "Shall we journey further with this word?",
-        "script": """Capricious means to be whimsical. Unpredictable.
-The capricious sink drain tormented the homeowner –- some days the water flowed freely, other days, a clog.
-
-I see another word. Metamorphous -- A magical change in appearance.
-Hoping the witch’s spell would transform him into a prince, the metamorphous backfired –- and the inchworm became a foot worm.
-
-A final word. Mercurial -- Emotionally unpredictable.
-Being mercurial, the gambler's mood swung rapidly from intense high-stakes Vegas poker to the sedate calm of local church bingo.
-
-Capricious. Metamorphous. Mercurial.
-Your fortune: Change is intoxicating, but surrendering to it can leave you spent.""",
-    },
-]
-
-# ---------- Request model ----------
-class YesNoRequest(BaseModel):
-    answer: str
-    context: Dict[str, Any] = {}
-
-Session = Dict[str, Any]
-SESSIONS: Dict[str, Session] = {}
-
-# ---------- Session helpers ----------
-def new_session() -> Session:
-    idxs = list(range(len(CLUSTERS)))
-    random.shuffle(idxs)
-    return {
-        "sid": None,  # set in /start
-
-        "INSTRUCTION_SHOWN": False,
-        "SHORT_HINT_SHOWN": False,
-
-        # NEVER-OFFERED indices only (the core fix):
-        "remaining": idxs,
-
-        # Offered-and-declined indices only:
-        "rejected": [],
-
-        # Titles of accepted clusters:
-        "words_revealed": [],
-
-        "first_offer_done": False,
-        "reoffer_attempts": 0,
-
-        # Phases: intro → await_continue → decline_confirm → post_reveal → reoffer_prompt → done
-        "phase": "intro",
-        "current_idx": None,
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Word Psychic – A Fun Vocabulary Fortune Game</title>
+<meta name="description" content="Word Psychic is a fun interactive vocabulary game where a mystical psychic reveals powerful English words and meanings. Discover new vocabulary through playful fortune-style readings." />
+<link rel="canonical" href="https://www.wordpsychic.com/" />
+
+<meta property="og:title" content="Word Psychic – A Fun Vocabulary Fortune Game">
+<meta property="og:description" content="A mystical interactive vocabulary game where a psychic reveals powerful English words and meanings.">
+<meta property="og:url" content="https://www.wordpsychic.com/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://www.wordpsychic.com/word-psychic-preview.jpg">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Word Psychic – A Fun Vocabulary Fortune Game">
+<meta name="twitter:description" content="Discover powerful English vocabulary through mystical fortune-style readings.">
+<meta name="twitter:image" content="https://www.wordpsychic.com/word-psychic-preview.jpg">
+
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg0:#050914;
+    --bg1:#071024;
+    --ink:#e9f3ff;
+    --muted:#a8c1dc;
+    --pill: rgba(14, 26, 54, .70);
+    --pillEdge: rgba(210,230,255,.18);
+    --panelEdge: rgba(210,230,255,.18);
+    --violetA: rgba(190,120,255,.14);
+    --violetB: rgba(140, 90,255,.10);
+    --violetC: rgba(220,140,255,.08);
+  }
+
+  html,body{height:100%}
+  body{
+    margin:0;
+    color:var(--ink);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+    background:
+      radial-gradient(1200px 700px at 50% 45%, var(--violetA), rgba(0,0,0,0) 60%),
+      radial-gradient(900px  520px at 50% 55%, var(--violetB), rgba(0,0,0,0) 65%),
+      radial-gradient(1400px 900px at 50% 120%, var(--violetC), rgba(0,0,0,0) 55%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    overflow-x:hidden;
+  }
+
+  .wrap{
+    width:min(1200px, calc(100% - 56px));
+    margin: 18px auto 24px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    padding-bottom: 14px;
+  }
+
+  .topbar{ display:flex; justify-content:center; position:relative; z-index:10; }
+  .controls{
+    display:flex;
+    align-items:center;
+    gap: 18px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--pill);
+    border: 1px solid var(--pillEdge);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 18px 60px rgba(0,0,0,.50);
+    width:min(1040px, 100%);
+    justify-content:center;
+    flex-wrap: wrap;
+  }
+  .controls label{
+    font-size: 16px;
+    line-height: 1;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+  .controls select{
+    font-size: 16px;
+    line-height: 1;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.14);
+    color: var(--ink);
+    outline:none;
+    min-width: 120px;
+  }
+  .controls input[type="checkbox"]{
+    transform: scale(1.05);
+    accent-color: #7ad3ff;
+  }
+  .controls .start{
+    margin-left: 14px;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: .02em;
+    color: rgba(235,250,255,.98);
+    background: linear-gradient(180deg, rgba(120,220,255,.22), rgba(255,255,255,.06));
+    border: 1px solid rgba(140,220,255,.36);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.10),
+      0 10px 28px rgba(0,0,0,.42),
+      0 0 0 1px rgba(120,220,255,.12);
+    cursor:pointer;
+    transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .controls .start:hover{
+    transform: translateY(-1px);
+    background: linear-gradient(180deg, rgba(140,235,255,.26), rgba(255,255,255,.08));
+    border-color: rgba(160,245,255,.46);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.12),
+      0 14px 34px rgba(0,0,0,.48),
+      0 0 34px rgba(120,220,255,.12);
+  }
+  .controls .start:active{ transform: translateY(0px); }
+  .controls .start:focus-visible{
+    outline: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.12),
+      0 14px 34px rgba(0,0,0,.48),
+      0 0 0 3px rgba(120,220,255,.22);
+  }
+  .controls .start[disabled]{
+    opacity:.55;
+    cursor:not-allowed;
+    transform:none;
+  }
+  .voice-test-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .voice-select{
+    min-width: 240px !important;
+    max-width: 320px;
+  }
+
+  .title-wrap{ display:flex; justify-content:center; margin-top: 0; position:relative; z-index:9; }
+  .title{
+    font-family: "Cinzel Decorative", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
+    font-size: 38px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(240,232,255,.92);
+    opacity: 0;
+    transform: translateY(-10px);
+    text-shadow:
+      0 0 18px rgba(200,140,255,.30),
+      0 0 34px rgba(160,120,255,.18);
+    transition: opacity 2.2s ease, transform 2.2s ease;
+    user-select:none;
+  }
+  .title.visible{ opacity: 1; transform: translateY(0); }
+
+  .hero-row{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height: 340px;
+    padding-top: 0px;
+    padding-bottom: 12px;
+  }
+
+  .side-icons{
+    position:absolute;
+    left: 8px;
+    top: 54%;
+    transform: translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap: 18px;
+    align-items:flex-start;
+    z-index: 5;
+  }
+
+  .icon-link{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 8px;
+    width: 92px;
+    text-decoration:none;
+    color: var(--muted);
+    user-select:none;
+  }
+  .icon-btn{
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.16);
+    background:
+      radial-gradient(120% 120% at 30% 20%, rgba(200,140,255,.18), rgba(0,0,0,0) 55%),
+      rgba(255,255,255,.05);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 14px 40px rgba(0,0,0,.38);
+    display:grid;
+    place-items:center;
+    transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    overflow: hidden;
+  }
+  .icon-link:hover .icon-btn{
+    transform: translateY(-1px);
+    background:
+      radial-gradient(120% 120% at 30% 20%, rgba(210,155,255,.22), rgba(0,0,0,0) 55%),
+      rgba(255,255,255,.08);
+    border-color: rgba(170,220,255,.30);
+  }
+  .icon-label{ font-size: 14px; letter-spacing:.02em; }
+
+  .ico-img{
+    width: 52px;
+    height: 52px;
+    display:block;
+    object-fit: cover;
+    border-radius: 12px;
+    image-rendering: auto;
+    filter:
+      saturate(1.25)
+      contrast(1.05)
+      drop-shadow(0 0 10px rgba(190,140,255,.22))
+      drop-shadow(0 10px 24px rgba(0,0,0,.35));
+    opacity: .98;
+  }
+
+  .stage{ width: 100%; display:flex; justify-content:center; align-items:center; }
+
+  #ballWrap{
+    position:relative;
+    width: 320px;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    z-index: 2;
+    filter: drop-shadow(0 46px 110px rgba(0,0,0,.72));
+    --beatScale: 1.0015;
+  }
+
+  .radiate, .aura, .aura2{ z-index: 0; }
+
+  .radiate{
+    position:absolute;
+    inset:-70%;
+    border-radius:50%;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 58%,
+        rgba(220,185,255,.20) 0%,
+        rgba(190,140,255,.12) 18%,
+        rgba(170,120,255,.07) 34%,
+        rgba(170,120,255,0) 70%);
+    filter: blur(30px);
+    opacity:.88;
+    transition: opacity 140ms ease-out, filter 140ms ease-out;
+  }
+
+  .aura{
+    position:absolute;
+    inset:-34%;
+    border-radius:50%;
+    pointer-events:none;
+    background: radial-gradient(circle,
+      rgba(210,160,255,.26) 0%,
+      rgba(170,140,255,.10) 32%,
+      rgba(170,140,255,0) 76%);
+    filter: blur(22px);
+    opacity:.70;
+    transition: opacity 140ms ease-out, filter 140ms ease-out;
+  }
+  .aura2{
+    position:absolute;
+    inset:-22%;
+    border-radius:50%;
+    pointer-events:none;
+    background: radial-gradient(circle at 50% 62%,
+      rgba(190,140,255,.22) 0%,
+      rgba(190,140,255,0) 72%);
+    filter: blur(38px);
+    opacity:.58;
+    transition: opacity 140ms ease-out, filter 140ms ease-out;
+  }
+
+  .ball{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    overflow:hidden;
+    z-index: 6;
+    background:
+      radial-gradient(circle at 50% 16%,
+        rgba(8,6,18,.72) 0%,
+        rgba(14,10,30,.46) 28%,
+        rgba(92,110,210,.24) 58%,
+        rgba(190,160,255,.46) 82%,
+        rgba(230,215,255,.18) 100%),
+      radial-gradient(circle at 50% 92%,
+        rgba(245,235,255,.72) 0%,
+        rgba(190,160,255,.18) 34%,
+        rgba(30,22,60,.12) 74%,
+        rgba(0,0,0,0) 100%);
+    border: none;
+    box-shadow:
+      0 0 0 1px rgba(240,255,255,.10),
+      0 0 52px rgba(180,245,255,.18),
+      0 0 130px rgba(160,240,255,.12),
+      inset 0 0 110px rgba(255,255,255,.10),
+      inset 0 -130px 260px rgba(0,0,0,.18),
+      inset 0 0 0 1px rgba(235,215,255,.10);
+    transform-origin: 50% 102%;
+    transform: scale(var(--beatScale));
+    transition: transform 120ms ease-out;
+    will-change: transform;
+  }
+
+  .ball::before{
+    content:"";
+    position:absolute;
+    inset:-10%;
+    border-radius:50%;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 30% 18%,
+        rgba(255,255,255,.62) 0%,
+        rgba(255,255,255,.18) 18%,
+        rgba(255,255,255,0) 46%),
+      radial-gradient(circle at 80% 34%,
+        rgba(230,255,255,.22) 0%,
+        rgba(230,255,255,0) 48%),
+      radial-gradient(circle,
+        rgba(255,255,255,.12) 0%,
+        rgba(255,255,255,0) 60%);
+    transform: rotate(-10deg);
+    opacity:.92;
+  }
+
+  .ball::after{
+    content:"";
+    position:absolute;
+    inset:-12%;
+    border-radius:50%;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 94%,
+        rgba(245,255,255,.66) 0%,
+        rgba(170,245,255,.18) 26%,
+        rgba(170,245,255,0) 60%);
+    opacity:.82;
+  }
+
+  .contactFade{
+    position:absolute;
+    left:50%;
+    transform: translateX(-50%);
+    bottom:-8px;
+    width: 330px;
+    height: 150px;
+    pointer-events:none;
+    z-index: 7;
+    border-radius: 999px;
+    background:
+      radial-gradient(ellipse at 50% 0%,
+        rgba(0,0,0,.42) 0%,
+        rgba(0,0,0,.22) 34%,
+        rgba(0,0,0,0) 72%);
+    filter: blur(12px);
+    opacity: .44;
+    mix-blend-mode: multiply;
+  }
+
+  .rimHard{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 50%,
+        rgba(255,255,255,0) 67.9%,
+        rgba(255,255,255,.42) 68.7%,
+        rgba(255,255,255,.08) 69.8%,
+        rgba(255,255,255,0) 71.3%);
+    mix-blend-mode: screen;
+    opacity: .50;
+    filter: blur(.35px);
+  }
+  .rimInner{
+    position:absolute;
+    inset:2%;
+    border-radius:50%;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 50%,
+        rgba(255,255,255,0) 66.8%,
+        rgba(210,180,255,.14) 68.4%,
+        rgba(20,18,40,.12) 69.6%,
+        rgba(255,255,255,0) 71.2%);
+    mix-blend-mode: screen;
+    opacity: .38;
+    filter: blur(.6px);
+  }
+
+  .sparkles{
+    position:absolute;
+    inset:-2%;
+    border-radius:50%;
+    pointer-events:none;
+    mix-blend-mode: screen;
+    opacity: .05;
+    filter: blur(.15px);
+    transition: opacity 180ms ease, filter 180ms ease;
+    background:
+      radial-gradient(circle at 18% 32%, rgba(255,255,255,.95) 0 1px, rgba(255,255,255,0) 3px),
+      radial-gradient(circle at 28% 18%, rgba(210,255,255,.70) 0 1px, rgba(255,255,255,0) 3px),
+      radial-gradient(circle at 72% 14%, rgba(255,255,255,.75) 0 1px, rgba(255,255,255,0) 3px),
+      radial-gradient(circle at 84% 26%, rgba(190,255,255,.70) 0 1px, rgba(255,255,255,0) 3px),
+      radial-gradient(circle at 90% 54%, rgba(255,255,255,.70) 0 1px, rgba(255,255,255,0) 3px),
+      radial-gradient(circle at 78% 78%, rgba(190,255,255,.55) 0 1px, rgba(255,255,255,0) 3px),
+      radial-gradient(circle at 46% 90%, rgba(255,255,255,.55) 0 1px, rgba(255,255,255,0) 3px),
+      radial-gradient(circle at 14% 70%, rgba(190,255,255,.55) 0 1px, rgba(255,255,255,0) 3px);
+  }
+
+  .swirlA,.swirlB,.swirlC{
+    position:absolute;
+    inset:-18%;
+    border-radius:50%;
+    pointer-events:none;
+    opacity:.66;
+    filter: blur(18px);
+    mix-blend-mode: screen;
+  }
+  .swirlA{
+    background:
+      conic-gradient(from 220deg,
+        rgba(200,255,255,0) 0%,
+        rgba(200,255,255,.20) 14%,
+        rgba(200,255,255,0) 30%,
+        rgba(170,245,255,.14) 54%,
+        rgba(200,255,255,0) 74%,
+        rgba(200,255,255,.12) 90%,
+        rgba(200,255,255,0) 100%),
+      radial-gradient(52% 44% at 56% 56%,
+        rgba(190,255,255,.22),
+        rgba(190,255,255,0) 72%);
+    animation: swirlA 10s ease-in-out infinite alternate;
+  }
+  .swirlB{
+    opacity:.54;
+    filter: blur(24px);
+    background:
+      conic-gradient(from 40deg,
+        rgba(150,230,255,0) 0%,
+        rgba(150,230,255,.18) 18%,
+        rgba(150,230,255,0) 40%,
+        rgba(120,210,255,.14) 62%,
+        rgba(150,230,255,0) 80%,
+        rgba(150,230,255,.12) 94%,
+        rgba(150,230,255,0) 100%),
+      radial-gradient(46% 38% at 44% 48%,
+        rgba(140,220,255,.18),
+        rgba(140,220,255,0) 74%);
+    animation: swirlB 14s ease-in-out infinite alternate;
+  }
+  .swirlC{
+    opacity:.30;
+    filter: blur(30px);
+    mix-blend-mode: multiply;
+    background: radial-gradient(58% 42% at 52% 22%,
+      rgba(0,0,0,.30),
+      rgba(0,0,0,0) 72%);
+    animation: storm 9s ease-in-out infinite alternate;
+  }
+
+  @keyframes swirlA{ from{ transform: translate(-10px,-6px) rotate(-6deg)} to{ transform: translate(12px,10px) rotate(10deg)} }
+  @keyframes swirlB{ from{ transform: translate(12px,10px) rotate(12deg)} to{ transform: translate(-12px,-10px) rotate(-10deg)} }
+  @keyframes storm{  from{ transform: translate(-10px,0px) scale(1.02)} to{ transform: translate(10px,8px) scale(0.98)} }
+
+  .mist,.mist2{
+    position:absolute;
+    inset:-18%;
+    border-radius:50%;
+    pointer-events:none;
+    filter: blur(22px);
+    mix-blend-mode: screen;
+    opacity:.92;
+    z-index: 1;
+  }
+  .mist{
+    background: radial-gradient(64% 46% at 50% 56%,
+      rgba(190,160,255,.16),
+      rgba(190,160,255,0) 74%);
+    animation: drift 7s ease-in-out infinite alternate;
+  }
+  .mist2{
+    background: radial-gradient(60% 42% at 46% 78%,
+      rgba(170,140,255,.13),
+      rgba(170,140,255,0) 76%);
+    animation: drift2 9.5s ease-in-out infinite alternate;
+  }
+  @keyframes drift{ from{transform:translateY(-8px)} to{transform:translateY(8px)} }
+  @keyframes drift2{ from{transform:translateX(-10px)} to{transform:translateX(10px)} }
+
+  .ground-glow{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:-98px;
+    width: 620px;
+    height: 235px;
+    background: radial-gradient(circle at 50% 26%,
+      rgba(200,255,255,.28) 0%,
+      rgba(140,220,255,.12) 26%,
+      rgba(140,220,255,0) 74%);
+    filter: blur(28px);
+    opacity:.88;
+    pointer-events:none;
+    transition: opacity 140ms ease-out, filter 140ms ease-out;
+    z-index: 0;
+  }
+
+  .seatShadow{
+    position:absolute;
+    left:50%;
+    transform: translateX(-50%);
+    bottom: -6px;
+    width: 238px;
+    height: 42px;
+    pointer-events:none;
+    z-index: 3;
+    opacity: .88;
+    filter: blur(6px);
+    background:
+      radial-gradient(ellipse at 50% 40%,
+        rgba(0,0,0,.58) 0%,
+        rgba(0,0,0,.34) 28%,
+        rgba(0,0,0,0) 72%),
+      radial-gradient(ellipse at 50% 15%,
+        rgba(200,255,255,.12) 0%,
+        rgba(200,255,255,0) 60%);
+    mix-blend-mode: multiply;
+  }
+
+  .cradle{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:-9px;
+    width: 244px;
+    height: 28px;
+    border-radius: 999px;
+    pointer-events:none;
+    z-index: 4;
+    background:
+      radial-gradient(ellipse at 50% 20%,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 52%,
+        rgba(255,255,255,.05)56%,
+        rgba(130,220,255,.12) 62%,
+        rgba(10,16,30,.88) 70%,
+        rgba(0,0,0,0) 78%),
+      linear-gradient(180deg,
+        rgba(255,255,255,.06),
+        rgba(255,255,255,0));
+    border: 1px solid rgba(170,240,255,.16);
+    box-shadow:
+      0 10px 22px rgba(0,0,0,.40),
+      inset 0 1px 0 rgba(255,255,255,.08);
+    opacity: .95;
+  }
+
+  .pedestal{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:-32px;
+    width: 312px;
+    height: 32px;
+    border-radius: 999px;
+    pointer-events:none;
+    z-index: 2;
+    background:
+      radial-gradient(150px 16px at 50% 18%,
+        rgba(255,255,255,.10),
+        rgba(255,255,255,0) 72%),
+      linear-gradient(180deg,
+        rgba(18,34,68,.74),
+        rgba(6,10,18,.98));
+    border: 1px solid rgba(200,245,255,.12);
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.60),
+      inset 0 1px 0 rgba(255,255,255,.08),
+      inset 0 -14px 18px rgba(0,0,0,.50);
+  }
+
+  .pedestal::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    transform: translateX(-50%);
+    bottom:-12px;
+    width: 372px;
+    height: 18px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(10,16,30,.86), rgba(0,0,0,.94));
+    border: 1px solid rgba(120,200,255,.08);
+    box-shadow:
+      0 16px 54px rgba(0,0,0,.66),
+      inset 0 1px 0 rgba(255,255,255,.04);
+    opacity:.98;
+  }
+
+  .pedestal::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    transform: translateX(-50%);
+    top: 6px;
+    width: 226px;
+    height: 16px;
+    border-radius: 999px;
+    background:
+      radial-gradient(120px 10px at 50% 55%,
+        rgba(0,0,0,.58),
+        rgba(0,0,0,0) 74%),
+      linear-gradient(180deg,
+        rgba(255,255,255,.06),
+        rgba(255,255,255,0));
+    opacity:.92;
+  }
+
+  #ballWrap.idle .radiate{ opacity:.18; filter: blur(34px); }
+  #ballWrap.idle .aura{    opacity:.12; filter: blur(28px); }
+  #ballWrap.idle .aura2{   opacity:.10; filter: blur(42px); }
+  #ballWrap.idle .ground-glow{ opacity:.12; filter: blur(34px); }
+
+  #ballWrap.speaking .radiate{ opacity:.55; }
+  #ballWrap.speaking .aura{ opacity:.44; }
+  #ballWrap.speaking .aura2{ opacity:.34; }
+  #ballWrap.speaking .ground-glow{ opacity:.42; }
+
+  #ballWrap.beat .radiate{ opacity:1.00; filter: blur(24px); }
+  #ballWrap.beat .aura{ opacity:.92; filter: blur(18px); }
+  #ballWrap.beat .aura2{ opacity:.78; filter: blur(32px); }
+  #ballWrap.beat .ground-glow{ opacity:1.00; filter: blur(22px); }
+
+  .action-bar{
+    width:min(1040px, 100%);
+    margin: 8px auto 6px;
+    display:flex;
+    justify-content:center;
+    position: relative;
+    z-index: 8;
+  }
+  .action-bar .buttons{
+    width:min(560px, 100%);
+    display:flex;
+    justify-content:center;
+    gap: 12px;
+    flex-wrap:wrap;
+    padding: 8px 12px 10px;
+    border-radius: 18px;
+    border: 1px solid rgba(210,230,255,.14);
+    background: rgba(8,14,28,.26);
+    backdrop-filter: blur(8px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 18px 60px rgba(0,0,0,.30);
+  }
+
+  button.action{
+    min-width: 112px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.05);
+    color: var(--ink);
+    cursor:pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 14px 40px rgba(0,0,0,.35);
+    transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+    font-size: 15px;
+  }
+  button.action:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(170,220,255,.26); }
+  button.action:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+  button.action.quiet{ background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.11); color: rgba(232,243,255,.86); }
+  button.action.placeholder{ opacity: 0; pointer-events: none; }
+
+  .console{
+    width:min(1040px, 100%);
+    margin: 0 auto;
+    border-radius: 18px;
+    border: 1px solid var(--panelEdge);
+    background:
+      radial-gradient(900px 260px at 50% 0%, rgba(120,210,255,.10), rgba(0,0,0,0) 60%),
+      linear-gradient(180deg, rgba(10,18,36,.86), rgba(6,10,18,.90));
+    box-shadow:
+      inset 0 0 26px rgba(0,0,0,.58),
+      0 26px 70px rgba(0,0,0,.42);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height: clamp(360px, 44vh, 460px);
+    min-height: 340px;
+    overflow-anchor: none;
+  }
+
+  .screen{
+    white-space: pre-wrap;
+    padding: 16px 22px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    position: relative;
+    z-index: 2;
+    color: rgba(233,243,255,.94);
+    text-shadow: 0 1px 0 rgba(0,0,0,.35);
+    background: rgba(0,0,0,.14);
+    scrollbar-gutter: stable both-edges;
+    overflow-anchor: none;
+  }
+
+  .note{
+    color: var(--muted);
+    font-size: 13px;
+    text-align:center;
+    margin-top: 2px;
+    min-height: 0;
+  }
+
+  .footerbar{
+    width:min(1040px, 100%);
+    margin: 4px auto 0;
+    padding: 10px 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(210,230,255,.14);
+    background: rgba(8,14,28,.26);
+    backdrop-filter: blur(10px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 18px 60px rgba(0,0,0,.24);
+    display:flex;
+    justify-content:center;
+    gap: 14px;
+    flex-wrap: wrap;
+    color: rgba(168,193,220,.92);
+    font-size: 14px;
+    letter-spacing: .01em;
+  }
+  .footerbar a{
+    color: rgba(210,230,255,.92);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(210,230,255,.18);
+  }
+  .footerbar a:hover{
+    border-bottom-color: rgba(210,230,255,.44);
+  }
+  .footer-sep{ opacity:.35; }
+
+  @media (max-width: 980px){
+    #ballWrap{ width: 300px; }
+    .contactFade{ width: 308px; }
+    .ground-glow{ width: 560px; height: 220px; }
+    .seatShadow{ width: 224px; height: 40px; bottom:-6px; }
+    .cradle{ width: 230px; height: 26px; bottom:-9px; }
+    .pedestal{ width: 294px; height: 30px; bottom:-30px; }
+    .pedestal::before{ width: 350px; height: 16px; bottom:-11px; }
+    .side-icons{ left: 4px; }
+    .icon-link{ width: 80px; }
+    .hero-row{ min-height: 320px; padding-bottom: 10px; }
+    .action-bar{ margin-top: 8px; margin-bottom: 6px; }
+    .action-bar .buttons{ width:min(520px, 100%); }
+    button.action{ min-width: 108px; padding: 10px 12px; font-size: 15px; }
+    .console{ height: clamp(340px, 48vh, 440px); min-height: 320px; }
+    .screen{ padding: 14px 20px; }
+    .footerbar{ font-size: 13px; padding: 10px 12px; }
+    .controls{ justify-content:center; }
+    .voice-select{ min-width: 180px !important; max-width: 240px; }
+  }
+</style>
+</head>
+
+<body>
+  <main class="wrap">
+
+    <div class="topbar">
+      <div class="controls">
+        <label>Pace
+          <select id="speed">
+            <option value="slow">Slow</option>
+            <option value="normal" selected>Normal</option>
+            <option value="fast">Fast</option>
+          </select>
+        </label>
+
+        <label>
+          <input type="checkbox" id="speakWhileTyping" checked>
+          <span id="voiceLabel">Voice On</span>
+        </label>
+
+        <div class="voice-test-wrap">
+          <label>Voice Mode
+            <select id="voiceMode">
+              <option value="auto" selected>Auto</option>
+              <option value="manual">Manual</option>
+            </select>
+          </label>
+
+          <label>Test Voice
+            <select id="voiceSelect" class="voice-select" disabled>
+              <option value="">Loading voices…</option>
+            </select>
+          </label>
+        </div>
+
+        <button id="startBtn" class="start">Start</button>
+      </div>
+    </div>
+
+    <header class="title-wrap" aria-label="Title">
+      <div class="title" id="titleText">THE WORD PSYCHIC</div>
+    </header>
+
+    <section class="hero-row" aria-label="Word Psychic chamber">
+      <nav class="side-icons" aria-label="Links">
+
+        <a class="icon-link" href="https://www.wordhippo.com/" target="_blank" rel="noopener" title="WordHippo (References)" aria-label="References (WordHippo)">
+          <div class="icon-btn">
+            <img class="ico-img" src="hippo_icon.jpg" alt="WordHippo">
+          </div>
+          <div class="icon-label">References</div>
+        </a>
+
+        <a class="icon-link" href="https://YOUR-PODCAST-FRIENDS-SITE.com" target="_blank" rel="noopener" title="Podcast Friends" aria-label="Podcast Friends">
+          <div class="icon-btn">
+            <img class="ico-img" src="podcast_icon.jpg" alt="Podcast">
+          </div>
+          <div class="icon-label">Podcast</div>
+        </a>
+
+      </nav>
+
+      <div class="stage">
+        <div id="ballWrap" class="idle">
+          <div class="radiate"></div>
+          <div class="aura"></div>
+          <div class="aura2"></div>
+
+          <div class="ball">
+            <div class="swirlA"></div>
+            <div class="swirlB"></div>
+            <div class="swirlC"></div>
+
+            <div class="rimHard"></div>
+            <div class="rimInner"></div>
+            <div class="sparkles"></div>
+          </div>
+
+          <div class="contactFade"></div>
+
+          <div class="mist"></div>
+          <div class="mist2"></div>
+
+          <div class="ground-glow"></div>
+          <div class="seatShadow"></div>
+          <div class="cradle"></div>
+          <div class="pedestal"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="action-bar" aria-label="Actions">
+      <div class="buttons">
+        <button id="yesBtn" class="action">Yes</button>
+        <button id="noBtn"  class="action">No</button>
+        <button id="stopBtn" class="action quiet placeholder" disabled aria-hidden="true">End session</button>
+      </div>
+    </section>
+
+    <section class="console" aria-label="Reading console">
+      <div id="screen" class="screen">Tap “Start” to summon the Word Psychic…</div>
+    </section>
+
+    <div class="note" id="status"></div>
+
+    <footer class="footerbar" aria-label="Footer">
+      <span>© 2026 SteveHendricks. All Rights Reserved.</span>
+      <span class="footer-sep">|</span>
+      <a href="mailto:scwrconfi@gmail.com">scwrconfi@gmail.com</a>
+    </footer>
+
+  </main>
+
+<script>
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    refreshVoiceList();
+  };
+}
+
+const API = "https://word-psychic-web.onrender.com";
+const LIVE_SYNC = true;
+
+const WHOOSH_MS = 1900;
+const WHOOSH_BUFFER_MS = 700;
+
+const ELLIPSIS_DELAY = 2000;
+const FINAL_ELLIPSIS_DELAY = 3000;
+
+const SENTENCE_PAUSE_MS   = 480;
+const PARAGRAPH_PAUSE_MS  = 900;
+const SECTION_PAUSE_MS    = 1200;
+
+let sessionId = null;
+let voiceReady = false;
+let chosenVoice = null;
+let startBound = false;
+let titleShown = false;
+
+let runToken = 0;
+let startInFlight = false;
+let chooseInFlight = false;
+let sessionDone = false;
+let currentFetchController = null;
+
+function bumpRunToken(){ runToken++; return runToken; }
+function isTokenLive(t){ return t === runToken; }
+
+function abortInFlightFetch(){
+  try{ currentFetchController?.abort(); }catch(e){}
+  currentFetchController = null;
+}
+
+const screenEl = document.getElementById("screen");
+const statusEl = document.getElementById("status");
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const stopBtn = document.getElementById("stopBtn");
+const startBtn = document.getElementById("startBtn");
+const speedSel = document.getElementById("speed");
+const speakWhileTyping = document.getElementById("speakWhileTyping");
+const voiceLabel = document.getElementById("voiceLabel");
+const voiceModeSel = document.getElementById("voiceMode");
+const voiceSelectEl = document.getElementById("voiceSelect");
+const ballWrap = document.getElementById("ballWrap");
+const titleEl = document.getElementById("titleText");
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>r())); }
+
+function trimLeadingNewlines(s){ return (s ?? "").replace(/^\s*\n+/, ""); }
+
+function tightenQuestionSpacing(s){
+  let t = (s ?? "");
+  t = t.replace(/\r\n/g, "\n");
+  t = t.replace(/\n{3,}/g, "\n\n");
+  const qStart = "(Do you\\b|Would you\\b|Shall we\\b|Shall I\\b)";
+  t = t.replace(new RegExp(`([^\\n])\\n(?=\\s*${qStart})`, "gi"), "$1\n\n");
+  t = t.replace(new RegExp(`\\n{3,}(?=\\s*${qStart})`, "gi"), "\n\n");
+  return t;
+}
+
+function normalizeCTA(s){
+  return tightenQuestionSpacing(
+    (s ?? "")
+      .replace(/Choose Yes or No\./gi, "Click Yes or No.")
+      .replace(/Choose Yes or No/gi, "Click Yes or No")
+      .replace(/Choose Yes,\s*No,\s*or End session\./gi, "Click Yes, No, or End session.")
+      .replace(/Choose Yes,\s*No,\s*or End session/gi, "Click Yes, No, or End session")
+  );
+}
+
+function autoScrollScreen(){
+  try { screenEl.scrollTop = screenEl.scrollHeight; } catch(e){}
+}
+
+let clearing = false;
+
+function smoothScrollToTop(el, duration = 420){
+  return new Promise(resolve => {
+    const startTop = el.scrollTop;
+    const delta = 0 - startTop;
+    if (Math.abs(delta) < 2 || duration <= 0){
+      el.scrollTop = 0;
+      resolve();
+      return;
+    }
+    const start = performance.now();
+    const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+    function tick(now){
+      const t = Math.min(1, (now - start) / duration);
+      el.scrollTop = startTop + delta * easeOutCubic(t);
+      if (t < 1) requestAnimationFrame(tick);
+      else resolve();
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+async function gentleResetAndClear(token){
+  if (!isTokenLive(token)) return;
+  if (clearing) return;
+  clearing = true;
+
+  await nextFrame();
+  await nextFrame();
+
+  if (!isTokenLive(token)){ clearing=false; return; }
+
+  try { await smoothScrollToTop(screenEl, 420); } catch(e){}
+  await sleep(50);
+
+  if (!isTokenLive(token)){ clearing=false; return; }
+
+  screenEl.textContent = "";
+  try { screenEl.scrollTop = 0; } catch(e){}
+
+  await nextFrame();
+  clearing = false;
+}
+
+let beatOffTimer = null;
+let fallbackBeatTimer = null;
+
+function setBeatScale(scale){
+  ballWrap.style.setProperty("--beatScale", String(scale));
+}
+
+function triggerBeat(strength = 1){
+  const s = Math.max(0.7, Math.min(1.8, strength));
+  const scale = (1.0032 + (s - 1) * 0.0045);
+  ballWrap.classList.add("beat");
+  setBeatScale(scale.toFixed(4));
+
+  clearTimeout(beatOffTimer);
+  beatOffTimer = setTimeout(() => {
+    ballWrap.classList.remove("beat");
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0026" : "1.0015");
+  }, 130);
+}
+
+function startFallbackBeats(){
+  stopFallbackBeats();
+  const tick = () => {
+    if (!ballWrap.classList.contains("speaking")) return;
+    const strength = 0.85 + Math.random() * 0.55;
+    triggerBeat(strength);
+    const next = 120 + Math.random() * 220;
+    fallbackBeatTimer = setTimeout(tick, next);
+  };
+  fallbackBeatTimer = setTimeout(tick, 160);
+}
+
+function stopFallbackBeats(){
+  clearTimeout(fallbackBeatTimer);
+  fallbackBeatTimer = null;
+}
+
+let speakingCount = 0;
+function setSpeaking(on){
+  speakingCount = Math.max(0, speakingCount + (on ? 1 : -1));
+  const isSpeaking = speakingCount > 0;
+
+  ballWrap.classList.toggle("speaking", isSpeaking);
+  ballWrap.classList.toggle("idle", !isSpeaking);
+
+  setBeatScale(isSpeaking ? "1.0026" : "1.0015");
+
+  if (isSpeaking) startFallbackBeats();
+  else stopFallbackBeats();
+}
+
+function updateSpeakingFromEngine(){
+  try{
+    const active = !!(window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending));
+    if (active){
+      ballWrap.classList.add("speaking");
+      ballWrap.classList.remove("idle");
+      setBeatScale("1.0026");
+      startFallbackBeats();
+    }else if (speakingCount === 0){
+      ballWrap.classList.remove("speaking");
+      ballWrap.classList.add("idle");
+      setBeatScale("1.0015");
+      stopFallbackBeats();
+    }
+  }catch(e){}
+}
+
+function setButtonsEnabled(on){
+  yesBtn.disabled = noBtn.disabled = !on;
+}
+function setStartEnabled(on){
+  startBtn.disabled = !on;
+}
+
+function showStopButton(show){
+  stopBtn.classList.toggle("placeholder", !show);
+  stopBtn.disabled = !show;
+  stopBtn.setAttribute("aria-hidden", (!show).toString());
+}
+
+function paceFactor(){
+  const v = speedSel.value;
+  return v==="slow" ? 1.35 : v==="fast" ? 0.75 : 1.0;
+}
+function typeDelayClassic(){
+  const v = speedSel.value;
+  return v==="slow" ? 26 : v==="fast" ? 9 : 14;
+}
+function baseSpeechRate(){
+  const v = speedSel.value;
+  return v === "slow" ? 0.84 : v === "fast" ? 1.25 : 0.98;
+}
+
+function syncVoiceLabel(){
+  voiceLabel.textContent = speakWhileTyping.checked ? "Voice On" : "Voice Off";
+  if (!speakWhileTyping.checked){
+    try { speechSynthesis.cancel(); } catch(e) {}
+    speakingCount = 0;
+    ballWrap.classList.remove("speaking");
+    ballWrap.classList.add("idle");
+    setBeatScale("1.0015");
+    stopFallbackBeats();
+  }
+}
+
+function syncVoiceModeUI(){
+  voiceSelectEl.disabled = voiceModeSel.value !== "manual";
+}
+
+function hardStopAllAudioAndBeats(){
+  try { speechSynthesis.cancel(); } catch(e){}
+  speakingCount = 0;
+  ballWrap.classList.remove("speaking");
+  ballWrap.classList.add("idle");
+  ballWrap.style.setProperty("--beatScale","1.0015");
+  stopFallbackBeats();
+  clearTimeout(beatOffTimer);
+}
+
+function playGhostlyWhoosh(){
+  try{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+
+    const ctx = new AudioCtx();
+    if (ctx.state === "suspended") ctx.resume();
+
+    const dur = WHOOSH_MS / 1000;
+    const sr = ctx.sampleRate;
+    const frames = Math.floor(sr * dur);
+
+    const buf = ctx.createBuffer(1, frames, sr);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < frames; i++){
+      const white = (Math.random()*2-1);
+      const low   = (i ? data[i-1] * 0.90 : 0);
+      data[i] = (white * 0.55) + (low * 0.45);
     }
 
-def normalize(a: str) -> str:
-    a = a.strip().lower()
-    if a in {"y", "yes"}: return "yes"
-    if a in {"n", "no"}:  return "no"
-    if a in {"q", "quit"}: return "quit"
-    if a in {"s", "stop", "enough", "end"}: return "stop"
-    return a
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
 
-def reply(st: Session, text: str, *, done: bool = False) -> Dict[str, Any]:
-    return {"text": text, "done": done, "context": {"session_id": st.get("sid")}}
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
 
-def choose_another_word() -> str:
-    return random.choice(ANOTHER_WORD_PROMPTS)
+    const filter2 = ctx.createBiquadFilter();
+    filter2.type = "bandpass";
+    filter2.Q.value = 0.9;
 
-def choose_goodbye() -> str:
-    return random.choice(GOODBYES)
+    const gain = ctx.createGain();
+    const now = ctx.currentTime;
 
-def choose_exit_blessing() -> str:
-    return random.choice(COURTEOUS_EXIT)
+    filter.frequency.setValueAtTime(260, now);
+    filter.frequency.exponentialRampToValueAtTime(1550, now + dur*0.62);
+    filter.frequency.exponentialRampToValueAtTime(520,  now + dur);
 
-def guidance_flow(st: Session, *, opening: bool) -> Optional[str]:
-    # Opening line is Yes/No only
-    if opening and not st["INSTRUCTION_SHOWN"]:
-        st["INSTRUCTION_SHOWN"] = True
-        st["SHORT_HINT_SHOWN"] = False
-        return "Yes opens the door, no keeps it shut."
-    # After that, we can mention End session
-    if st["INSTRUCTION_SHOWN"] and not st["SHORT_HINT_SHOWN"]:
-        st["SHORT_HINT_SHOWN"] = True
-        return SHORT_HINT
-    return None
+    filter2.frequency.setValueAtTime(320, now);
+    filter2.frequency.exponentialRampToValueAtTime(920, now + dur*0.70);
+    filter2.frequency.exponentialRampToValueAtTime(420, now + dur);
 
-def summary_text(words: List[str]) -> str:
-    if not words:
-        return "No words were revealed this time. The veil remains for another day."
-    lines = "\n\n".join(title for title in words)
-    return "Here are the words that visited you from the beyond:\n\n" + lines
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.50, now + dur*0.22);
+    gain.gain.exponentialRampToValueAtTime(0.16, now + dur*0.78);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
-def closing_block(st: Session) -> str:
-    closing = summary_text(st["words_revealed"])
-    if st["words_revealed"]:
-        closing += "\n\nCarry these words carefully; they will open doors when you need them."
-    blessing = choose_exit_blessing().rstrip()
-    closing += "\n" + (blessing if blessing[-1] in ".!?" else blessing + ".")
-    return closing
+    src.connect(filter);
+    filter.connect(filter2);
+    filter2.connect(gain);
+    gain.connect(ctx.destination);
 
-def pick_continue_question(cluster: Dict[str, Any]) -> str:
-    """
-    Use the cluster's continue_q sometimes (keeps your authored phrasing in the mix),
-    otherwise rotate in variants so the psychic doesn't sound robotic.
-    """
-    base = (cluster.get("continue_q") or "").strip()
-    if base and random.random() < 0.35:
-        return base
-    return choose_continue_q()
+    src.start(now);
+    src.stop(now + dur + 0.05);
+  }catch(e){}
+}
 
-def offer_next_word(st: Session) -> Dict[str, Any]:
-    # Prefer NEVER-OFFERED clusters
-    if st["remaining"]:
-        idx = st["remaining"].pop()
-        st["current_idx"] = idx
-        st["phase"] = "await_continue"
-        cluster = CLUSTERS[idx]
+function unlockVoice(){
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance("");
+    speechSynthesis.speak(u);
+    voiceReady = true;
+    setTimeout(() => {
+      refreshVoiceList();
+      selectVoice();
+    }, 250);
+  }catch(e){
+    voiceReady = false;
+  }
+}
 
-        if st["first_offer_done"]:
-            head = cluster["title"].split(" → ")[0]
-            intro = f"Your new word is “{head}.”\n\n"
-        else:
-            intro = cluster["intro_line"]
+/* =========================
+   VOICE HIERARCHY + TUNING
+   ========================= */
 
-        # ✅ NEW: varied “journey further?” question
-        continue_q = pick_continue_question(cluster)
+const TOP_PSYCHIC_VOICES = [
+  "Google UK English Female",
+  "Isha",
+  "Stephanie",
+  "Tessa",
+  "Martha",
+  "Karen",
+  "Fiona"
+];
 
-        g = guidance_flow(st, opening=(not st["first_offer_done"]))
-        text = f"{intro}{continue_q}" + (f"\n{g}" if g else "")
-        return reply(st, text)
+const SECOND_TIER_VOICES = [
+  "Samantha",
+  "Google US English",
+  "Microsoft Aria",
+  "Microsoft Jenny",
+  "Microsoft Sonia",
+  "Microsoft Ava",
+  "Microsoft Emma",
+  "Microsoft Ana",
+  "Microsoft Zira"
+];
 
-    # No unseen clusters left → handle rejected
-    if st["rejected"]:
-        # ✅ FIX: if we hit the re-offer limit, still return closing summary
-        # whenever any words were revealed.
-        if st["reoffer_attempts"] >= 2:
-            st["phase"] = "done"
-            if st["words_revealed"]:
-                return reply(st, closing_block(st), done=True)
-            return reply(
-                st,
-                "I have asked you twice about the words you set aside. The veil closes for today.",
-                done=True,
-            )
+const LOW_PRIORITY_VOICES = [
+  "Veena",
+  "Moira",
+  "Sangeeta"
+];
 
-        st["phase"] = "reoffer_prompt"
-        st["reoffer_attempts"] += 1
-        st["SHORT_HINT_SHOWN"] = False
-        # ✅ NEW: varied re-offer prompt
-        return reply(st, choose_reoffer_prompt())
+const ALL_PREFERRED_VOICES = [
+  ...TOP_PSYCHIC_VOICES,
+  ...SECOND_TIER_VOICES,
+  ...LOW_PRIORITY_VOICES
+];
 
-    # Truly nothing left
-    st["phase"] = "done"
-    closing = "You have received all available words for this session.\n" + closing_block(st)
-    return reply(st, closing, done=True)
+function normVoiceName(s){
+  return String(s || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-def get_session(request: Request, ctx: Dict[str, Any]) -> Tuple[str, Session]:
-    sid = ctx.get("session_id") or request.cookies.get("wp_sid")
-    if not sid or sid not in SESSIONS:
-        sid = str(uuid4())
-        st = new_session()
-        st["sid"] = sid
-        SESSIONS[sid] = st
-        return sid, st
-    return sid, SESSIONS[sid]
+function isEnglishVoice(v){
+  return !!(v && v.lang && /^en([-_]|$)/i.test(v.lang));
+}
 
-# ---------- Endpoints ----------
-@app.get("/start")
-def start(response: Response):
-    sid = str(uuid4())
-    st = new_session()
-    st["sid"] = sid
-    SESSIONS[sid] = st
-    response.set_cookie(
-        "wp_sid",
-        sid,
-        httponly=True,
-        secure=True,
-        samesite="none",
-        path="/",
-    )
+function scoreGenericEnglishVoice(v){
+  const name = normVoiceName(v?.name || "");
+  const lang = String(v?.lang || "").toLowerCase();
+  let score = 0;
 
-    guidance = (
-        "Do you wish to summon the Word Psychic, who through the meanings of words deciphers your fortune?\n"
-        + SHORT_HINT_OPENING
-    )
-    st["phase"] = "intro"
-    return {"session_id": sid, "prompt": "", "guidance": guidance}
-from fastapi import Response
+  if (/(google uk english female)/i.test(name)) score += 30;
+  if (/(isha|stephanie|tessa|martha|karen|fiona)/i.test(name)) score += 18;
+  if (/(female|woman|aria|jenny|sonia|ava|emma|ana|zira)/i.test(name)) score += 10;
 
-@app.options("/choose")
-@app.options("/choose/")
-def options_choose():
-    return Response(status_code=200)
-    
-@app.post("/choose")
-@app.post("/choose/")
-def choose(req: YesNoRequest, request: Request):
-    sid, st = get_session(request, req.context)
-    a = normalize(req.answer)
-    ...
+  if (/google/.test(name)) score += 5;
+  if (/microsoft/.test(name)) score += 4;
 
-    # Always-available end: ALWAYS return closing (with summary if any)
-    if a in {"quit", "stop"}:
-        st["phase"] = "done"
-        return reply(st, closing_block(st), done=True)
+  if (/en-gb/.test(lang)) score += 8;
+  if (/en-au|en-ie|en-in|en-za/.test(lang)) score += 4;
+  if (/en-us/.test(lang)) score += 2;
 
-    # Phase: intro (summon?)
-    if st["phase"] == "intro":
-        if a == "yes":
-            st["first_offer_done"] = False
-            return offer_next_word(st)
-        if a == "no":
-            st["phase"] = "done"
-            return reply(st, choose_goodbye(), done=True)
-        # ✅ NEW: varied invalid input prompt (Yes/No)
-        return reply(st, choose_invalid_yn())
+  if (/(samantha)/i.test(name)) score -= 3;
+  if (/(veena|moira|sangeeta)/i.test(name)) score -= 8;
 
-    # Phase: await_continue
-    if st["phase"] == "await_continue":
-        idx = st.get("current_idx")
-        cluster = CLUSTERS[idx] if idx is not None else None
+  return score;
+}
 
-        if a == "yes":
-            if cluster is None:
-                st["phase"] = "done"
-                return reply(st, "The spirits are quiet. Please refresh to begin anew.", done=True)
+function getManualVoice(){
+  const wanted = normVoiceName(voiceSelectEl.value);
+  if (!wanted) return null;
+  const voices = speechSynthesis.getVoices() || [];
+  return voices.find(v => normVoiceName(v.name) === wanted) || null;
+}
 
-            st["words_revealed"].append(cluster["title"])
-            st["first_offer_done"] = True
-            st["SHORT_HINT_SHOWN"] = False
+function refreshVoiceList(){
+  const voices = speechSynthesis.getVoices() || [];
+  const englishVoices = voices
+    .filter(isEnglishVoice)
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-            st["phase"] = "post_reveal"
-            another = choose_another_word()
-            g = guidance_flow(st, opening=False)
+  const currentValue = voiceSelectEl.value;
+  voiceSelectEl.innerHTML = "";
 
-            # Extra blank line before the "another word?" prompt
-            tail = f"\n\n{another}" + (f"\n{g}" if g else "")
-            return reply(st, cluster["script"] + "\n\n" + tail)
+  if (!englishVoices.length){
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "No voices found";
+    voiceSelectEl.appendChild(opt);
+    syncVoiceModeUI();
+    return;
+  }
 
-        if a == "no":
-            if idx is not None and idx not in st["rejected"]:
-                st["rejected"].append(idx)
+  for (const v of englishVoices){
+    const opt = document.createElement("option");
+    opt.value = normVoiceName(v.name);
+    opt.textContent = `${v.name} [${v.lang}]`;
+    voiceSelectEl.appendChild(opt);
+  }
 
-            st["first_offer_done"] = True
-            st["phase"] = "decline_confirm"
-            st["SHORT_HINT_SHOWN"] = False
-            # ✅ NEW: varied decline-confirm prompt
-            return reply(st, choose_decline_confirm())
+  if (currentValue && [...voiceSelectEl.options].some(o => o.value === currentValue)){
+    voiceSelectEl.value = currentValue;
+  } else {
+    const defaultTestVoice = englishVoices.find(v =>
+      [
+        "google uk english female",
+        "isha",
+        "stephanie",
+        "tessa",
+        "martha",
+        "karen",
+        "fiona"
+      ].some(n => normVoiceName(v.name).includes(n))
+    );
+    voiceSelectEl.value = defaultTestVoice ? normVoiceName(defaultTestVoice.name) : voiceSelectEl.options[0].value;
+  }
 
-        # ✅ NEW: varied invalid input prompt (Yes/No/End session)
-        return reply(st, choose_invalid_yne())
+  syncVoiceModeUI();
+}
 
-    # Phase: decline_confirm
-    if st["phase"] == "decline_confirm":
-        if a == "yes":
-            return offer_next_word(st)
-        if a == "no":
-            st["phase"] = "done"
-            return reply(st, closing_block(st), done=True)
-        # ✅ NEW: varied invalid input prompt (Yes/No/End session)
-        return reply(st, choose_invalid_yne())
+function selectVoice(){
+  const voices = speechSynthesis.getVoices() || [];
+  console.log("Available voices:", voices.map(v => `${v.name} [${v.lang}]`));
 
-    # Phase: post_reveal
-    if st["phase"] == "post_reveal":
-        if a == "yes":
-            return offer_next_word(st)
-        if a == "no":
-            st["phase"] = "done"
-            return reply(st, closing_block(st), done=True)
-        # ✅ NEW: varied invalid input prompt (Yes/No/End session)
-        return reply(st, choose_invalid_yne())
+  if (!voices.length){
+    chosenVoice = null;
+    console.log("Chosen voice:", "none");
+    return chosenVoice;
+  }
 
-    # Phase: reoffer_prompt
-    if st["phase"] == "reoffer_prompt":
-        if a == "yes":
-            # Move rejected into remaining as a new (secondary) pool
-            st["remaining"] = st["rejected"][:]
-            random.shuffle(st["remaining"])
-            st["rejected"] = []
-            st["first_offer_done"] = True
-            return offer_next_word(st)
+  if (voiceModeSel.value === "manual"){
+    const manual = getManualVoice();
+    if (manual){
+      chosenVoice = manual;
+      console.log("Chosen voice (manual):", `${chosenVoice.name} [${chosenVoice.lang}]`);
+      return chosenVoice;
+    }
+  }
 
-        st["phase"] = "done"
-        text = (
-            "I have asked you twice about the words you set aside. The veil closes for today."
-            if st["reoffer_attempts"] >= 2
-            else "Very well. The session is complete. May the meanings serve you."
-        )
-        # And still provide closing summary if any accepted words exist
-        if st["words_revealed"]:
-            text = closing_block(st)
-        return reply(st, text, done=True)
+  const byExactName = new Map(
+    voices
+      .filter(v => v && v.name)
+      .map(v => [normVoiceName(v.name), v])
+  );
 
-    st["phase"] = "done"
-    return reply(st, "The spirits are quiet. Please refresh to begin anew.", done=True)
+  for (const preferred of ALL_PREFERRED_VOICES){
+    const exact = byExactName.get(normVoiceName(preferred));
+    if (exact){
+      chosenVoice = exact;
+      console.log("Chosen voice (auto):", `${chosenVoice.name} [${chosenVoice.lang}]`);
+      return chosenVoice;
+    }
+  }
 
-@app.get("/summary")
-def summary(request: Request, session_id: Optional[str] = None):
-    sid = session_id or request.cookies.get("wp_sid")
-    if not sid or sid not in SESSIONS:
-        return {"text": "Session expired.", "words": []}
-    st = SESSIONS[sid]
-    return {"text": summary_text(st["words_revealed"]), "words": st["words_revealed"]}
+  for (const preferred of ALL_PREFERRED_VOICES){
+    const wanted = normVoiceName(preferred);
+    const partial = voices.find(v => {
+      const n = normVoiceName(v?.name || "");
+      return n === wanted || n.includes(wanted) || wanted.includes(n);
+    });
+    if (partial){
+      chosenVoice = partial;
+      console.log("Chosen voice (auto):", `${chosenVoice.name} [${chosenVoice.lang}]`);
+      return chosenVoice;
+    }
+  }
+
+  const englishVoices = voices.filter(isEnglishVoice);
+  if (englishVoices.length){
+    englishVoices.sort((a, b) => scoreGenericEnglishVoice(b) - scoreGenericEnglishVoice(a));
+    chosenVoice = englishVoices[0];
+    console.log("Chosen voice (fallback):", `${chosenVoice.name} [${chosenVoice.lang}]`);
+    return chosenVoice;
+  }
+
+  chosenVoice = voices[0] || null;
+  console.log("Chosen voice:", chosenVoice ? `${chosenVoice.name} [${chosenVoice.lang}]` : "none");
+  return chosenVoice;
+}
+
+async function ensureVoiceSelected(timeoutMs = 1500){
+  const start = performance.now();
+  refreshVoiceList();
+  selectVoice();
+
+  while ((!chosenVoice || !voiceReady) && (performance.now() - start) < timeoutMs){
+    await sleep(50);
+    refreshVoiceList();
+    selectVoice();
+  }
+}
+
+function styleParams(){
+  const base = baseSpeechRate();
+  const name = normVoiceName(chosenVoice?.name || "");
+
+  let pitch = 1.00;
+  let rateMult = 0.88;
+
+  if (name.includes("google uk english female")) {
+    pitch = 0.97;
+    rateMult = 0.86;
+
+  } else if (name.includes("isha")) {
+    pitch = 0.99;
+    rateMult = 0.93;
+
+  } else if (name.includes("stephanie")) {
+    pitch = 0.98;
+    rateMult = 0.88;
+
+  } else if (name.includes("tessa")) {
+    pitch = 0.95;
+    rateMult = 0.86;
+
+  } else if (name.includes("martha")) {
+    pitch = 0.97;
+    rateMult = 0.87;
+
+  } else if (name.includes("karen")) {
+    pitch = 0.98;
+    rateMult = 0.87;
+
+  } else if (name.includes("fiona")) {
+    pitch = 0.96;
+    rateMult = 0.82;
+
+  } else if (name.includes("samantha")) {
+    pitch = 1.08;
+    rateMult = 0.78;
+
+  } else if (name.includes("veena")) {
+    pitch = 0.96;
+    rateMult = 0.80;
+
+  } else if (name.includes("moira")) {
+    pitch = 1.03;
+    rateMult = 0.83;
+
+  } else if (name.includes("sangeeta")) {
+    pitch = 0.95;
+    rateMult = 0.80;
+
+  } else if (
+    name.includes("microsoft aria") ||
+    name.includes("microsoft jenny") ||
+    name.includes("microsoft sonia") ||
+    name.includes("microsoft ava") ||
+    name.includes("microsoft emma") ||
+    name.includes("microsoft ana")
+  ) {
+    pitch = 0.99;
+    rateMult = 0.87;
+
+  } else if (name.includes("microsoft zira")) {
+    pitch = 1.00;
+    rateMult = 0.84;
+
+  } else if (name.includes("google us english")) {
+    pitch = 0.99;
+    rateMult = 0.87;
+
+  } else if (isEnglishVoice(chosenVoice)) {
+    pitch = 0.99;
+    rateMult = 0.88;
+  }
+
+  return {
+    pitch,
+    rate: base * rateMult
+  };
+}
+
+function isEllipsisOnly(text){
+  return text.trim().replace(/[.\u2026]/g, "") === "";
+}
+
+function textForSpeech(text){
+  let t = text.replace(/\u2026/g, "").replace(/\.{3,}/g, "");
+  t = t.replace(/ ?→ ?/g, ". ");
+  return t;
+}
+
+function splitChunks(full){
+  const out = [];
+  let buf = "";
+
+  for (let i = 0; i < full.length; i++){
+    if (full.slice(i, i + 3) === "\n\n\n"){
+      if (buf) out.push(buf);
+      buf = "";
+      out.push("\n\n\n");
+      i += 2;
+      continue;
+    }
+
+    if (full.slice(i, i + 2) === "\n\n"){
+      if (buf) out.push(buf);
+      buf = "";
+      out.push("\n\n");
+      i += 1;
+      continue;
+    }
+
+    const ch = full[i];
+    const next = full[i + 1];
+    buf += ch;
+
+    const isEndPunct =
+      (ch === "." || ch === "!" || ch === "?") &&
+      (i + 1 >= full.length || /\s/.test(next));
+
+    const isColonBreak = (ch === ":" && next === "\n");
+
+    if (isEndPunct || isColonBreak){
+      out.push(buf);
+      buf = "";
+    }
+  }
+
+  if (buf) out.push(buf);
+  return out;
+}
+
+function speakSentenceWithStart(text){
+  const immediate = { started: Promise.resolve(), done: Promise.resolve(), rateUsed: baseSpeechRate() };
+  if (!voiceReady) return immediate;
+
+  const part = (text || "").trim();
+  if (!part) return immediate;
+
+  const u = new SpeechSynthesisUtterance(textForSpeech(part));
+  const style = styleParams();
+  if (chosenVoice) u.voice = chosenVoice;
+  u.pitch = style.pitch;
+  u.rate  = style.rate;
+  u.volume = 1.0;
+
+  u.onboundary = (ev) => {
+    if (!ev) return;
+    if (ev.name === "word" || typeof ev.charIndex === "number"){
+      const jitter = 0.85 + Math.random() * 0.55;
+      triggerBeat(jitter);
+    }
+  };
+
+  let startedResolve, doneResolve;
+  const started = new Promise(r => (startedResolve = r));
+  const done = new Promise(r => (doneResolve = r));
+
+  u.onstart = () => { setSpeaking(true); updateSpeakingFromEngine(); startedResolve(); };
+  u.onend   = () => { setSpeaking(false); updateSpeakingFromEngine(); doneResolve(); };
+  u.onerror = () => { setSpeaking(false); updateSpeakingFromEngine(); doneResolve(); };
+
+  try{ speechSynthesis.speak(u); }catch(e){ startedResolve(); doneResolve(); }
+  return { started, done, rateUsed: u.rate };
+}
+
+function estimateSpeechMs(text, rateUsed){
+  const t = (text || "").trim();
+  if (!t) return 0;
+  const words = (t.match(/\S+/g) || []).length;
+  const effectiveWpm = 180 * (rateUsed || 1);
+  let ms = (words / Math.max(1, effectiveWpm)) * 60_000;
+  const punct = (t.match(/[,.!?;:]/g) || []).length;
+  ms += punct * 55 * paceFactor();
+  return Math.max(360, Math.min(ms, 9000));
+}
+
+async function typeChunkOverMs(chunk, totalMs, token){
+  const s = chunk || "";
+  const chars = Math.max(1, s.length);
+  let perChar = totalMs / chars;
+  perChar = Math.max(6, Math.min(32, perChar));
+  for (const ch of s){
+    if (!isTokenLive(token)) return;
+    screenEl.textContent += ch;
+    autoScrollScreen();
+    await sleep(perChar);
+  }
+}
+
+async function typeChunkClassic(chunk, token){
+  for (const ch of (chunk || "")){
+    if (!isTokenLive(token)) return;
+    screenEl.textContent += ch;
+    autoScrollScreen();
+    await sleep(typeDelayClassic());
+  }
+}
+
+async function speakAndTypePerSentence(text, token){
+  if (!isTokenLive(token)) return;
+
+  const chunks = splitChunks(text || "");
+
+  for (const chunk of chunks){
+    if (!isTokenLive(token)) return;
+
+    const SPEAK_NOW = speakWhileTyping.checked;
+
+    if (chunk === "\n\n" || chunk === "\n\n\n"){
+      for (const ch of chunk){
+        if (!isTokenLive(token)) return;
+        screenEl.textContent += ch;
+        autoScrollScreen();
+        await sleep(8);
+      }
+      updateSpeakingFromEngine();
+      await sleep((chunk === "\n\n\n" ? SECTION_PAUSE_MS : PARAGRAPH_PAUSE_MS) * paceFactor());
+      continue;
+    }
+
+    if (isEllipsisOnly(chunk)){
+      if (speakingCount === 0) updateSpeakingFromEngine();
+      const dots = (chunk.match(/[.\u2026]/g) || []).length || 3;
+      for (let i = 0; i < dots; i++){
+        if (!isTokenLive(token)) return;
+        screenEl.textContent += "…";
+        autoScrollScreen();
+        updateSpeakingFromEngine();
+        await sleep(((i === dots - 1) ? FINAL_ELLIPSIS_DELAY : ELLIPSIS_DELAY) * paceFactor());
+      }
+      continue;
+    }
+
+    if (!SPEAK_NOW){
+      await typeChunkClassic(chunk, token);
+      updateSpeakingFromEngine();
+      await sleep(SENTENCE_PAUSE_MS * paceFactor());
+      continue;
+    }
+
+    const speech = speakSentenceWithStart(chunk);
+    const canSpeak = voiceReady && chosenVoice && SPEAK_NOW;
+
+    if (!LIVE_SYNC || !canSpeak){
+      await typeChunkClassic(chunk, token);
+      await Promise.race([speech.done, sleep(8000)]);
+      updateSpeakingFromEngine();
+      await sleep(SENTENCE_PAUSE_MS * paceFactor());
+      continue;
+    }
+
+    await Promise.race([speech.started, sleep(600)]);
+    await typeChunkOverMs(chunk, estimateSpeechMs(chunk, speech.rateUsed), token);
+    await Promise.race([speech.done, sleep(8000)]);
+    updateSpeakingFromEngine();
+    await sleep(SENTENCE_PAUSE_MS * paceFactor());
+  }
+
+  updateSpeakingFromEngine();
+}
+
+async function forceEndSession(){
+  const token = bumpRunToken();
+  hardStopAllAudioAndBeats();
+  abortInFlightFetch();
+
+  sessionDone = true;
+  chooseInFlight = false;
+  startInFlight = false;
+
+  yesBtn.disabled = true;
+  noBtn.disabled = true;
+  stopBtn.disabled = true;
+
+  screenEl.textContent = "";
+  autoScrollScreen();
+
+  const goodbye =
+`Sorry to see you go.
+Come back another time…
+The words will be waiting for your call.`;
+
+  await speakAndTypePerSentence(goodbye, token);
+
+  statusEl.textContent = "Session ended. Press Start to begin again.";
+  setStartEnabled(true);
+
+  try{
+    fetch(`${API}/choose`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ answer: "stop", context: { session_id: sessionId } }),
+      keepalive: true
+    }).catch(()=>{});
+  }catch(e){}
+}
+
+async function startSession(token){
+  try{
+    statusEl.textContent = "";
+    sessionDone = false;
+
+    setButtonsEnabled(false);
+
+    await gentleResetAndClear(token);
+    if (!isTokenLive(token)) return;
+
+    abortInFlightFetch();
+    currentFetchController = new AbortController();
+
+    const res = await fetch(`${API}/start`, {
+      signal: currentFetchController.signal
+    });
+    if(!res.ok) throw new Error(`Start failed: ${res.status} ${res.statusText}`);
+    const data = await res.json();
+    if (!isTokenLive(token)) return;
+
+    sessionId = data.session_id || sessionId;
+
+    if (data.prompt)   await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.prompt)), token);
+    if (data.guidance) await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.guidance)), token);
+
+    if (!isTokenLive(token)) return;
+    setButtonsEnabled(true);
+  }catch(err){
+    if (!isTokenLive(token)) return;
+    screenEl.textContent = `⚠️ Startup error\n${String(err)}`;
+    setButtonsEnabled(false);
+    stopBtn.disabled = true;
+    setStartEnabled(true);
+  }
+}
+
+async function sendChoice(answer){
+  if (chooseInFlight) return;
+  if (sessionDone) return;
+
+  chooseInFlight = true;
+  const token = runToken;
+
+  try{
+    setButtonsEnabled(false);
+
+    await gentleResetAndClear(token);
+    if (!isTokenLive(token)) return;
+
+    abortInFlightFetch();
+    currentFetchController = new AbortController();
+
+    const res = await fetch(`${API}/choose`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        answer,
+        context: { session_id: sessionId }
+      }),
+      signal: currentFetchController.signal
+    });
+
+    if(!res.ok) throw new Error(`Choose failed: ${res.status} ${res.statusText}`);
+    const data = await res.json();
+    if (!isTokenLive(token)) return;
+
+    if (data.context?.session_id) sessionId = data.context.session_id;
+
+    if (data.text) await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.text)), token);
+
+    if (!isTokenLive(token)) return;
+
+    const done = !!data.done;
+    sessionDone = done;
+
+    if (done){
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      stopBtn.disabled = true;
+      statusEl.textContent = "Session ended. Press Start to begin again.";
+      setStartEnabled(true);
+    }else{
+      setButtonsEnabled(true);
+      stopBtn.disabled = false;
+    }
+  }catch(err){
+    if (!isTokenLive(runToken)) return;
+    screenEl.textContent = `⚠️ Request error\n${String(err)}`;
+    if (!sessionDone){
+      setButtonsEnabled(true);
+      stopBtn.disabled = false;
+    }
+  }finally{
+    chooseInFlight = false;
+  }
+}
+
+let introAnswered = false;
+function revealEndSessionAfterIntro(){
+  if (introAnswered) return;
+  introAnswered = true;
+  showStopButton(true);
+  stopBtn.disabled = false;
+}
+
+function bindStartOnce(){
+  if (startBound) return;
+  startBound = true;
+
+  startBtn.addEventListener("click", async (e)=>{
+    e.preventDefault();
+
+    if (startInFlight) return;
+    startInFlight = true;
+
+    const token = bumpRunToken();
+
+    setStartEnabled(false);
+    setButtonsEnabled(false);
+    stopBtn.disabled = true;
+    statusEl.textContent = "";
+
+    abortInFlightFetch();
+    hardStopAllAudioAndBeats();
+
+    sessionId = null;
+    sessionDone = false;
+    chooseInFlight = false;
+
+    introAnswered = false;
+    showStopButton(false);
+
+    if (!titleShown){
+      titleShown = true;
+      playGhostlyWhoosh();
+      if (titleEl) titleEl.classList.add("visible");
+    }
+
+    await sleep(WHOOSH_MS + WHOOSH_BUFFER_MS);
+    if (!isTokenLive(token)){ startInFlight = false; return; }
+
+    unlockVoice();
+    await ensureVoiceSelected(1200);
+    if (!isTokenLive(token)){ startInFlight = false; return; }
+
+    await startSession(token);
+
+    startInFlight = false;
+  });
+}
+
+setButtonsEnabled(false);
+setStartEnabled(true);
+showStopButton(false);
+syncVoiceLabel();
+syncVoiceModeUI();
+refreshVoiceList();
+
+bindStartOnce();
+
+yesBtn.addEventListener("click", (e)=>{
+  e.preventDefault();
+  revealEndSessionAfterIntro();
+  sendChoice("yes");
+});
+
+noBtn.addEventListener("click", (e)=>{
+  e.preventDefault();
+  revealEndSessionAfterIntro();
+  sendChoice("no");
+});
+
+stopBtn.addEventListener("click", (e)=>{
+  e.preventDefault();
+  forceEndSession();
+});
+
+speakWhileTyping.addEventListener("change", syncVoiceLabel);
+voiceModeSel.addEventListener("change", () => {
+  syncVoiceModeUI();
+  refreshVoiceList();
+  selectVoice();
+});
+voiceSelectEl.addEventListener("change", () => {
+  if (voiceModeSel.value === "manual"){
+    selectVoice();
+  }
+});
+</script>
+</body>
+</html>
