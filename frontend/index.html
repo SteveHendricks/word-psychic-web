@@ -1226,15 +1226,18 @@ function unlockVoice(){
 const TOP_PSYCHIC_VOICES = [
   "Google UK English Female",
   "Isha",
-  "Stephanie",
   "Tessa",
-  "Martha",
+  "Stephanie",
   "Karen",
-  "Fiona"
+  "Martha"
 ];
 
 const SECOND_TIER_VOICES = [
+  "Sangeeta",
+  "Fiona",
   "Samantha",
+  "Moira",
+  "Veena",
   "Google US English",
   "Microsoft Aria",
   "Microsoft Jenny",
@@ -1245,11 +1248,7 @@ const SECOND_TIER_VOICES = [
   "Microsoft Zira"
 ];
 
-const LOW_PRIORITY_VOICES = [
-  "Veena",
-  "Moira",
-  "Sangeeta"
-];
+const LOW_PRIORITY_VOICES = [];
 
 const ALL_PREFERRED_VOICES = [
   ...TOP_PSYCHIC_VOICES,
@@ -1274,8 +1273,9 @@ function scoreGenericEnglishVoice(v){
   let score = 0;
 
   if (/(google uk english female)/i.test(name)) score += 30;
-  if (/(isha|stephanie|tessa|martha|karen|fiona)/i.test(name)) score += 18;
-  if (/(female|woman|aria|jenny|sonia|ava|emma|ana|zira)/i.test(name)) score += 10;
+  if (/(isha|tessa|stephanie|karen|martha)/i.test(name)) score += 18;
+  if (/(sangeeta|fiona|samantha|moira|veena)/i.test(name)) score += 10;
+  if (/(female|woman|aria|jenny|sonia|ava|emma|ana|zira)/i.test(name)) score += 8;
 
   if (/google/.test(name)) score += 5;
   if (/microsoft/.test(name)) score += 4;
@@ -1283,9 +1283,6 @@ function scoreGenericEnglishVoice(v){
   if (/en-gb/.test(lang)) score += 8;
   if (/en-au|en-ie|en-in|en-za/.test(lang)) score += 4;
   if (/en-us/.test(lang)) score += 2;
-
-  if (/(samantha)/i.test(name)) score -= 3;
-  if (/(veena|moira|sangeeta)/i.test(name)) score -= 8;
 
   return score;
 }
@@ -1329,11 +1326,15 @@ function refreshVoiceList(){
       [
         "google uk english female",
         "isha",
-        "stephanie",
         "tessa",
-        "martha",
+        "stephanie",
         "karen",
-        "fiona"
+        "martha",
+        "sangeeta",
+        "fiona",
+        "samantha",
+        "moira",
+        "veena"
       ].some(n => normVoiceName(v.name).includes(n))
     );
     voiceSelectEl.value = defaultTestVoice ? normVoiceName(defaultTestVoice.name) : voiceSelectEl.options[0].value;
@@ -1418,52 +1419,52 @@ function styleParams(){
   const base = baseSpeechRate();
   const name = normVoiceName(chosenVoice?.name || "");
 
-  let pitch = 1.00;
-  let rateMult = 0.88;
+  let pitch = 0.98;
+  let rateMult = 0.87;
 
   if (name.includes("google uk english female")) {
-    pitch = 0.97;
-    rateMult = 0.86;
+    pitch = 0.96;
+    rateMult = 0.84;
 
   } else if (name.includes("isha")) {
-    pitch = 0.99;
-    rateMult = 0.93;
-
-  } else if (name.includes("stephanie")) {
     pitch = 0.98;
-    rateMult = 0.88;
+    rateMult = 0.91;
 
   } else if (name.includes("tessa")) {
-    pitch = 0.95;
+    pitch = 0.94;
+    rateMult = 0.84;
+
+  } else if (name.includes("stephanie")) {
+    pitch = 0.97;
     rateMult = 0.86;
 
-  } else if (name.includes("martha")) {
-    pitch = 0.97;
-    rateMult = 0.87;
-
   } else if (name.includes("karen")) {
-    pitch = 0.98;
-    rateMult = 0.87;
+    pitch = 0.97;
+    rateMult = 0.85;
 
-  } else if (name.includes("fiona")) {
+  } else if (name.includes("martha")) {
     pitch = 0.96;
-    rateMult = 0.82;
-
-  } else if (name.includes("samantha")) {
-    pitch = 1.08;
-    rateMult = 0.78;
-
-  } else if (name.includes("veena")) {
-    pitch = 0.96;
-    rateMult = 0.80;
-
-  } else if (name.includes("moira")) {
-    pitch = 1.03;
-    rateMult = 0.83;
+    rateMult = 0.85;
 
   } else if (name.includes("sangeeta")) {
-    pitch = 0.95;
-    rateMult = 0.80;
+    pitch = 0.93;
+    rateMult = 0.76;
+
+  } else if (name.includes("fiona")) {
+    pitch = 0.94;
+    rateMult = 0.77;
+
+  } else if (name.includes("samantha")) {
+    pitch = 1.00;
+    rateMult = 0.72;
+
+  } else if (name.includes("moira")) {
+    pitch = 0.96;
+    rateMult = 0.74;
+
+  } else if (name.includes("veena")) {
+    pitch = 0.92;
+    rateMult = 0.70;
 
   } else if (
     name.includes("microsoft aria") ||
@@ -1473,20 +1474,20 @@ function styleParams(){
     name.includes("microsoft emma") ||
     name.includes("microsoft ana")
   ) {
-    pitch = 0.99;
-    rateMult = 0.87;
+    pitch = 0.98;
+    rateMult = 0.85;
 
   } else if (name.includes("microsoft zira")) {
-    pitch = 1.00;
-    rateMult = 0.84;
+    pitch = 0.98;
+    rateMult = 0.81;
 
   } else if (name.includes("google us english")) {
-    pitch = 0.99;
-    rateMult = 0.87;
+    pitch = 0.98;
+    rateMult = 0.84;
 
   } else if (isEnglishVoice(chosenVoice)) {
-    pitch = 0.99;
-    rateMult = 0.88;
+    pitch = 0.98;
+    rateMult = 0.85;
   }
 
   return {
@@ -1502,6 +1503,37 @@ function isEllipsisOnly(text){
 function textForSpeech(text){
   let t = text.replace(/\u2026/g, "").replace(/\.{3,}/g, "");
   t = t.replace(/ ?→ ?/g, ". ");
+  return t;
+}
+
+function voiceSpecificSpeechText(text){
+  let t = textForSpeech(text);
+  const name = normVoiceName(chosenVoice?.name || "");
+
+  if (
+    name.includes("veena") ||
+    name.includes("moira") ||
+    name.includes("samantha") ||
+    name.includes("sangeeta") ||
+    name.includes("fiona")
+  ){
+    t = t
+      .replace(/—/g, ". ")
+      .replace(/\s+-\s+/g, ". ")
+      .replace(/;/g, ". ")
+      .replace(/:\s+/g, ". ")
+      .replace(/,\s+(especially|because|although|though|while|when|if)\b/gi, ". $1")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
+
+  if (name.includes("veena")){
+    t = t
+      .replace(/\bvery well\b/gi, "Very well")
+      .replace(/\bjourney further\b/gi, "go further")
+      .replace(/\breveal another word\b/gi, "show another word");
+  }
+
   return t;
 }
 
@@ -1553,9 +1585,10 @@ function speakSentenceWithStart(text){
   const part = (text || "").trim();
   if (!part) return immediate;
 
-  const u = new SpeechSynthesisUtterance(textForSpeech(part));
+  const u = new SpeechSynthesisUtterance(voiceSpecificSpeechText(part));
   const style = styleParams();
   if (chosenVoice) u.voice = chosenVoice;
+  if (chosenVoice?.lang) u.lang = chosenVoice.lang;
   u.pitch = style.pitch;
   u.rate  = style.rate;
   u.volume = 1.0;
