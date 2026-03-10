@@ -109,13 +109,13 @@ CLUSTERS = [
         "title": "Antipathy → Vilify → Annihilate",
         "intro_line": "Your word is “antipathy.”\n\n",
         "continue_q": "Shall we journey further with this word?",
-        "script": """Antipathy means a strong dislike.
+        "script": """Antipathy means distate. A strong dislike.
 Antipathy is what the rooster felt toward his alarm clock.
 
-I see another word. Vilify -- To attack someone’s reputation.
+I see another word. Vilify \u2014 Defame. To attack someone’s reputation.
 Busted with a stolen ten percent off coupon for a nuclear reactor, the thief vilified the detective online.
 
-A final word. Annihilate -- To utterly destroy.
+A final word. Annihilate \u2014 To utterly destroy.
 Having annihilated the town, the hurricane reflected, "Maybe I should cut back on the caffeine."
 
 Antipathy. Vilify. Annihilate.
