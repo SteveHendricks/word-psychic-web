@@ -1228,13 +1228,13 @@ const TOP_PSYCHIC_VOICES = [
   "Isha",
   "Tessa",
   "Stephanie",
-  "Karen",
-  "Martha"
+  "Martha",
+  "Sangeeta",
+  "Fiona",
+  "Karen"
 ];
 
 const SECOND_TIER_VOICES = [
-  "Sangeeta",
-  "Fiona",
   "Samantha",
   "Moira",
   "Veena",
@@ -1247,7 +1247,7 @@ const SECOND_TIER_VOICES = [
   "Microsoft Ana",
   "Microsoft Zira"
 ];
-
+  
 const LOW_PRIORITY_VOICES = [];
 
 const ALL_PREFERRED_VOICES = [
@@ -1454,17 +1454,17 @@ function styleParams(){
     pitch = 0.94;
     rateMult = 0.77;
 
-  } else if (name.includes("samantha")) {
-    pitch = 1.00;
-    rateMult = 0.72;
+    } else if (name.includes("samantha")) {
+    pitch = 0.99;
+    rateMult = 0.68;
 
   } else if (name.includes("moira")) {
     pitch = 0.96;
     rateMult = 0.74;
 
   } else if (name.includes("veena")) {
-    pitch = 0.92;
-    rateMult = 0.70;
+    pitch = 0.91;
+    rateMult = 0.66;
 
   } else if (
     name.includes("microsoft aria") ||
