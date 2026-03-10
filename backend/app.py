@@ -112,26 +112,26 @@ CLUSTERS = [
         "script": """Antipathy means distate. A strong dislike.
 Antipathy is what the rooster felt toward his alarm clock.
 
-I see another word. Vilify \u2014 Defame. To attack someone’s reputation.
+I see another word. Vilify — Defame. To attack someone’s reputation.
 Busted with a stolen ten percent off coupon for a nuclear reactor, the thief vilified the detective online.
 
-A final word. Annihilate \u2014 To utterly destroy.
+A final word. Annihilate — To utterly destroy.
 Having annihilated the town, the hurricane reflected, "Maybe I should cut back on the caffeine."
 
 Antipathy. Vilify. Annihilate.
-Your fortune: Ill will destroys quietly; guarding against it leaves room for peace.""",
+Your fortune: Ill will destroys quietly — guarding against it leaves room for peace.""",
     },
     {
         "title": "Prudent → Revere → Venerate",
         "intro_line": "Your word is “prudent.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Prudent means being careful and wise.
-The demanding CEO wants a prudent business plan -- right now!
+The demanding CEO wants a prudent business plan — right now!
 
-I see a second word. Revere -- To respect and honor deeply.
+I see a second word. Revere — To respect and honor deeply.
 Pizza was revered among the dogs for calming their hysterical disagreements.
 
-A final word. Venerate -- To hold as sacred.
+A final word. Venerate — Worship. To hold as sacred due to age or character.
 Because it thought its whistle sang wisdom, the frying pan venerated the old tea kettle.
 
 Prudent. Revere. Venerate.
