@@ -71,7 +71,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.06),
       0 18px 60px rgba(0,0,0,.50);
-    width:min(1040px, 100%);
+    width:min(760px, 100%);
     justify-content:center;
     flex-wrap: wrap;
   }
@@ -136,16 +136,6 @@
     opacity:.55;
     cursor:not-allowed;
     transform:none;
-  }
-  .voice-test-wrap{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-  .voice-select{
-    min-width: 240px !important;
-    max-width: 320px;
   }
 
   .title-wrap{ display:flex; justify-content:center; margin-top: 0; position:relative; z-index:9; }
@@ -783,8 +773,7 @@
     .console{ height: clamp(340px, 48vh, 440px); min-height: 320px; }
     .screen{ padding: 14px 20px; }
     .footerbar{ font-size: 13px; padding: 10px 12px; }
-    .controls{ justify-content:center; }
-    .voice-select{ min-width: 180px !important; max-width: 240px; }
+    .controls{ justify-content:center; width:min(640px, 100%); }
   }
 </style>
 </head>
@@ -806,21 +795,6 @@
           <input type="checkbox" id="speakWhileTyping" checked>
           <span id="voiceLabel">Voice On</span>
         </label>
-
-        <div class="voice-test-wrap">
-          <label>Voice Mode
-            <select id="voiceMode">
-              <option value="auto" selected>Auto</option>
-              <option value="manual">Manual</option>
-            </select>
-          </label>
-
-          <label>Test Voice
-            <select id="voiceSelect" class="voice-select" disabled>
-              <option value="">Loading voices…</option>
-            </select>
-          </label>
-        </div>
 
         <button id="startBtn" class="start">Start</button>
       </div>
@@ -901,12 +875,6 @@
   </main>
 
 <script>
-if (typeof window !== "undefined" && "speechSynthesis" in window) {
-  window.speechSynthesis.onvoiceschanged = () => {
-    refreshVoiceList();
-  };
-}
-
 const API = "https://word-psychic-web.onrender.com";
 const LIVE_SYNC = true;
 
@@ -949,8 +917,6 @@ const startBtn = document.getElementById("startBtn");
 const speedSel = document.getElementById("speed");
 const speakWhileTyping = document.getElementById("speakWhileTyping");
 const voiceLabel = document.getElementById("voiceLabel");
-const voiceModeSel = document.getElementById("voiceMode");
-const voiceSelectEl = document.getElementById("voiceSelect");
 const ballWrap = document.getElementById("ballWrap");
 const titleEl = document.getElementById("titleText");
 
@@ -1134,10 +1100,6 @@ function syncVoiceLabel(){
   }
 }
 
-function syncVoiceModeUI(){
-  voiceSelectEl.disabled = voiceModeSel.value !== "manual";
-}
-
 function hardStopAllAudioAndBeats(){
   try { speechSynthesis.cancel(); } catch(e){}
   speakingCount = 0;
@@ -1211,7 +1173,6 @@ function unlockVoice(){
     speechSynthesis.speak(u);
     voiceReady = true;
     setTimeout(() => {
-      refreshVoiceList();
       selectVoice();
     }, 250);
   }catch(e){
@@ -1247,7 +1208,7 @@ const SECOND_TIER_VOICES = [
   "Microsoft Ana",
   "Microsoft Zira"
 ];
-  
+
 const LOW_PRIORITY_VOICES = [];
 
 const ALL_PREFERRED_VOICES = [
@@ -1273,8 +1234,8 @@ function scoreGenericEnglishVoice(v){
   let score = 0;
 
   if (/(google uk english female)/i.test(name)) score += 30;
-  if (/(isha|tessa|stephanie|karen|martha)/i.test(name)) score += 18;
-  if (/(sangeeta|fiona|samantha|moira|veena)/i.test(name)) score += 10;
+  if (/(isha|tessa|stephanie|martha|sangeeta|fiona|karen)/i.test(name)) score += 18;
+  if (/(samantha|moira|veena)/i.test(name)) score += 10;
   if (/(female|woman|aria|jenny|sonia|ava|emma|ana|zira)/i.test(name)) score += 8;
 
   if (/google/.test(name)) score += 5;
@@ -1287,62 +1248,6 @@ function scoreGenericEnglishVoice(v){
   return score;
 }
 
-function getManualVoice(){
-  const wanted = normVoiceName(voiceSelectEl.value);
-  if (!wanted) return null;
-  const voices = speechSynthesis.getVoices() || [];
-  return voices.find(v => normVoiceName(v.name) === wanted) || null;
-}
-
-function refreshVoiceList(){
-  const voices = speechSynthesis.getVoices() || [];
-  const englishVoices = voices
-    .filter(isEnglishVoice)
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  const currentValue = voiceSelectEl.value;
-  voiceSelectEl.innerHTML = "";
-
-  if (!englishVoices.length){
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "No voices found";
-    voiceSelectEl.appendChild(opt);
-    syncVoiceModeUI();
-    return;
-  }
-
-  for (const v of englishVoices){
-    const opt = document.createElement("option");
-    opt.value = normVoiceName(v.name);
-    opt.textContent = `${v.name} [${v.lang}]`;
-    voiceSelectEl.appendChild(opt);
-  }
-
-  if (currentValue && [...voiceSelectEl.options].some(o => o.value === currentValue)){
-    voiceSelectEl.value = currentValue;
-  } else {
-    const defaultTestVoice = englishVoices.find(v =>
-      [
-        "google uk english female",
-        "isha",
-        "tessa",
-        "stephanie",
-        "karen",
-        "martha",
-        "sangeeta",
-        "fiona",
-        "samantha",
-        "moira",
-        "veena"
-      ].some(n => normVoiceName(v.name).includes(n))
-    );
-    voiceSelectEl.value = defaultTestVoice ? normVoiceName(defaultTestVoice.name) : voiceSelectEl.options[0].value;
-  }
-
-  syncVoiceModeUI();
-}
-
 function selectVoice(){
   const voices = speechSynthesis.getVoices() || [];
   console.log("Available voices:", voices.map(v => `${v.name} [${v.lang}]`));
@@ -1351,15 +1256,6 @@ function selectVoice(){
     chosenVoice = null;
     console.log("Chosen voice:", "none");
     return chosenVoice;
-  }
-
-  if (voiceModeSel.value === "manual"){
-    const manual = getManualVoice();
-    if (manual){
-      chosenVoice = manual;
-      console.log("Chosen voice (manual):", `${chosenVoice.name} [${chosenVoice.lang}]`);
-      return chosenVoice;
-    }
   }
 
   const byExactName = new Map(
@@ -1405,12 +1301,10 @@ function selectVoice(){
 
 async function ensureVoiceSelected(timeoutMs = 1500){
   const start = performance.now();
-  refreshVoiceList();
   selectVoice();
 
   while ((!chosenVoice || !voiceReady) && (performance.now() - start) < timeoutMs){
     await sleep(50);
-    refreshVoiceList();
     selectVoice();
   }
 }
@@ -1438,10 +1332,6 @@ function styleParams(){
     pitch = 0.97;
     rateMult = 0.86;
 
-  } else if (name.includes("karen")) {
-    pitch = 0.97;
-    rateMult = 0.85;
-
   } else if (name.includes("martha")) {
     pitch = 0.96;
     rateMult = 0.85;
@@ -1454,7 +1344,11 @@ function styleParams(){
     pitch = 0.94;
     rateMult = 0.77;
 
-    } else if (name.includes("samantha")) {
+  } else if (name.includes("karen")) {
+    pitch = 0.97;
+    rateMult = 0.85;
+
+  } else if (name.includes("samantha")) {
     pitch = 0.99;
     rateMult = 0.68;
 
@@ -1897,12 +1791,17 @@ function bindStartOnce(){
   });
 }
 
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    selectVoice();
+  };
+}
+
 setButtonsEnabled(false);
 setStartEnabled(true);
 showStopButton(false);
 syncVoiceLabel();
-syncVoiceModeUI();
-refreshVoiceList();
+selectVoice();
 
 bindStartOnce();
 
@@ -1924,16 +1823,6 @@ stopBtn.addEventListener("click", (e)=>{
 });
 
 speakWhileTyping.addEventListener("change", syncVoiceLabel);
-voiceModeSel.addEventListener("change", () => {
-  syncVoiceModeUI();
-  refreshVoiceList();
-  selectVoice();
-});
-voiceSelectEl.addEventListener("change", () => {
-  if (voiceModeSel.value === "manual"){
-    selectVoice();
-  }
-});
 </script>
 </body>
 </html>
