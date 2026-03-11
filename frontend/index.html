@@ -64,6 +64,10 @@
     touch-action: pan-y;
   }
 
+  main, section, header, footer, nav, div {
+    overscroll-behavior-x: none;
+  }
+
   .wrap{
     width:min(1200px, calc(100% - 56px));
     margin: 18px auto 24px;
@@ -890,28 +894,34 @@
 
     .controls{
       width:100%;
-      gap: 10px;
-      padding: 10px 12px 12px;
+      gap: 8px;
+      padding: 9px 10px 10px;
       border-radius: 14px;
+      flex-wrap: nowrap;
+      justify-content: center;
     }
 
     .controls label{
-      font-size: 14px;
-      gap: 8px;
+      font-size: 13px;
+      gap: 6px;
+      flex: 0 0 auto;
     }
 
     .controls select{
-      min-width: 96px;
-      height: 36px;
-      font-size: 15px;
+      min-width: 82px;
+      width: 82px;
+      height: 34px;
+      font-size: 14px;
+      padding: 0 8px;
     }
 
     .controls .start{
       margin-left: 0;
-      padding: 10px 18px;
-      font-size: 17px;
-      min-height: 42px;
-      max-width: 150px;
+      padding: 8px 14px;
+      font-size: 15px;
+      min-height: 38px;
+      min-width: 96px;
+      max-width: 110px;
       width: auto;
     }
 
@@ -936,8 +946,8 @@
       display:flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
-      padding-bottom: 0;
+      gap: 10px;
+      padding-bottom: 4px;
     }
 
     .stage{
@@ -956,8 +966,8 @@
       justify-content:center;
       align-items:flex-start;
       width: 100%;
-      gap: 16px;
-      margin-top: 0;
+      gap: 18px;
+      margin-top: 6px;
     }
 
     .icon-link{
@@ -997,7 +1007,7 @@
     .pedestal::after{ width: min(50vw, 185px); height: 12px; }
 
     .action-bar{
-      margin-top: 0;
+      margin-top: 4px;
       margin-bottom: 2px;
     }
 
@@ -1064,11 +1074,11 @@
 
     .controls{
       display:flex;
-      flex-wrap:wrap;
+      flex-wrap: nowrap;
       justify-content:center;
       align-items:center;
-      gap: 8px 10px;
-      padding: 10px;
+      gap: 8px;
+      padding: 9px 8px;
     }
 
     .controls label{
@@ -1076,14 +1086,23 @@
       justify-content:center;
       text-align:center;
       flex-wrap:nowrap;
+      gap: 5px;
+      font-size: 12px;
+    }
+
+    .controls select{
+      min-width: 74px;
+      width: 74px;
+      font-size: 13px;
+      height: 32px;
     }
 
     .controls .start{
-      max-width: 140px;
-      min-width: 116px;
-      font-size: 16px;
-      min-height: 40px;
-      padding: 9px 15px;
+      min-width: 88px;
+      max-width: 100px;
+      font-size: 14px;
+      min-height: 36px;
+      padding: 8px 12px;
     }
 
     .title{
@@ -1096,12 +1115,16 @@
       min-width: 180px;
     }
 
+    .side-icons{
+      margin-top: 8px;
+    }
+
     .action-bar .buttons{
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
     }
 
     #stopBtn{
-      grid-column: 1 / -1;
+      grid-column: auto;
     }
 
     .console{
@@ -1285,9 +1308,9 @@ const WHOOSH_BUFFER_MS = 700;
 const ELLIPSIS_DELAY = 2000;
 const FINAL_ELLIPSIS_DELAY = 3000;
 
-const SENTENCE_PAUSE_MS   = 620;
-const PARAGRAPH_PAUSE_MS  = 1200;
-const SECTION_PAUSE_MS    = 1500;
+const SENTENCE_PAUSE_MS   = 760;
+const PARAGRAPH_PAUSE_MS  = 1450;
+const SECTION_PAUSE_MS    = 1800;
 
 let sessionId = null;
 let voiceReady = false;
@@ -1493,10 +1516,10 @@ function baseSpeechRate(){
   const v = speedSel.value;
 
   if (IS_MOBILE_LAYOUT){
-    return v === "slow" ? 0.96 : v === "fast" ? 1.34 : 1.08;
+    return v === "slow" ? 0.98 : v === "fast" ? 1.36 : 1.10;
   }
 
-  return v === "slow" ? 0.92 : v === "fast" ? 1.35 : 1.05;
+  return v === "slow" ? 0.94 : v === "fast" ? 1.38 : 1.08;
 }
 
 function syncVoiceLabel(){
@@ -1956,16 +1979,43 @@ function estimateSpeechMs(text, rateUsed){
 async function typeChunkOverMs(chunk, totalMs, token){
   const s = chunk || "";
   const chars = Math.max(1, s.length);
-  let perChar = totalMs / chars;
+  const existingLen = screenEl.textContent.length;
+  const start = performance.now();
 
-  perChar = Math.max(8, Math.min(IS_MOBILE_LAYOUT ? 54 : 42, perChar));
+  return new Promise(resolve => {
+    function step(now){
+      if (!isTokenLive(token)){
+        resolve();
+        return;
+      }
 
-  for (const ch of s){
-    if (!isTokenLive(token)) return;
-    screenEl.textContent += ch;
-    autoScrollScreen();
-    await sleep(perChar);
-  }
+      const elapsed = now - start;
+      const progress = Math.min(1, elapsed / totalMs);
+      const targetChars = Math.floor(progress * chars);
+
+      const wantedText = s.slice(0, targetChars);
+      const currentChunkText = screenEl.textContent.slice(existingLen);
+
+      if (currentChunkText !== wantedText){
+        screenEl.textContent = screenEl.textContent.slice(0, existingLen) + wantedText;
+        autoScrollScreen();
+      }
+
+      if (progress < 1){
+        requestAnimationFrame(step);
+      }else{
+        const fullChunkText = s;
+        const finalChunkText = screenEl.textContent.slice(existingLen);
+        if (finalChunkText !== fullChunkText){
+          screenEl.textContent = screenEl.textContent.slice(0, existingLen) + fullChunkText;
+          autoScrollScreen();
+        }
+        resolve();
+      }
+    }
+
+    requestAnimationFrame(step);
+  });
 }
 
 async function typeChunkClassic(chunk, token){
@@ -2232,6 +2282,18 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
     selectVoice();
   };
 }
+
+document.addEventListener("touchstart", (e) => {
+  window.__touchStartX = e.touches?.[0]?.clientX || 0;
+}, { passive: true });
+
+document.addEventListener("touchmove", (e) => {
+  if (!e.target.closest(".screen")) {
+    if (Math.abs((e.touches?.[0]?.clientX || 0) - (window.__touchStartX || 0)) > 12) {
+      e.preventDefault();
+    }
+  }
+}, { passive: false });
 
 setButtonsEnabled(false);
 setStartEnabled(true);
