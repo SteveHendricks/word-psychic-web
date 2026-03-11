@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Word Psychic – A Fun Vocabulary Fortune Game</title>
 <meta name="description" content="Word Psychic is a fun interactive vocabulary game where a mystical psychic reveals powerful English words and meanings. Discover new vocabulary through playful fortune-style readings." />
 <link rel="canonical" href="https://www.wordpsychic.com/" />
@@ -37,7 +37,15 @@
     --violetC: rgba(220,140,255,.08);
   }
 
-  html,body{height:100%}
+  *{ box-sizing:border-box; }
+
+  html,body{
+    height:100%;
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
   body{
     margin:0;
     color:var(--ink);
@@ -48,6 +56,9 @@
       radial-gradient(1400px 900px at 50% 120%, var(--violetC), rgba(0,0,0,0) 55%),
       linear-gradient(180deg, var(--bg0), var(--bg1));
     overflow-x:hidden;
+    overflow-x:clip;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   .wrap{
@@ -56,10 +67,16 @@
     display:flex;
     flex-direction:column;
     gap: 10px;
-    padding-bottom: 14px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   }
 
-  .topbar{ display:flex; justify-content:center; position:relative; z-index:10; }
+  .topbar{
+    display:flex;
+    justify-content:center;
+    position:relative;
+    z-index:10;
+  }
+
   .controls{
     display:flex;
     align-items:center;
@@ -75,6 +92,7 @@
     justify-content:center;
     flex-wrap: wrap;
   }
+
   .controls label{
     font-size: 16px;
     line-height: 1;
@@ -82,6 +100,7 @@
     align-items:center;
     gap: 10px;
   }
+
   .controls select{
     font-size: 16px;
     line-height: 1;
@@ -94,10 +113,12 @@
     outline:none;
     min-width: 120px;
   }
+
   .controls input[type="checkbox"]{
     transform: scale(1.05);
     accent-color: #7ad3ff;
   }
+
   .controls .start{
     margin-left: 14px;
     padding: 12px 30px;
@@ -114,7 +135,9 @@
       0 0 0 1px rgba(120,220,255,.12);
     cursor:pointer;
     transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    min-height: 46px;
   }
+
   .controls .start:hover{
     transform: translateY(-1px);
     background: linear-gradient(180deg, rgba(140,235,255,.26), rgba(255,255,255,.08));
@@ -124,7 +147,9 @@
       0 14px 34px rgba(0,0,0,.48),
       0 0 34px rgba(120,220,255,.12);
   }
+
   .controls .start:active{ transform: translateY(0px); }
+
   .controls .start:focus-visible{
     outline: none;
     box-shadow:
@@ -132,13 +157,21 @@
       0 14px 34px rgba(0,0,0,.48),
       0 0 0 3px rgba(120,220,255,.22);
   }
+
   .controls .start[disabled]{
     opacity:.55;
     cursor:not-allowed;
     transform:none;
   }
 
-  .title-wrap{ display:flex; justify-content:center; margin-top: 0; position:relative; z-index:9; }
+  .title-wrap{
+    display:flex;
+    justify-content:center;
+    margin-top: 0;
+    position:relative;
+    z-index:9;
+  }
+
   .title{
     font-family: "Cinzel Decorative", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
     font-size: 38px;
@@ -152,8 +185,13 @@
       0 0 34px rgba(160,120,255,.18);
     transition: opacity 2.2s ease, transform 2.2s ease;
     user-select:none;
+    text-align:center;
   }
-  .title.visible{ opacity: 1; transform: translateY(0); }
+
+  .title.visible{
+    opacity: 1;
+    transform: translateY(0);
+  }
 
   .hero-row{
     position:relative;
@@ -187,6 +225,7 @@
     color: var(--muted);
     user-select:none;
   }
+
   .icon-btn{
     width: 58px;
     height: 58px;
@@ -203,6 +242,7 @@
     transition: transform .15s ease, background .15s ease, border-color .15s ease;
     overflow: hidden;
   }
+
   .icon-link:hover .icon-btn{
     transform: translateY(-1px);
     background:
@@ -210,7 +250,12 @@
       rgba(255,255,255,.08);
     border-color: rgba(170,220,255,.30);
   }
-  .icon-label{ font-size: 14px; letter-spacing:.02em; }
+
+  .icon-label{
+    font-size: 14px;
+    letter-spacing:.02em;
+    text-align:center;
+  }
 
   .ico-img{
     width: 52px;
@@ -227,7 +272,12 @@
     opacity: .98;
   }
 
-  .stage{ width: 100%; display:flex; justify-content:center; align-items:center; }
+  .stage{
+    width: 100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
 
   #ballWrap{
     position:relative;
@@ -237,6 +287,11 @@
     z-index: 2;
     filter: drop-shadow(0 46px 110px rgba(0,0,0,.72));
     --beatScale: 1.0015;
+    isolation: isolate;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, filter;
+    contain: layout paint;
   }
 
   .radiate, .aura, .aura2{ z-index: 0; }
@@ -270,6 +325,7 @@
     opacity:.70;
     transition: opacity 140ms ease-out, filter 140ms ease-out;
   }
+
   .aura2{
     position:absolute;
     inset:-22%;
@@ -301,7 +357,6 @@
         rgba(190,160,255,.18) 34%,
         rgba(30,22,60,.12) 74%,
         rgba(0,0,0,0) 100%);
-    border: none;
     box-shadow:
       0 0 0 1px rgba(240,255,255,.10),
       0 0 52px rgba(180,245,255,.18),
@@ -310,9 +365,15 @@
       inset 0 -130px 260px rgba(0,0,0,.18),
       inset 0 0 0 1px rgba(235,215,255,.10);
     transform-origin: 50% 102%;
-    transform: scale(var(--beatScale));
+    transform: scale(var(--beatScale)) translateZ(0);
+    -webkit-transform: scale(var(--beatScale)) translateZ(0);
     transition: transform 120ms ease-out;
     will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    clip-path: circle(49.8% at 50% 50%);
+    contain: paint;
   }
 
   .ball::before{
@@ -385,6 +446,7 @@
     opacity: .50;
     filter: blur(.35px);
   }
+
   .rimInner{
     position:absolute;
     inset:2%;
@@ -430,6 +492,7 @@
     filter: blur(18px);
     mix-blend-mode: screen;
   }
+
   .swirlA{
     background:
       conic-gradient(from 220deg,
@@ -445,6 +508,7 @@
         rgba(190,255,255,0) 72%);
     animation: swirlA 10s ease-in-out infinite alternate;
   }
+
   .swirlB{
     opacity:.54;
     filter: blur(24px);
@@ -462,6 +526,7 @@
         rgba(140,220,255,0) 74%);
     animation: swirlB 14s ease-in-out infinite alternate;
   }
+
   .swirlC{
     opacity:.30;
     filter: blur(30px);
@@ -486,18 +551,21 @@
     opacity:.92;
     z-index: 1;
   }
+
   .mist{
     background: radial-gradient(64% 46% at 50% 56%,
       rgba(190,160,255,.16),
       rgba(190,160,255,0) 74%);
     animation: drift 7s ease-in-out infinite alternate;
   }
+
   .mist2{
     background: radial-gradient(60% 42% at 46% 78%,
       rgba(170,140,255,.13),
       rgba(170,140,255,0) 76%);
     animation: drift2 9.5s ease-in-out infinite alternate;
   }
+
   @keyframes drift{ from{transform:translateY(-8px)} to{transform:translateY(8px)} }
   @keyframes drift2{ from{transform:translateX(-10px)} to{transform:translateX(10px)} }
 
@@ -629,6 +697,20 @@
     opacity:.92;
   }
 
+  .ball::before,
+  .ball::after,
+  .rimHard,
+  .rimInner,
+  .sparkles,
+  .swirlA,
+  .swirlB,
+  .swirlC,
+  .mist,
+  .mist2{
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
   #ballWrap.idle .radiate{ opacity:.18; filter: blur(34px); }
   #ballWrap.idle .aura{    opacity:.12; filter: blur(28px); }
   #ballWrap.idle .aura2{   opacity:.10; filter: blur(42px); }
@@ -652,6 +734,7 @@
     position: relative;
     z-index: 8;
   }
+
   .action-bar .buttons{
     width:min(560px, 100%);
     display:flex;
@@ -663,6 +746,7 @@
     border: 1px solid rgba(210,230,255,.14);
     background: rgba(8,14,28,.26);
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.06),
       0 18px 60px rgba(0,0,0,.30);
@@ -670,6 +754,7 @@
 
   button.action{
     min-width: 112px;
+    min-height: 48px;
     padding: 10px 12px;
     border-radius: 14px;
     border: 1px solid rgba(255,255,255,.16);
@@ -680,10 +765,29 @@
     transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
     font-size: 15px;
   }
-  button.action:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(170,220,255,.26); }
-  button.action:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
-  button.action.quiet{ background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.11); color: rgba(232,243,255,.86); }
-  button.action.placeholder{ opacity: 0; pointer-events: none; }
+
+  button.action:hover{
+    transform: translateY(-1px);
+    background: rgba(255,255,255,.08);
+    border-color: rgba(170,220,255,.26);
+  }
+
+  button.action:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+    transform:none;
+  }
+
+  button.action.quiet{
+    background: rgba(255,255,255,.03);
+    border-color: rgba(255,255,255,.11);
+    color: rgba(232,243,255,.86);
+  }
+
+  button.action.placeholder{
+    opacity: 0;
+    pointer-events: none;
+  }
 
   .console{
     width:min(1040px, 100%);
@@ -717,6 +821,7 @@
     background: rgba(0,0,0,.14);
     scrollbar-gutter: stable both-edges;
     overflow-anchor: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   .note{
@@ -735,6 +840,7 @@
     border: 1px solid rgba(210,230,255,.14);
     background: rgba(8,14,28,.26);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.06),
       0 18px 60px rgba(0,0,0,.24);
@@ -745,16 +851,36 @@
     color: rgba(168,193,220,.92);
     font-size: 14px;
     letter-spacing: .01em;
+    text-align:center;
   }
+
   .footerbar a{
     color: rgba(210,230,255,.92);
     text-decoration: none;
     border-bottom: 1px solid rgba(210,230,255,.18);
   }
+
   .footerbar a:hover{
     border-bottom-color: rgba(210,230,255,.44);
   }
+
   .footer-sep{ opacity:.35; }
+
+  @supports (-webkit-touch-callout: none) {
+    .swirlA,.swirlB,.swirlC{
+      inset: -8%;
+      filter: blur(14px);
+    }
+
+    .mist,.mist2{
+      inset: -8%;
+      filter: blur(14px);
+    }
+
+    .sparkles{
+      opacity: .035;
+    }
+  }
 
   @media (max-width: 980px){
     #ballWrap{ width: 300px; }
@@ -774,6 +900,303 @@
     .screen{ padding: 14px 20px; }
     .footerbar{ font-size: 13px; padding: 10px 12px; }
     .controls{ justify-content:center; width:min(640px, 100%); }
+  }
+
+  @media (max-width: 768px){
+    .wrap{
+      width:min(100%, calc(100% - 18px));
+      margin: 8px auto 16px;
+      gap: 8px;
+    }
+
+    .topbar{
+      position: relative;
+      z-index: 20;
+    }
+
+    .controls{
+      width:100%;
+      gap: 10px;
+      padding: 10px 12px 12px;
+      border-radius: 14px;
+    }
+
+    .controls label{
+      font-size: 14px;
+      gap: 8px;
+    }
+
+    .controls select{
+      min-width: 96px;
+      height: 36px;
+      font-size: 15px;
+    }
+
+    .controls .start{
+      margin-left: 0;
+      padding: 10px 18px;
+      font-size: 17px;
+      min-height: 42px;
+      max-width: 160px;
+      width: auto;
+    }
+
+    .title-wrap{
+      width: 100%;
+      justify-content: center;
+    }
+
+    .title{
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+      font-size: clamp(24px, 7vw, 31px);
+      font-weight: 700;
+      letter-spacing: .07em;
+      line-height: 1.12;
+      padding: 0 4px;
+    }
+
+    .hero-row{
+      min-height: unset;
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 4px;
+    }
+
+    .stage{
+      order: 1;
+      width: 100%;
+    }
+
+    .side-icons{
+      position: static !important;
+      left: auto !important;
+      top: auto !important;
+      transform: none !important;
+      order: 2;
+      display:flex;
+      flex-direction: row;
+      justify-content:center;
+      align-items:flex-start;
+      width: 100%;
+      gap: 16px;
+      margin-top: 2px;
+    }
+
+    .icon-link{
+      width: 84px;
+      gap: 6px;
+    }
+
+    .icon-btn{
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+    }
+
+    .ico-img{
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+    }
+
+    .icon-label{
+      font-size: 12px;
+      line-height: 1.15;
+      text-align:center;
+    }
+
+    #ballWrap{
+      width: min(66vw, 280px);
+      min-width: 210px;
+    }
+
+    .contactFade{ width: min(74vw, 290px); height: 128px; }
+    .ground-glow{ width: min(135vw, 500px); height: 150px; bottom:-72px; }
+    .seatShadow{ width: min(54vw, 205px); height: 34px; }
+    .cradle{ width: min(56vw, 210px); height: 24px; }
+    .pedestal{ width: min(72vw, 265px); height: 28px; bottom:-28px; }
+    .pedestal::before{ width: min(86vw, 315px); height: 15px; bottom:-10px; }
+    .pedestal::after{ width: min(54vw, 195px); height: 13px; }
+
+    .action-bar{
+      margin-top: 2px;
+      margin-bottom: 4px;
+    }
+
+    .action-bar .buttons{
+      width:100%;
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 14px;
+    }
+
+    button.action{
+      min-width: 0;
+      width:100%;
+      min-height: 46px;
+      font-size: 15px;
+      padding: 10px 10px;
+      border-radius: 12px;
+    }
+
+    .console{
+      width:100%;
+      min-height: 200px;
+      height: 26vh;
+      border-radius: 14px;
+    }
+
+    .screen{
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .footerbar{
+      gap: 6px;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 9px 10px;
+      border-radius: 14px;
+    }
+
+    .footer-sep{
+      display:none;
+    }
+  }
+
+  @media (max-width: 560px){
+    html, body{
+      width:100%;
+      max-width:100%;
+      overflow-x:hidden;
+    }
+
+    body{
+      font-size:15px;
+      overflow-x: clip;
+    }
+
+    .wrap{
+      width:min(100%, calc(100% - 14px));
+      margin: 6px auto 14px;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      align-items:center;
+      gap: 8px 10px;
+      padding: 10px;
+    }
+
+    .controls label{
+      width:auto;
+      justify-content:center;
+      text-align:center;
+      flex-wrap:nowrap;
+    }
+
+    .controls .start{
+      max-width: 145px;
+      min-width: 120px;
+      font-size: 16px;
+      min-height: 40px;
+      padding: 9px 16px;
+    }
+
+    .title{
+      font-size: clamp(21px, 7.4vw, 27px);
+      letter-spacing: .05em;
+    }
+
+    #ballWrap{
+      width: min(64vw, 255px);
+      min-width: 190px;
+    }
+
+    .action-bar .buttons{
+      grid-template-columns: 1fr 1fr;
+    }
+
+    #stopBtn{
+      grid-column: 1 / -1;
+    }
+
+    .console{
+      min-height: 180px;
+      height: 24vh;
+    }
+
+    .screen{
+      padding: 11px 12px;
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 380px){
+    .title{
+      font-size: 20px;
+      letter-spacing: .04em;
+    }
+
+    #ballWrap{
+      width: min(62vw, 235px);
+      min-width: 175px;
+    }
+
+    .controls{
+      gap: 8px;
+    }
+
+    .controls label{
+      font-size: 13px;
+    }
+
+    .controls select{
+      min-width: 88px;
+      font-size: 14px;
+    }
+
+    .controls .start{
+      min-width: 110px;
+      font-size: 15px;
+      padding: 8px 14px;
+    }
+
+    .icon-link{
+      width: 76px;
+    }
+
+    .icon-btn{
+      width: 48px;
+      height: 48px;
+    }
+
+    .ico-img{
+      width: 42px;
+      height: 42px;
+    }
+
+    .action-bar .buttons{
+      grid-template-columns: 1fr;
+    }
+
+    button.action{
+      grid-column: auto;
+    }
+
+    .console{
+      min-height: 165px;
+      height: 22vh;
+    }
   }
 </style>
 </head>
@@ -876,7 +1299,12 @@
 
 <script>
 const API = "https://word-psychic-web.onrender.com";
-const LIVE_SYNC = true;
+
+const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const IS_WEBKIT = /WebKit/i.test(navigator.userAgent);
+const IS_IOS_WEBKIT_FAMILY = IS_IOS || /Safari|CriOS/i.test(navigator.userAgent);
+
+const LIVE_SYNC = !IS_IOS_WEBKIT_FAMILY;
 
 const WHOOSH_MS = 1900;
 const WHOOSH_BUFFER_MS = 700;
@@ -1079,12 +1507,24 @@ function paceFactor(){
   const v = speedSel.value;
   return v==="slow" ? 1.35 : v==="fast" ? 0.75 : 1.0;
 }
+
 function typeDelayClassic(){
   const v = speedSel.value;
-  return v==="slow" ? 26 : v==="fast" ? 9 : 14;
+
+  if (IS_IOS_WEBKIT_FAMILY){
+    return v==="slow" ? 16 : v==="fast" ? 5 : 8;
+  }
+
+  return v==="slow" ? 22 : v==="fast" ? 8 : 12;
 }
+
 function baseSpeechRate(){
   const v = speedSel.value;
+
+  if (IS_IOS_WEBKIT_FAMILY){
+    return v === "slow" ? 0.98 : v === "fast" ? 1.42 : 1.12;
+  }
+
   return v === "slow" ? 0.92 : v === "fast" ? 1.35 : 1.05;
 }
 
@@ -1169,12 +1609,22 @@ function playGhostlyWhoosh(){
 function unlockVoice(){
   try{
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance("");
+
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
     speechSynthesis.speak(u);
+
     voiceReady = true;
+    selectVoice();
+
     setTimeout(() => {
-      selectVoice();
-    }, 250);
+      try{
+        speechSynthesis.cancel();
+      }catch(e){}
+    }, 60);
+
   }catch(e){
     voiceReady = false;
   }
@@ -1586,10 +2036,12 @@ async function speakAndTypePerSentence(text, token){
     const canSpeak = voiceReady && chosenVoice && SPEAK_NOW;
 
     if (!LIVE_SYNC || !canSpeak){
+      if (canSpeak){
+        Promise.race([speech.done, sleep(8000)]).catch(()=>{});
+      }
       await typeChunkClassic(chunk, token);
-      await Promise.race([speech.done, sleep(8000)]);
       updateSpeakingFromEngine();
-      await sleep(SENTENCE_PAUSE_MS * paceFactor());
+      await sleep((IS_IOS_WEBKIT_FAMILY ? 220 : SENTENCE_PAUSE_MS) * paceFactor());
       continue;
     }
 
@@ -1772,6 +2224,9 @@ function bindStartOnce(){
     introAnswered = false;
     showStopButton(false);
 
+    unlockVoice();
+    await ensureVoiceSelected(500);
+
     if (!titleShown){
       titleShown = true;
       playGhostlyWhoosh();
@@ -1779,10 +2234,6 @@ function bindStartOnce(){
     }
 
     await sleep(WHOOSH_MS + WHOOSH_BUFFER_MS);
-    if (!isTokenLive(token)){ startInFlight = false; return; }
-
-    unlockVoice();
-    await ensureVoiceSelected(1200);
     if (!isTokenLive(token)){ startInFlight = false; return; }
 
     await startSession(token);
