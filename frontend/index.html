@@ -57,8 +57,11 @@
       linear-gradient(180deg, var(--bg0), var(--bg1));
     overflow-x:hidden;
     overflow-x:clip;
+    overscroll-behavior-x:none;
+    overscroll-behavior-y:contain;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    touch-action: pan-y;
   }
 
   .wrap{
@@ -68,6 +71,7 @@
     flex-direction:column;
     gap: 10px;
     padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    overflow-x:clip;
   }
 
   .topbar{
@@ -136,6 +140,7 @@
     cursor:pointer;
     transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
     min-height: 46px;
+    touch-action: manipulation;
   }
 
   .controls .start:hover{
@@ -199,8 +204,8 @@
     justify-content:center;
     align-items:center;
     min-height: 340px;
-    padding-top: 0px;
-    padding-bottom: 12px;
+    padding-top: 0;
+    padding-bottom: 8px;
   }
 
   .side-icons{
@@ -241,6 +246,7 @@
     place-items:center;
     transition: transform .15s ease, background .15s ease, border-color .15s ease;
     overflow: hidden;
+    touch-action: manipulation;
   }
 
   .icon-link:hover .icon-btn{
@@ -291,7 +297,6 @@
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     will-change: transform, filter;
-    contain: layout paint;
   }
 
   .radiate, .aura, .aura2{ z-index: 0; }
@@ -372,8 +377,6 @@
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     -webkit-mask-image: -webkit-radial-gradient(white, black);
-    clip-path: circle(49.8% at 50% 50%);
-    contain: paint;
   }
 
   .ball::before{
@@ -697,20 +700,6 @@
     opacity:.92;
   }
 
-  .ball::before,
-  .ball::after,
-  .rimHard,
-  .rimInner,
-  .sparkles,
-  .swirlA,
-  .swirlB,
-  .swirlC,
-  .mist,
-  .mist2{
-    -webkit-transform: translateZ(0);
-    backface-visibility: hidden;
-  }
-
   #ballWrap.idle .radiate{ opacity:.18; filter: blur(34px); }
   #ballWrap.idle .aura{    opacity:.12; filter: blur(28px); }
   #ballWrap.idle .aura2{   opacity:.10; filter: blur(42px); }
@@ -728,7 +717,7 @@
 
   .action-bar{
     width:min(1040px, 100%);
-    margin: 8px auto 6px;
+    margin: 2px auto 4px;
     display:flex;
     justify-content:center;
     position: relative;
@@ -764,6 +753,7 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 14px 40px rgba(0,0,0,.35);
     transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
     font-size: 15px;
+    touch-action: manipulation;
   }
 
   button.action:hover{
@@ -822,6 +812,7 @@
     scrollbar-gutter: stable both-edges;
     overflow-anchor: none;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   .note{
@@ -866,22 +857,6 @@
 
   .footer-sep{ opacity:.35; }
 
-  @supports (-webkit-touch-callout: none) {
-    .swirlA,.swirlB,.swirlC{
-      inset: -8%;
-      filter: blur(14px);
-    }
-
-    .mist,.mist2{
-      inset: -8%;
-      filter: blur(14px);
-    }
-
-    .sparkles{
-      opacity: .035;
-    }
-  }
-
   @media (max-width: 980px){
     #ballWrap{ width: 300px; }
     .contactFade{ width: 308px; }
@@ -892,8 +867,7 @@
     .pedestal::before{ width: 350px; height: 16px; bottom:-11px; }
     .side-icons{ left: 4px; }
     .icon-link{ width: 80px; }
-    .hero-row{ min-height: 320px; padding-bottom: 10px; }
-    .action-bar{ margin-top: 8px; margin-bottom: 6px; }
+    .hero-row{ min-height: 320px; padding-bottom: 6px; }
     .action-bar .buttons{ width:min(520px, 100%); }
     button.action{ min-width: 108px; padding: 10px 12px; font-size: 15px; }
     .console{ height: clamp(340px, 48vh, 440px); min-height: 320px; }
@@ -905,8 +879,8 @@
   @media (max-width: 768px){
     .wrap{
       width:min(100%, calc(100% - 18px));
-      margin: 8px auto 16px;
-      gap: 8px;
+      margin: 8px auto 14px;
+      gap: 7px;
     }
 
     .topbar{
@@ -937,7 +911,7 @@
       padding: 10px 18px;
       font-size: 17px;
       min-height: 42px;
-      max-width: 160px;
+      max-width: 150px;
       width: auto;
     }
 
@@ -962,8 +936,8 @@
       display:flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding-bottom: 4px;
+      gap: 6px;
+      padding-bottom: 0;
     }
 
     .stage{
@@ -983,23 +957,23 @@
       align-items:flex-start;
       width: 100%;
       gap: 16px;
-      margin-top: 2px;
+      margin-top: 0;
     }
 
     .icon-link{
-      width: 84px;
+      width: 82px;
       gap: 6px;
     }
 
     .icon-btn{
-      width: 52px;
-      height: 52px;
+      width: 50px;
+      height: 50px;
       border-radius: 14px;
     }
 
     .ico-img{
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       border-radius: 10px;
     }
 
@@ -1010,21 +984,21 @@
     }
 
     #ballWrap{
-      width: min(66vw, 280px);
-      min-width: 210px;
+      width: min(62vw, 260px);
+      min-width: 200px;
     }
 
-    .contactFade{ width: min(74vw, 290px); height: 128px; }
-    .ground-glow{ width: min(135vw, 500px); height: 150px; bottom:-72px; }
-    .seatShadow{ width: min(54vw, 205px); height: 34px; }
-    .cradle{ width: min(56vw, 210px); height: 24px; }
-    .pedestal{ width: min(72vw, 265px); height: 28px; bottom:-28px; }
-    .pedestal::before{ width: min(86vw, 315px); height: 15px; bottom:-10px; }
-    .pedestal::after{ width: min(54vw, 195px); height: 13px; }
+    .contactFade{ width: min(70vw, 280px); height: 118px; }
+    .ground-glow{ width: min(128vw, 470px); height: 140px; bottom:-68px; }
+    .seatShadow{ width: min(50vw, 195px); height: 32px; }
+    .cradle{ width: min(52vw, 200px); height: 22px; }
+    .pedestal{ width: min(68vw, 250px); height: 26px; bottom:-26px; }
+    .pedestal::before{ width: min(82vw, 300px); height: 14px; bottom:-10px; }
+    .pedestal::after{ width: min(50vw, 185px); height: 12px; }
 
     .action-bar{
-      margin-top: 2px;
-      margin-bottom: 4px;
+      margin-top: 0;
+      margin-bottom: 2px;
     }
 
     .action-bar .buttons{
@@ -1039,16 +1013,16 @@
     button.action{
       min-width: 0;
       width:100%;
-      min-height: 46px;
+      min-height: 44px;
       font-size: 15px;
-      padding: 10px 10px;
+      padding: 9px 10px;
       border-radius: 12px;
     }
 
     .console{
       width:100%;
-      min-height: 200px;
-      height: 26vh;
+      min-height: 220px;
+      height: 30vh;
       border-radius: 14px;
     }
 
@@ -1085,7 +1059,7 @@
 
     .wrap{
       width:min(100%, calc(100% - 14px));
-      margin: 6px auto 14px;
+      margin: 6px auto 12px;
     }
 
     .controls{
@@ -1105,11 +1079,11 @@
     }
 
     .controls .start{
-      max-width: 145px;
-      min-width: 120px;
+      max-width: 140px;
+      min-width: 116px;
       font-size: 16px;
       min-height: 40px;
-      padding: 9px 16px;
+      padding: 9px 15px;
     }
 
     .title{
@@ -1118,8 +1092,8 @@
     }
 
     #ballWrap{
-      width: min(64vw, 255px);
-      min-width: 190px;
+      width: min(60vw, 240px);
+      min-width: 180px;
     }
 
     .action-bar .buttons{
@@ -1131,8 +1105,8 @@
     }
 
     .console{
-      min-height: 180px;
-      height: 24vh;
+      min-height: 210px;
+      height: 28vh;
     }
 
     .screen{
@@ -1148,8 +1122,8 @@
     }
 
     #ballWrap{
-      width: min(62vw, 235px);
-      min-width: 175px;
+      width: min(58vw, 220px);
+      min-width: 165px;
     }
 
     .controls{
@@ -1161,28 +1135,28 @@
     }
 
     .controls select{
-      min-width: 88px;
+      min-width: 86px;
       font-size: 14px;
     }
 
     .controls .start{
-      min-width: 110px;
+      min-width: 108px;
       font-size: 15px;
       padding: 8px 14px;
     }
 
     .icon-link{
-      width: 76px;
+      width: 74px;
     }
 
     .icon-btn{
-      width: 48px;
-      height: 48px;
+      width: 46px;
+      height: 46px;
     }
 
     .ico-img{
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
     }
 
     .action-bar .buttons{
@@ -1194,8 +1168,8 @@
     }
 
     .console{
-      min-height: 165px;
-      height: 22vh;
+      min-height: 190px;
+      height: 26vh;
     }
   }
 </style>
@@ -1301,10 +1275,9 @@
 const API = "https://word-psychic-web.onrender.com";
 
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-const IS_WEBKIT = /WebKit/i.test(navigator.userAgent);
-const IS_IOS_WEBKIT_FAMILY = IS_IOS || /Safari|CriOS/i.test(navigator.userAgent);
+const IS_MOBILE_LAYOUT = window.matchMedia("(max-width: 768px)").matches || IS_IOS;
 
-const LIVE_SYNC = !IS_IOS_WEBKIT_FAMILY;
+const LIVE_SYNC = true;
 
 const WHOOSH_MS = 1900;
 const WHOOSH_BUFFER_MS = 700;
@@ -1312,9 +1285,9 @@ const WHOOSH_BUFFER_MS = 700;
 const ELLIPSIS_DELAY = 2000;
 const FINAL_ELLIPSIS_DELAY = 3000;
 
-const SENTENCE_PAUSE_MS   = 480;
-const PARAGRAPH_PAUSE_MS  = 900;
-const SECTION_PAUSE_MS    = 1200;
+const SENTENCE_PAUSE_MS   = 620;
+const PARAGRAPH_PAUSE_MS  = 1200;
+const SECTION_PAUSE_MS    = 1500;
 
 let sessionId = null;
 let voiceReady = false;
@@ -1448,10 +1421,10 @@ function startFallbackBeats(){
     if (!ballWrap.classList.contains("speaking")) return;
     const strength = 0.85 + Math.random() * 0.55;
     triggerBeat(strength);
-    const next = 120 + Math.random() * 220;
+    const next = 140 + Math.random() * 240;
     fallbackBeatTimer = setTimeout(tick, next);
   };
-  fallbackBeatTimer = setTimeout(tick, 160);
+  fallbackBeatTimer = setTimeout(tick, 180);
 }
 
 function stopFallbackBeats(){
@@ -1475,7 +1448,7 @@ function setSpeaking(on){
 
 function updateSpeakingFromEngine(){
   try{
-    const active = !!(window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending));
+    const active = !!(window.speechSynthesis && speechSynthesis.speaking);
     if (active){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
@@ -1505,24 +1478,22 @@ function showStopButton(show){
 
 function paceFactor(){
   const v = speedSel.value;
-  return v==="slow" ? 1.35 : v==="fast" ? 0.75 : 1.0;
+  return v==="slow" ? 1.2 : v==="fast" ? 0.82 : 1.0;
 }
 
 function typeDelayClassic(){
   const v = speedSel.value;
-
-  if (IS_IOS_WEBKIT_FAMILY){
-    return v==="slow" ? 16 : v==="fast" ? 5 : 8;
+  if (IS_MOBILE_LAYOUT){
+    return v==="slow" ? 18 : v==="fast" ? 7 : 11;
   }
-
-  return v==="slow" ? 22 : v==="fast" ? 8 : 12;
+  return v==="slow" ? 24 : v==="fast" ? 9 : 14;
 }
 
 function baseSpeechRate(){
   const v = speedSel.value;
 
-  if (IS_IOS_WEBKIT_FAMILY){
-    return v === "slow" ? 0.98 : v === "fast" ? 1.42 : 1.12;
+  if (IS_MOBILE_LAYOUT){
+    return v === "slow" ? 0.96 : v === "fast" ? 1.34 : 1.08;
   }
 
   return v === "slow" ? 0.92 : v === "fast" ? 1.35 : 1.05;
@@ -1950,8 +1921,16 @@ function speakSentenceWithStart(text){
   const done = new Promise(r => (doneResolve = r));
 
   u.onstart = () => { setSpeaking(true); updateSpeakingFromEngine(); startedResolve(); };
-  u.onend   = () => { setSpeaking(false); updateSpeakingFromEngine(); doneResolve(); };
-  u.onerror = () => { setSpeaking(false); updateSpeakingFromEngine(); doneResolve(); };
+  u.onend   = () => {
+    setSpeaking(false);
+    updateSpeakingFromEngine();
+    doneResolve();
+  };
+  u.onerror = () => {
+    setSpeaking(false);
+    updateSpeakingFromEngine();
+    doneResolve();
+  };
 
   try{ speechSynthesis.speak(u); }catch(e){ startedResolve(); doneResolve(); }
   return { started, done, rateUsed: u.rate };
@@ -1960,19 +1939,27 @@ function speakSentenceWithStart(text){
 function estimateSpeechMs(text, rateUsed){
   const t = (text || "").trim();
   if (!t) return 0;
+
   const words = (t.match(/\S+/g) || []).length;
-  const effectiveWpm = 180 * (rateUsed || 1);
-  let ms = (words / Math.max(1, effectiveWpm)) * 60_000;
+  const effectiveWpm = 165 * (rateUsed || 1);
+  let ms = (words / Math.max(1, effectiveWpm)) * 60000;
+
   const punct = (t.match(/[,.!?;:]/g) || []).length;
-  ms += punct * 55 * paceFactor();
-  return Math.max(360, Math.min(ms, 9000));
+  ms += punct * 95 * paceFactor();
+
+  const syncFactor = IS_MOBILE_LAYOUT ? 1.72 : 1.38;
+  ms *= syncFactor;
+
+  return Math.max(520, Math.min(ms, 12000));
 }
 
 async function typeChunkOverMs(chunk, totalMs, token){
   const s = chunk || "";
   const chars = Math.max(1, s.length);
   let perChar = totalMs / chars;
-  perChar = Math.max(6, Math.min(32, perChar));
+
+  perChar = Math.max(8, Math.min(IS_MOBILE_LAYOUT ? 54 : 42, perChar));
+
   for (const ch of s){
     if (!isTokenLive(token)) return;
     screenEl.textContent += ch;
@@ -2005,7 +1992,7 @@ async function speakAndTypePerSentence(text, token){
         if (!isTokenLive(token)) return;
         screenEl.textContent += ch;
         autoScrollScreen();
-        await sleep(8);
+        await sleep(10);
       }
       updateSpeakingFromEngine();
       await sleep((chunk === "\n\n\n" ? SECTION_PAUSE_MS : PARAGRAPH_PAUSE_MS) * paceFactor());
@@ -2036,18 +2023,16 @@ async function speakAndTypePerSentence(text, token){
     const canSpeak = voiceReady && chosenVoice && SPEAK_NOW;
 
     if (!LIVE_SYNC || !canSpeak){
-      if (canSpeak){
-        Promise.race([speech.done, sleep(8000)]).catch(()=>{});
-      }
       await typeChunkClassic(chunk, token);
+      await Promise.race([speech.done, sleep(8000)]);
       updateSpeakingFromEngine();
-      await sleep((IS_IOS_WEBKIT_FAMILY ? 220 : SENTENCE_PAUSE_MS) * paceFactor());
+      await sleep(SENTENCE_PAUSE_MS * paceFactor());
       continue;
     }
 
-    await Promise.race([speech.started, sleep(600)]);
+    await Promise.race([speech.started, sleep(700)]);
     await typeChunkOverMs(chunk, estimateSpeechMs(chunk, speech.rateUsed), token);
-    await Promise.race([speech.done, sleep(8000)]);
+    await Promise.race([speech.done, sleep(12000)]);
     updateSpeakingFromEngine();
     await sleep(SENTENCE_PAUSE_MS * paceFactor());
   }
@@ -2225,7 +2210,7 @@ function bindStartOnce(){
     showStopButton(false);
 
     unlockVoice();
-    await ensureVoiceSelected(500);
+    await ensureVoiceSelected(700);
 
     if (!titleShown){
       titleShown = true;
