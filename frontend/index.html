@@ -296,7 +296,7 @@
     margin: 0 auto;
     z-index: 2;
     filter: drop-shadow(0 46px 110px rgba(0,0,0,.72));
-    --beatScale: 1.0012;
+    --beatScale: 1.0011;
     isolation: isolate;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
@@ -318,7 +318,7 @@
         rgba(170,120,255,0) 70%);
     filter: blur(30px);
     opacity:.84;
-    transition: opacity 90ms ease-out, filter 90ms ease-out;
+    transition: opacity 70ms ease-out, filter 70ms ease-out;
   }
 
   .aura{
@@ -332,7 +332,7 @@
       rgba(170,140,255,0) 76%);
     filter: blur(22px);
     opacity:.66;
-    transition: opacity 90ms ease-out, filter 90ms ease-out;
+    transition: opacity 70ms ease-out, filter 70ms ease-out;
   }
 
   .aura2{
@@ -345,7 +345,7 @@
       rgba(190,140,255,0) 72%);
     filter: blur(38px);
     opacity:.54;
-    transition: opacity 90ms ease-out, filter 90ms ease-out;
+    transition: opacity 70ms ease-out, filter 70ms ease-out;
   }
 
   .ball{
@@ -376,7 +376,7 @@
     transform-origin: 50% 102%;
     transform: scale(var(--beatScale)) translateZ(0);
     -webkit-transform: scale(var(--beatScale)) translateZ(0);
-    transition: transform 90ms ease-out;
+    transition: transform 72ms ease-out;
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
@@ -476,9 +476,9 @@
     border-radius:50%;
     pointer-events:none;
     mix-blend-mode: screen;
-    opacity: .06;
+    opacity: .05;
     filter: blur(.15px);
-    transition: opacity 120ms ease, filter 120ms ease;
+    transition: opacity 90ms ease, filter 90ms ease;
     background:
       radial-gradient(circle at 18% 32%, rgba(255,255,255,.95) 0 1px, rgba(255,255,255,0) 3px),
       radial-gradient(circle at 28% 18%, rgba(210,255,255,.70) 0 1px, rgba(255,255,255,0) 3px),
@@ -590,7 +590,7 @@
     filter: blur(28px);
     opacity:.88;
     pointer-events:none;
-    transition: opacity 90ms ease-out, filter 90ms ease-out;
+    transition: opacity 70ms ease-out, filter 70ms ease-out;
     z-index: 0;
   }
 
@@ -709,16 +709,16 @@
   #ballWrap.idle .aura2{   opacity:.11; filter: blur(42px); }
   #ballWrap.idle .ground-glow{ opacity:.16; filter: blur(34px); }
 
-  #ballWrap.speaking .radiate{ opacity:.50; }
-  #ballWrap.speaking .aura{ opacity:.38; }
-  #ballWrap.speaking .aura2{ opacity:.30; }
-  #ballWrap.speaking .ground-glow{ opacity:.48; }
+  #ballWrap.speaking .radiate{ opacity:.48; }
+  #ballWrap.speaking .aura{ opacity:.36; }
+  #ballWrap.speaking .aura2{ opacity:.28; }
+  #ballWrap.speaking .ground-glow{ opacity:.45; }
 
-  #ballWrap.beat .radiate{ opacity:.76; filter: blur(23px); }
-  #ballWrap.beat .aura{ opacity:.68; filter: blur(17px); }
-  #ballWrap.beat .aura2{ opacity:.54; filter: blur(28px); }
-  #ballWrap.beat .ground-glow{ opacity:.74; filter: blur(20px); }
-  #ballWrap.beat .sparkles{ opacity:.12; }
+  #ballWrap.beat .radiate{ opacity:.68; filter: blur(22px); }
+  #ballWrap.beat .aura{ opacity:.58; filter: blur(17px); }
+  #ballWrap.beat .aura2{ opacity:.46; filter: blur(28px); }
+  #ballWrap.beat .ground-glow{ opacity:.66; filter: blur(19px); }
+  #ballWrap.beat .sparkles{ opacity:.10; }
 
   .action-bar{
     width:min(1040px, 100%);
@@ -948,9 +948,9 @@
       display:flex;
       flex-direction: column;
       align-items: center;
-      gap: 18px;
+      gap: 22px;
       padding-top: 8px;
-      padding-bottom: 10px;
+      padding-bottom: 4px;
     }
 
     .stage{
@@ -970,7 +970,7 @@
       align-items:flex-start;
       width: 100%;
       gap: 24px;
-      margin-top: 18px;
+      margin-top: 28px;
     }
 
     .icon-link{
@@ -1010,7 +1010,7 @@
     .pedestal::after{ width: min(50vw, 185px); height: 12px; }
 
     .action-bar{
-      margin-top: 2px;
+      margin-top: -4px;
       margin-bottom: 2px;
     }
 
@@ -1026,9 +1026,9 @@
     button.action{
       min-width: 0;
       width:100%;
-      min-height: 40px;
+      min-height: 38px;
       font-size: 14px;
-      padding: 8px 8px;
+      padding: 7px 8px;
       border-radius: 12px;
     }
 
@@ -1119,7 +1119,7 @@
     }
 
     .side-icons{
-      margin-top: 16px;
+      margin-top: 24px;
       gap: 22px;
     }
 
@@ -1258,7 +1258,6 @@
       </div>
 
       <nav class="side-icons" aria-label="Links">
-
         <a class="icon-link" href="https://www.wordhippo.com/" target="_blank" rel="noopener" title="WordHippo (References)" aria-label="References (WordHippo)">
           <div class="icon-btn">
             <img class="ico-img" src="hippo_icon.jpg" alt="WordHippo">
@@ -1272,7 +1271,6 @@
           </div>
           <div class="icon-label">Podcast</div>
         </a>
-
       </nav>
     </section>
 
@@ -1313,7 +1311,7 @@ const WHOOSH_BUFFER_MS = 560;
 const ELLIPSIS_DELAY = 1500;
 const FINAL_ELLIPSIS_DELAY = 2200;
 
-const SENTENCE_PAUSE_MS   = 250;
+const SENTENCE_PAUSE_MS   = 220;
 const PARAGRAPH_PAUSE_MS  = 700;
 const SECTION_PAUSE_MS    = 980;
 
@@ -1394,28 +1392,28 @@ function setBeatScale(scale){
 }
 
 function triggerBeat(strength = 1){
-  const s = Math.max(0.75, Math.min(1.45, strength));
-  const scale = (1.0018 + (s - 1) * 0.0022);
+  const s = Math.max(0.78, Math.min(1.24, strength));
+  const scale = (1.00135 + (s - 1) * 0.0015);
   ballWrap.classList.add("beat");
   setBeatScale(scale.toFixed(4));
 
   clearTimeout(beatOffTimer);
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
-    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0016" : "1.0012");
-  }, 82);
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0012" : "1.0011");
+  }, 58);
 }
 
 function startFallbackBeats(){
   stopFallbackBeats();
   const tick = () => {
     if (!ballWrap.classList.contains("speaking")) return;
-    const strength = 0.86 + Math.random() * 0.30;
+    const strength = 0.90 + Math.random() * 0.16;
     triggerBeat(strength);
-    const next = 108 + Math.random() * 110;
+    const next = 96 + Math.random() * 90;
     fallbackBeatTimer = setTimeout(tick, next);
   };
-  fallbackBeatTimer = setTimeout(tick, 120);
+  fallbackBeatTimer = setTimeout(tick, 105);
 }
 
 function stopFallbackBeats(){
@@ -1431,7 +1429,7 @@ function setSpeaking(on){
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
 
-  setBeatScale(isSpeaking ? "1.0016" : "1.0012");
+  setBeatScale(isSpeaking ? "1.0012" : "1.0011");
 
   if (isSpeaking) startFallbackBeats();
   else stopFallbackBeats();
@@ -1443,12 +1441,12 @@ function updateSpeakingFromEngine(){
     if (active){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
-      setBeatScale("1.0016");
+      setBeatScale("1.0012");
       startFallbackBeats();
     }else if (speakingCount === 0){
       ballWrap.classList.remove("speaking");
       ballWrap.classList.add("idle");
-      setBeatScale("1.0012");
+      setBeatScale("1.0011");
       stopFallbackBeats();
     }
   }catch(e){}
@@ -1469,11 +1467,18 @@ function showStopButton(show){
 
 function paceFactor(){
   const v = speedSel.value;
-  return v==="slow" ? 1.10 : v==="fast" ? 0.88 : 1.0;
+  return v==="slow" ? 1.10 : v==="fast" ? 0.89 : 1.0;
 }
 
 function typeDelayClassic(){
   const v = speedSel.value;
+
+  if (IS_SAFARI && IS_MOBILE_LAYOUT){
+    return v==="slow" ? 11 : v==="fast" ? 5 : 7;
+  }
+  if (IS_SAFARI){
+    return v==="slow" ? 12 : v==="fast" ? 5 : 7;
+  }
   if (IS_MOBILE_LAYOUT){
     return v==="slow" ? 14 : v==="fast" ? 5 : 8;
   }
@@ -1484,10 +1489,10 @@ function baseSpeechRate(){
   const v = speedSel.value;
 
   if (IS_MOBILE_LAYOUT){
-    return v === "slow" ? 1.00 : v === "fast" ? 1.36 : 1.18;
+    return v === "slow" ? 0.94 : v === "fast" ? 1.20 : 1.04;
   }
 
-  return v === "slow" ? 0.98 : v === "fast" ? 1.34 : 1.15;
+  return v === "slow" ? 0.92 : v === "fast" ? 1.18 : 1.02;
 }
 
 function syncVoiceLabel(){
@@ -1497,7 +1502,7 @@ function syncVoiceLabel(){
     speakingCount = 0;
     ballWrap.classList.remove("speaking");
     ballWrap.classList.add("idle");
-    setBeatScale("1.0012");
+    setBeatScale("1.0011");
     stopFallbackBeats();
   }
 }
@@ -1507,7 +1512,7 @@ function hardStopAllAudioAndBeats(){
   speakingCount = 0;
   ballWrap.classList.remove("speaking");
   ballWrap.classList.add("idle");
-  ballWrap.style.setProperty("--beatScale","1.0012");
+  ballWrap.style.setProperty("--beatScale","1.0011");
   stopFallbackBeats();
   clearTimeout(beatOffTimer);
 }
@@ -1544,6 +1549,8 @@ function playGhostlyWhoosh(){
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
+    const peakGain = IS_IOS ? 0.48 : 0.38;
+    const tailGain = IS_IOS ? 0.16 : 0.12;
 
     filter.frequency.setValueAtTime(260, now);
     filter.frequency.exponentialRampToValueAtTime(1550, now + dur*0.62);
@@ -1554,8 +1561,8 @@ function playGhostlyWhoosh(){
     filter2.frequency.exponentialRampToValueAtTime(420, now + dur);
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.34, now + dur*0.22);
-    gain.gain.exponentialRampToValueAtTime(0.10, now + dur*0.78);
+    gain.gain.exponentialRampToValueAtTime(peakGain, now + dur*0.22);
+    gain.gain.exponentialRampToValueAtTime(tailGain, now + dur*0.78);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
     src.connect(filter);
@@ -1722,51 +1729,51 @@ function styleParams(){
   const name = normVoiceName(chosenVoice?.name || "");
 
   let pitch = 0.98;
-  let rateMult = 0.94;
+  let rateMult = 0.90;
 
   if (name.includes("google uk english female")) {
     pitch = 0.96;
-    rateMult = 0.96;
+    rateMult = 0.91;
 
   } else if (name.includes("isha")) {
     pitch = 0.98;
-    rateMult = 0.99;
+    rateMult = 0.93;
 
   } else if (name.includes("tessa")) {
-    pitch = 0.94;
-    rateMult = 0.95;
+    pitch = 0.95;
+    rateMult = 0.90;
 
   } else if (name.includes("stephanie")) {
     pitch = 0.97;
-    rateMult = 0.96;
+    rateMult = 0.91;
 
   } else if (name.includes("martha")) {
     pitch = 0.96;
-    rateMult = 0.95;
+    rateMult = 0.90;
 
   } else if (name.includes("sangeeta")) {
     pitch = 0.94;
-    rateMult = 0.90;
+    rateMult = 0.86;
 
   } else if (name.includes("fiona")) {
     pitch = 0.95;
-    rateMult = 0.91;
+    rateMult = 0.87;
 
   } else if (name.includes("karen")) {
     pitch = 0.97;
-    rateMult = 0.95;
+    rateMult = 0.90;
 
   } else if (name.includes("samantha")) {
     pitch = 0.99;
-    rateMult = 0.86;
+    rateMult = 0.82;
 
   } else if (name.includes("moira")) {
     pitch = 0.97;
-    rateMult = 0.89;
+    rateMult = 0.84;
 
   } else if (name.includes("veena")) {
     pitch = 0.92;
-    rateMult = 0.84;
+    rateMult = 0.80;
 
   } else if (
     name.includes("microsoft aria") ||
@@ -1777,19 +1784,19 @@ function styleParams(){
     name.includes("microsoft ana")
   ) {
     pitch = 0.98;
-    rateMult = 0.95;
+    rateMult = 0.90;
 
   } else if (name.includes("microsoft zira")) {
     pitch = 0.98;
-    rateMult = 0.91;
+    rateMult = 0.88;
 
   } else if (name.includes("google us english")) {
     pitch = 0.98;
-    rateMult = 0.95;
+    rateMult = 0.90;
 
   } else if (isEnglishVoice(chosenVoice)) {
     pitch = 0.98;
-    rateMult = 0.94;
+    rateMult = 0.89;
   }
 
   return {
@@ -1898,7 +1905,7 @@ function speakSentenceWithStart(text){
   u.onboundary = (ev) => {
     if (!ev) return;
     if (ev.name === "word" || typeof ev.charIndex === "number"){
-      const jitter = 0.88 + Math.random() * 0.24;
+      const jitter = 0.90 + Math.random() * 0.14;
       triggerBeat(jitter);
     }
   };
@@ -1928,16 +1935,16 @@ function estimateSpeechMs(text, rateUsed){
   if (!t) return 0;
 
   const words = (t.match(/\S+/g) || []).length;
-  const effectiveWpm = 174 * (rateUsed || 1);
+  const effectiveWpm = 165 * (rateUsed || 1);
   let ms = (words / Math.max(1, effectiveWpm)) * 60000;
 
   const punct = (t.match(/[,.!?;:]/g) || []).length;
-  ms += punct * 58 * paceFactor();
+  ms += punct * 60 * paceFactor();
 
-  const syncFactor = IS_MOBILE_LAYOUT ? 1.12 : 1.05;
+  const syncFactor = IS_MOBILE_LAYOUT ? 0.95 : 0.93;
   ms *= syncFactor;
 
-  return Math.max(220, Math.min(ms, 7000));
+  return Math.max(180, Math.min(ms, 7600));
 }
 
 async function typeChunkOverMs(chunk, totalMs, token){
@@ -1945,6 +1952,8 @@ async function typeChunkOverMs(chunk, totalMs, token){
   const chars = Math.max(1, s.length);
   const existingLen = screenEl.textContent.length;
   const start = performance.now();
+  const safariLead = IS_SAFARI ? 1.08 : 1.03;
+  const adjustedMs = Math.max(140, totalMs / safariLead);
 
   return new Promise(resolve => {
     function step(now){
@@ -1954,7 +1963,7 @@ async function typeChunkOverMs(chunk, totalMs, token){
       }
 
       const elapsed = now - start;
-      const progress = Math.min(1, elapsed / totalMs);
+      const progress = Math.min(1, elapsed / adjustedMs);
       const targetChars = Math.floor(progress * chars);
 
       const wantedText = s.slice(0, targetChars);
@@ -2044,8 +2053,14 @@ async function speakAndTypePerSentence(text, token){
     }
 
     await Promise.race([speech.started, sleep(250)]);
-    await typeChunkOverMs(chunk, estimateSpeechMs(chunk, speech.rateUsed), token);
-    await Promise.race([speech.done, sleep(7000)]);
+
+    if (IS_SAFARI){
+      await typeChunkClassic(chunk, token);
+    }else{
+      await typeChunkOverMs(chunk, estimateSpeechMs(chunk, speech.rateUsed), token);
+    }
+
+    await Promise.race([speech.done, sleep(7600)]);
     updateSpeakingFromEngine();
     await sleep(SENTENCE_PAUSE_MS * paceFactor());
   }
@@ -2203,7 +2218,7 @@ async function sendChoice(answer){
 
 let introAnswered = false;
 function revealEndSessionAfterIntro(){
-  if (introAnswered) return;
+  if (introAnswered || sessionDone) return;
   introAnswered = true;
   showStopButton(true);
   stopBtn.disabled = false;
@@ -2282,18 +2297,21 @@ bindStartOnce();
 
 yesBtn.addEventListener("click", (e)=>{
   e.preventDefault();
+  if (sessionDone) return;
   revealEndSessionAfterIntro();
   sendChoice("yes");
 });
 
 noBtn.addEventListener("click", (e)=>{
   e.preventDefault();
+  if (sessionDone) return;
   revealEndSessionAfterIntro();
   sendChoice("no");
 });
 
 stopBtn.addEventListener("click", (e)=>{
   e.preventDefault();
+  if (sessionDone) return;
   forceEndSession();
 });
 
