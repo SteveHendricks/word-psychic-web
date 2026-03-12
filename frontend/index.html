@@ -176,7 +176,7 @@
   .title-wrap{
     display:flex;
     justify-content:center;
-    margin-top: 0;
+    margin-top: 4px;
     position:relative;
     z-index:9;
   }
@@ -207,15 +207,15 @@
     display:flex;
     justify-content:center;
     align-items:center;
-    min-height: 340px;
-    padding-top: 0;
-    padding-bottom: 8px;
+    min-height: 360px;
+    padding-top: 6px;
+    padding-bottom: 20px;
   }
 
   .side-icons{
     position:absolute;
     left: 8px;
-    top: 54%;
+    top: 56%;
     transform: translateY(-50%);
     display:flex;
     flex-direction:column;
@@ -296,7 +296,7 @@
     margin: 0 auto;
     z-index: 2;
     filter: drop-shadow(0 46px 110px rgba(0,0,0,.72));
-    --beatScale: 1.0015;
+    --beatScale: 1.0012;
     isolation: isolate;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
@@ -317,8 +317,8 @@
         rgba(170,120,255,.07) 34%,
         rgba(170,120,255,0) 70%);
     filter: blur(30px);
-    opacity:.88;
-    transition: opacity 140ms ease-out, filter 140ms ease-out;
+    opacity:.84;
+    transition: opacity 90ms ease-out, filter 90ms ease-out;
   }
 
   .aura{
@@ -331,8 +331,8 @@
       rgba(170,140,255,.10) 32%,
       rgba(170,140,255,0) 76%);
     filter: blur(22px);
-    opacity:.70;
-    transition: opacity 140ms ease-out, filter 140ms ease-out;
+    opacity:.66;
+    transition: opacity 90ms ease-out, filter 90ms ease-out;
   }
 
   .aura2{
@@ -344,8 +344,8 @@
       rgba(190,140,255,.22) 0%,
       rgba(190,140,255,0) 72%);
     filter: blur(38px);
-    opacity:.58;
-    transition: opacity 140ms ease-out, filter 140ms ease-out;
+    opacity:.54;
+    transition: opacity 90ms ease-out, filter 90ms ease-out;
   }
 
   .ball{
@@ -376,7 +376,7 @@
     transform-origin: 50% 102%;
     transform: scale(var(--beatScale)) translateZ(0);
     -webkit-transform: scale(var(--beatScale)) translateZ(0);
-    transition: transform 120ms ease-out;
+    transition: transform 90ms ease-out;
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
@@ -476,9 +476,9 @@
     border-radius:50%;
     pointer-events:none;
     mix-blend-mode: screen;
-    opacity: .05;
+    opacity: .06;
     filter: blur(.15px);
-    transition: opacity 180ms ease, filter 180ms ease;
+    transition: opacity 120ms ease, filter 120ms ease;
     background:
       radial-gradient(circle at 18% 32%, rgba(255,255,255,.95) 0 1px, rgba(255,255,255,0) 3px),
       radial-gradient(circle at 28% 18%, rgba(210,255,255,.70) 0 1px, rgba(255,255,255,0) 3px),
@@ -590,7 +590,7 @@
     filter: blur(28px);
     opacity:.88;
     pointer-events:none;
-    transition: opacity 140ms ease-out, filter 140ms ease-out;
+    transition: opacity 90ms ease-out, filter 90ms ease-out;
     z-index: 0;
   }
 
@@ -704,20 +704,21 @@
     opacity:.92;
   }
 
-  #ballWrap.idle .radiate{ opacity:.18; filter: blur(34px); }
-  #ballWrap.idle .aura{    opacity:.12; filter: blur(28px); }
-  #ballWrap.idle .aura2{   opacity:.10; filter: blur(42px); }
-  #ballWrap.idle .ground-glow{ opacity:.12; filter: blur(34px); }
+  #ballWrap.idle .radiate{ opacity:.20; filter: blur(34px); }
+  #ballWrap.idle .aura{    opacity:.14; filter: blur(28px); }
+  #ballWrap.idle .aura2{   opacity:.11; filter: blur(42px); }
+  #ballWrap.idle .ground-glow{ opacity:.16; filter: blur(34px); }
 
-  #ballWrap.speaking .radiate{ opacity:.55; }
-  #ballWrap.speaking .aura{ opacity:.44; }
-  #ballWrap.speaking .aura2{ opacity:.34; }
-  #ballWrap.speaking .ground-glow{ opacity:.42; }
+  #ballWrap.speaking .radiate{ opacity:.50; }
+  #ballWrap.speaking .aura{ opacity:.38; }
+  #ballWrap.speaking .aura2{ opacity:.30; }
+  #ballWrap.speaking .ground-glow{ opacity:.48; }
 
-  #ballWrap.beat .radiate{ opacity:1.00; filter: blur(24px); }
-  #ballWrap.beat .aura{ opacity:.92; filter: blur(18px); }
-  #ballWrap.beat .aura2{ opacity:.78; filter: blur(32px); }
-  #ballWrap.beat .ground-glow{ opacity:1.00; filter: blur(22px); }
+  #ballWrap.beat .radiate{ opacity:.76; filter: blur(23px); }
+  #ballWrap.beat .aura{ opacity:.68; filter: blur(17px); }
+  #ballWrap.beat .aura2{ opacity:.54; filter: blur(28px); }
+  #ballWrap.beat .ground-glow{ opacity:.74; filter: blur(20px); }
+  #ballWrap.beat .sparkles{ opacity:.12; }
 
   .action-bar{
     width:min(1040px, 100%);
@@ -797,8 +798,8 @@
     overflow:hidden;
     display:flex;
     flex-direction:column;
-    height: clamp(360px, 44vh, 460px);
-    min-height: 340px;
+    height: clamp(350px, 42vh, 450px);
+    min-height: 320px;
     overflow-anchor: none;
   }
 
@@ -824,7 +825,7 @@
     font-size: 13px;
     text-align:center;
     margin-top: 2px;
-    min-height: 0;
+    min-height: 18px;
   }
 
   .footerbar{
@@ -871,10 +872,10 @@
     .pedestal::before{ width: 350px; height: 16px; bottom:-11px; }
     .side-icons{ left: 4px; }
     .icon-link{ width: 80px; }
-    .hero-row{ min-height: 320px; padding-bottom: 6px; }
+    .hero-row{ min-height: 335px; padding-bottom: 10px; }
     .action-bar .buttons{ width:min(520px, 100%); }
     button.action{ min-width: 108px; padding: 10px 12px; font-size: 15px; }
-    .console{ height: clamp(340px, 48vh, 440px); min-height: 320px; }
+    .console{ height: clamp(330px, 45vh, 430px); min-height: 300px; }
     .screen{ padding: 14px 20px; }
     .footerbar{ font-size: 13px; padding: 10px 12px; }
     .controls{ justify-content:center; width:min(640px, 100%); }
@@ -884,7 +885,7 @@
     .wrap{
       width:min(100%, calc(100% - 18px));
       margin: 8px auto 14px;
-      gap: 7px;
+      gap: 8px;
     }
 
     .topbar{
@@ -928,6 +929,7 @@
     .title-wrap{
       width: 100%;
       justify-content: center;
+      margin-top: 8px;
     }
 
     .title{
@@ -946,8 +948,9 @@
       display:flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      padding-bottom: 4px;
+      gap: 18px;
+      padding-top: 8px;
+      padding-bottom: 10px;
     }
 
     .stage{
@@ -966,8 +969,8 @@
       justify-content:center;
       align-items:flex-start;
       width: 100%;
-      gap: 18px;
-      margin-top: 6px;
+      gap: 24px;
+      margin-top: 18px;
     }
 
     .icon-link{
@@ -994,12 +997,12 @@
     }
 
     #ballWrap{
-      width: min(62vw, 260px);
-      min-width: 200px;
+      width: min(60vw, 248px);
+      min-width: 192px;
     }
 
     .contactFade{ width: min(70vw, 280px); height: 118px; }
-    .ground-glow{ width: min(128vw, 470px); height: 140px; bottom:-68px; }
+    .ground-glow{ width: min(126vw, 450px); height: 134px; bottom:-66px; }
     .seatShadow{ width: min(50vw, 195px); height: 32px; }
     .cradle{ width: min(52vw, 200px); height: 22px; }
     .pedestal{ width: min(68vw, 250px); height: 26px; bottom:-26px; }
@@ -1007,7 +1010,7 @@
     .pedestal::after{ width: min(50vw, 185px); height: 12px; }
 
     .action-bar{
-      margin-top: 4px;
+      margin-top: 2px;
       margin-bottom: 2px;
     }
 
@@ -1016,23 +1019,23 @@
       display:grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
-      padding: 8px;
+      padding: 7px;
       border-radius: 14px;
     }
 
     button.action{
       min-width: 0;
       width:100%;
-      min-height: 44px;
-      font-size: 15px;
-      padding: 9px 10px;
+      min-height: 40px;
+      font-size: 14px;
+      padding: 8px 8px;
       border-radius: 12px;
     }
 
     .console{
       width:100%;
-      min-height: 220px;
-      height: 30vh;
+      min-height: 190px;
+      height: 24vh;
       border-radius: 14px;
     }
 
@@ -1111,12 +1114,13 @@
     }
 
     #ballWrap{
-      width: min(60vw, 240px);
-      min-width: 180px;
+      width: min(58vw, 236px);
+      min-width: 176px;
     }
 
     .side-icons{
-      margin-top: 8px;
+      margin-top: 16px;
+      gap: 22px;
     }
 
     .action-bar .buttons{
@@ -1128,8 +1132,8 @@
     }
 
     .console{
-      min-height: 210px;
-      height: 28vh;
+      min-height: 180px;
+      height: 22vh;
     }
 
     .screen{
@@ -1145,8 +1149,8 @@
     }
 
     #ballWrap{
-      width: min(58vw, 220px);
-      min-width: 165px;
+      width: min(56vw, 214px);
+      min-width: 162px;
     }
 
     .controls{
@@ -1191,8 +1195,8 @@
     }
 
     .console{
-      min-height: 190px;
-      height: 26vh;
+      min-height: 175px;
+      height: 21vh;
     }
   }
 </style>
@@ -1225,24 +1229,6 @@
     </header>
 
     <section class="hero-row" aria-label="Word Psychic chamber">
-      <nav class="side-icons" aria-label="Links">
-
-        <a class="icon-link" href="https://www.wordhippo.com/" target="_blank" rel="noopener" title="WordHippo (References)" aria-label="References (WordHippo)">
-          <div class="icon-btn">
-            <img class="ico-img" src="hippo_icon.jpg" alt="WordHippo">
-          </div>
-          <div class="icon-label">References</div>
-        </a>
-
-        <a class="icon-link" href="https://YOUR-PODCAST-FRIENDS-SITE.com" target="_blank" rel="noopener" title="Podcast Friends" aria-label="Podcast Friends">
-          <div class="icon-btn">
-            <img class="ico-img" src="podcast_icon.jpg" alt="Podcast">
-          </div>
-          <div class="icon-label">Podcast</div>
-        </a>
-
-      </nav>
-
       <div class="stage">
         <div id="ballWrap" class="idle">
           <div class="radiate"></div>
@@ -1270,6 +1256,24 @@
           <div class="pedestal"></div>
         </div>
       </div>
+
+      <nav class="side-icons" aria-label="Links">
+
+        <a class="icon-link" href="https://www.wordhippo.com/" target="_blank" rel="noopener" title="WordHippo (References)" aria-label="References (WordHippo)">
+          <div class="icon-btn">
+            <img class="ico-img" src="hippo_icon.jpg" alt="WordHippo">
+          </div>
+          <div class="icon-label">References</div>
+        </a>
+
+        <a class="icon-link" href="https://YOUR-PODCAST-FRIENDS-SITE.com" target="_blank" rel="noopener" title="Podcast Friends" aria-label="Podcast Friends">
+          <div class="icon-btn">
+            <img class="ico-img" src="podcast_icon.jpg" alt="Podcast">
+          </div>
+          <div class="icon-label">Podcast</div>
+        </a>
+
+      </nav>
     </section>
 
     <section class="action-bar" aria-label="Actions">
@@ -1299,18 +1303,19 @@ const API = "https://word-psychic-web.onrender.com";
 
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const IS_MOBILE_LAYOUT = window.matchMedia("(max-width: 768px)").matches || IS_IOS;
+const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 const LIVE_SYNC = true;
 
 const WHOOSH_MS = 1900;
-const WHOOSH_BUFFER_MS = 700;
+const WHOOSH_BUFFER_MS = 560;
 
-const ELLIPSIS_DELAY = 2000;
-const FINAL_ELLIPSIS_DELAY = 3000;
+const ELLIPSIS_DELAY = 1500;
+const FINAL_ELLIPSIS_DELAY = 2200;
 
-const SENTENCE_PAUSE_MS   = 760;
-const PARAGRAPH_PAUSE_MS  = 1450;
-const SECTION_PAUSE_MS    = 1800;
+const SENTENCE_PAUSE_MS   = 250;
+const PARAGRAPH_PAUSE_MS  = 700;
+const SECTION_PAUSE_MS    = 980;
 
 let sessionId = null;
 let voiceReady = false;
@@ -1345,7 +1350,6 @@ const ballWrap = document.getElementById("ballWrap");
 const titleEl = document.getElementById("titleText");
 
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>r())); }
 
 function trimLeadingNewlines(s){ return (s ?? "").replace(/^\s*\n+/, ""); }
 
@@ -1353,7 +1357,7 @@ function tightenQuestionSpacing(s){
   let t = (s ?? "");
   t = t.replace(/\r\n/g, "\n");
   t = t.replace(/\n{3,}/g, "\n\n");
-  const qStart = "(Do you\\b|Would you\\b|Shall we\\b|Shall I\\b)";
+  const qStart = "(Do you\\b|Would you\\b|Shall we\\b|Shall I\\b|Select\\b|Yes\\b|A simple\\b)";
   t = t.replace(new RegExp(`([^\\n])\\n(?=\\s*${qStart})`, "gi"), "$1\n\n");
   t = t.replace(new RegExp(`\\n{3,}(?=\\s*${qStart})`, "gi"), "\n\n");
   return t;
@@ -1362,10 +1366,14 @@ function tightenQuestionSpacing(s){
 function normalizeCTA(s){
   return tightenQuestionSpacing(
     (s ?? "")
-      .replace(/Choose Yes or No\./gi, "Click Yes or No.")
-      .replace(/Choose Yes or No/gi, "Click Yes or No")
-      .replace(/Choose Yes,\s*No,\s*or End session\./gi, "Click Yes, No, or End session.")
-      .replace(/Choose Yes,\s*No,\s*or End session/gi, "Click Yes, No, or End session")
+      .replace(/Choose Yes or No\./gi, "Select Yes or No.")
+      .replace(/Choose Yes or No/gi, "Select Yes or No")
+      .replace(/Click Yes or No\./gi, "Select Yes or No.")
+      .replace(/Click Yes or No/gi, "Select Yes or No")
+      .replace(/Choose Yes,\s*No,\s*or End session\./gi, "Select Yes, No, or End session.")
+      .replace(/Choose Yes,\s*No,\s*or End session/gi, "Select Yes, No, or End session")
+      .replace(/Click Yes,\s*No,\s*or End session\./gi, "Select Yes, No, or End session.")
+      .replace(/Click Yes,\s*No,\s*or End session/gi, "Select Yes, No, or End session")
   );
 }
 
@@ -1373,49 +1381,9 @@ function autoScrollScreen(){
   try { screenEl.scrollTop = screenEl.scrollHeight; } catch(e){}
 }
 
-let clearing = false;
-
-function smoothScrollToTop(el, duration = 420){
-  return new Promise(resolve => {
-    const startTop = el.scrollTop;
-    const delta = 0 - startTop;
-    if (Math.abs(delta) < 2 || duration <= 0){
-      el.scrollTop = 0;
-      resolve();
-      return;
-    }
-    const start = performance.now();
-    const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
-    function tick(now){
-      const t = Math.min(1, (now - start) / duration);
-      el.scrollTop = startTop + delta * easeOutCubic(t);
-      if (t < 1) requestAnimationFrame(tick);
-      else resolve();
-    }
-    requestAnimationFrame(tick);
-  });
-}
-
-async function gentleResetAndClear(token){
-  if (!isTokenLive(token)) return;
-  if (clearing) return;
-  clearing = true;
-
-  await nextFrame();
-  await nextFrame();
-
-  if (!isTokenLive(token)){ clearing=false; return; }
-
-  try { await smoothScrollToTop(screenEl, 420); } catch(e){}
-  await sleep(50);
-
-  if (!isTokenLive(token)){ clearing=false; return; }
-
+function quickClearScreen(){
   screenEl.textContent = "";
   try { screenEl.scrollTop = 0; } catch(e){}
-
-  await nextFrame();
-  clearing = false;
 }
 
 let beatOffTimer = null;
@@ -1426,28 +1394,28 @@ function setBeatScale(scale){
 }
 
 function triggerBeat(strength = 1){
-  const s = Math.max(0.7, Math.min(1.8, strength));
-  const scale = (1.0032 + (s - 1) * 0.0045);
+  const s = Math.max(0.75, Math.min(1.45, strength));
+  const scale = (1.0018 + (s - 1) * 0.0022);
   ballWrap.classList.add("beat");
   setBeatScale(scale.toFixed(4));
 
   clearTimeout(beatOffTimer);
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
-    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0026" : "1.0015");
-  }, 130);
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0016" : "1.0012");
+  }, 82);
 }
 
 function startFallbackBeats(){
   stopFallbackBeats();
   const tick = () => {
     if (!ballWrap.classList.contains("speaking")) return;
-    const strength = 0.85 + Math.random() * 0.55;
+    const strength = 0.86 + Math.random() * 0.30;
     triggerBeat(strength);
-    const next = 140 + Math.random() * 240;
+    const next = 108 + Math.random() * 110;
     fallbackBeatTimer = setTimeout(tick, next);
   };
-  fallbackBeatTimer = setTimeout(tick, 180);
+  fallbackBeatTimer = setTimeout(tick, 120);
 }
 
 function stopFallbackBeats(){
@@ -1463,7 +1431,7 @@ function setSpeaking(on){
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
 
-  setBeatScale(isSpeaking ? "1.0026" : "1.0015");
+  setBeatScale(isSpeaking ? "1.0016" : "1.0012");
 
   if (isSpeaking) startFallbackBeats();
   else stopFallbackBeats();
@@ -1475,12 +1443,12 @@ function updateSpeakingFromEngine(){
     if (active){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
-      setBeatScale("1.0026");
+      setBeatScale("1.0016");
       startFallbackBeats();
     }else if (speakingCount === 0){
       ballWrap.classList.remove("speaking");
       ballWrap.classList.add("idle");
-      setBeatScale("1.0015");
+      setBeatScale("1.0012");
       stopFallbackBeats();
     }
   }catch(e){}
@@ -1501,25 +1469,25 @@ function showStopButton(show){
 
 function paceFactor(){
   const v = speedSel.value;
-  return v==="slow" ? 1.2 : v==="fast" ? 0.82 : 1.0;
+  return v==="slow" ? 1.10 : v==="fast" ? 0.88 : 1.0;
 }
 
 function typeDelayClassic(){
   const v = speedSel.value;
   if (IS_MOBILE_LAYOUT){
-    return v==="slow" ? 18 : v==="fast" ? 7 : 11;
+    return v==="slow" ? 14 : v==="fast" ? 5 : 8;
   }
-  return v==="slow" ? 24 : v==="fast" ? 9 : 14;
+  return v==="slow" ? 16 : v==="fast" ? 6 : 9;
 }
 
 function baseSpeechRate(){
   const v = speedSel.value;
 
   if (IS_MOBILE_LAYOUT){
-    return v === "slow" ? 0.98 : v === "fast" ? 1.36 : 1.10;
+    return v === "slow" ? 1.00 : v === "fast" ? 1.36 : 1.18;
   }
 
-  return v === "slow" ? 0.94 : v === "fast" ? 1.38 : 1.08;
+  return v === "slow" ? 0.98 : v === "fast" ? 1.34 : 1.15;
 }
 
 function syncVoiceLabel(){
@@ -1529,7 +1497,7 @@ function syncVoiceLabel(){
     speakingCount = 0;
     ballWrap.classList.remove("speaking");
     ballWrap.classList.add("idle");
-    setBeatScale("1.0015");
+    setBeatScale("1.0012");
     stopFallbackBeats();
   }
 }
@@ -1539,7 +1507,7 @@ function hardStopAllAudioAndBeats(){
   speakingCount = 0;
   ballWrap.classList.remove("speaking");
   ballWrap.classList.add("idle");
-  ballWrap.style.setProperty("--beatScale","1.0015");
+  ballWrap.style.setProperty("--beatScale","1.0012");
   stopFallbackBeats();
   clearTimeout(beatOffTimer);
 }
@@ -1586,8 +1554,8 @@ function playGhostlyWhoosh(){
     filter2.frequency.exponentialRampToValueAtTime(420, now + dur);
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.50, now + dur*0.22);
-    gain.gain.exponentialRampToValueAtTime(0.16, now + dur*0.78);
+    gain.gain.exponentialRampToValueAtTime(0.34, now + dur*0.22);
+    gain.gain.exponentialRampToValueAtTime(0.10, now + dur*0.78);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
     src.connect(filter);
@@ -1623,10 +1591,6 @@ function unlockVoice(){
     voiceReady = false;
   }
 }
-
-/* =========================
-   VOICE HIERARCHY + TUNING
-   ========================= */
 
 const TOP_PSYCHIC_VOICES = [
   "Google UK English Female",
@@ -1758,51 +1722,51 @@ function styleParams(){
   const name = normVoiceName(chosenVoice?.name || "");
 
   let pitch = 0.98;
-  let rateMult = 0.87;
+  let rateMult = 0.94;
 
   if (name.includes("google uk english female")) {
     pitch = 0.96;
-    rateMult = 0.84;
+    rateMult = 0.96;
 
   } else if (name.includes("isha")) {
     pitch = 0.98;
-    rateMult = 0.91;
+    rateMult = 0.99;
 
   } else if (name.includes("tessa")) {
     pitch = 0.94;
-    rateMult = 0.84;
+    rateMult = 0.95;
 
   } else if (name.includes("stephanie")) {
     pitch = 0.97;
-    rateMult = 0.86;
+    rateMult = 0.96;
 
   } else if (name.includes("martha")) {
     pitch = 0.96;
-    rateMult = 0.85;
+    rateMult = 0.95;
 
   } else if (name.includes("sangeeta")) {
-    pitch = 0.93;
-    rateMult = 0.76;
+    pitch = 0.94;
+    rateMult = 0.90;
 
   } else if (name.includes("fiona")) {
-    pitch = 0.94;
-    rateMult = 0.77;
+    pitch = 0.95;
+    rateMult = 0.91;
 
   } else if (name.includes("karen")) {
     pitch = 0.97;
-    rateMult = 0.85;
+    rateMult = 0.95;
 
   } else if (name.includes("samantha")) {
     pitch = 0.99;
-    rateMult = 0.68;
+    rateMult = 0.86;
 
   } else if (name.includes("moira")) {
-    pitch = 0.96;
-    rateMult = 0.74;
+    pitch = 0.97;
+    rateMult = 0.89;
 
   } else if (name.includes("veena")) {
-    pitch = 0.91;
-    rateMult = 0.66;
+    pitch = 0.92;
+    rateMult = 0.84;
 
   } else if (
     name.includes("microsoft aria") ||
@@ -1813,19 +1777,19 @@ function styleParams(){
     name.includes("microsoft ana")
   ) {
     pitch = 0.98;
-    rateMult = 0.85;
+    rateMult = 0.95;
 
   } else if (name.includes("microsoft zira")) {
     pitch = 0.98;
-    rateMult = 0.81;
+    rateMult = 0.91;
 
   } else if (name.includes("google us english")) {
     pitch = 0.98;
-    rateMult = 0.84;
+    rateMult = 0.95;
 
   } else if (isEnglishVoice(chosenVoice)) {
     pitch = 0.98;
-    rateMult = 0.85;
+    rateMult = 0.94;
   }
 
   return {
@@ -1934,7 +1898,7 @@ function speakSentenceWithStart(text){
   u.onboundary = (ev) => {
     if (!ev) return;
     if (ev.name === "word" || typeof ev.charIndex === "number"){
-      const jitter = 0.85 + Math.random() * 0.55;
+      const jitter = 0.88 + Math.random() * 0.24;
       triggerBeat(jitter);
     }
   };
@@ -1964,16 +1928,16 @@ function estimateSpeechMs(text, rateUsed){
   if (!t) return 0;
 
   const words = (t.match(/\S+/g) || []).length;
-  const effectiveWpm = 165 * (rateUsed || 1);
+  const effectiveWpm = 174 * (rateUsed || 1);
   let ms = (words / Math.max(1, effectiveWpm)) * 60000;
 
   const punct = (t.match(/[,.!?;:]/g) || []).length;
-  ms += punct * 95 * paceFactor();
+  ms += punct * 58 * paceFactor();
 
-  const syncFactor = IS_MOBILE_LAYOUT ? 1.72 : 1.38;
+  const syncFactor = IS_MOBILE_LAYOUT ? 1.12 : 1.05;
   ms *= syncFactor;
 
-  return Math.max(520, Math.min(ms, 12000));
+  return Math.max(220, Math.min(ms, 7000));
 }
 
 async function typeChunkOverMs(chunk, totalMs, token){
@@ -2042,7 +2006,6 @@ async function speakAndTypePerSentence(text, token){
         if (!isTokenLive(token)) return;
         screenEl.textContent += ch;
         autoScrollScreen();
-        await sleep(10);
       }
       updateSpeakingFromEngine();
       await sleep((chunk === "\n\n\n" ? SECTION_PAUSE_MS : PARAGRAPH_PAUSE_MS) * paceFactor());
@@ -2074,20 +2037,41 @@ async function speakAndTypePerSentence(text, token){
 
     if (!LIVE_SYNC || !canSpeak){
       await typeChunkClassic(chunk, token);
-      await Promise.race([speech.done, sleep(8000)]);
+      await Promise.race([speech.done, sleep(5000)]);
       updateSpeakingFromEngine();
       await sleep(SENTENCE_PAUSE_MS * paceFactor());
       continue;
     }
 
-    await Promise.race([speech.started, sleep(700)]);
+    await Promise.race([speech.started, sleep(250)]);
     await typeChunkOverMs(chunk, estimateSpeechMs(chunk, speech.rateUsed), token);
-    await Promise.race([speech.done, sleep(12000)]);
+    await Promise.race([speech.done, sleep(7000)]);
     updateSpeakingFromEngine();
     await sleep(SENTENCE_PAUSE_MS * paceFactor());
   }
 
   updateSpeakingFromEngine();
+}
+
+async function fetchJsonWithRetry(url, options = {}, retries = 1){
+  for (let attempt = 0; attempt <= retries; attempt++){
+    try{
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error(`${options.method || "GET"} failed: ${res.status} ${res.statusText}`);
+      return await res.json();
+    }catch(err){
+      const isAbort = err?.name === "AbortError";
+      const isMaybeLoadFailed =
+        err instanceof TypeError ||
+        /load failed/i.test(String(err)) ||
+        /networkerror/i.test(String(err));
+
+      if (isAbort) throw err;
+      if (attempt >= retries || !isMaybeLoadFailed) throw err;
+
+      await sleep((IS_IOS || IS_SAFARI) ? 260 : 160);
+    }
+  }
 }
 
 async function forceEndSession(){
@@ -2103,8 +2087,7 @@ async function forceEndSession(){
   noBtn.disabled = true;
   stopBtn.disabled = true;
 
-  screenEl.textContent = "";
-  autoScrollScreen();
+  quickClearScreen();
 
   const goodbye =
 `Sorry to see you go.
@@ -2133,18 +2116,15 @@ async function startSession(token){
     sessionDone = false;
 
     setButtonsEnabled(false);
-
-    await gentleResetAndClear(token);
-    if (!isTokenLive(token)) return;
+    quickClearScreen();
 
     abortInFlightFetch();
     currentFetchController = new AbortController();
 
-    const res = await fetch(`${API}/start`, {
+    const data = await fetchJsonWithRetry(`${API}/start`, {
       signal: currentFetchController.signal
-    });
-    if(!res.ok) throw new Error(`Start failed: ${res.status} ${res.statusText}`);
-    const data = await res.json();
+    }, 1);
+
     if (!isTokenLive(token)) return;
 
     sessionId = data.session_id || sessionId;
@@ -2172,14 +2152,13 @@ async function sendChoice(answer){
 
   try{
     setButtonsEnabled(false);
-
-    await gentleResetAndClear(token);
-    if (!isTokenLive(token)) return;
+    statusEl.textContent = "";
+    quickClearScreen();
 
     abortInFlightFetch();
     currentFetchController = new AbortController();
 
-    const res = await fetch(`${API}/choose`, {
+    const data = await fetchJsonWithRetry(`${API}/choose`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -2187,10 +2166,8 @@ async function sendChoice(answer){
         context: { session_id: sessionId }
       }),
       signal: currentFetchController.signal
-    });
+    }, 1);
 
-    if(!res.ok) throw new Error(`Choose failed: ${res.status} ${res.statusText}`);
-    const data = await res.json();
     if (!isTokenLive(token)) return;
 
     if (data.context?.session_id) sessionId = data.context.session_id;
