@@ -16,6 +16,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 origins = [
     "https://word-psychic-frontend.onrender.com",
     "http://localhost:5500",
@@ -42,34 +43,34 @@ COURTEOUS_EXIT = [
 ]
 
 # Startup is Yes/No only
-SHORT_HINT_OPENING = "Choose Yes or No."
+SHORT_HINT_OPENING = "Select Yes or No."
 # Later prompts can mention End session
-SHORT_HINT = "Choose Yes, No, or End session."
+SHORT_HINT = "Select Yes, No, or End session."
 
-# ---------- NEW: Natural-language variation pools ----------
+# ---------- Natural-language variation pools ----------
 DECLINE_CONFIRM_PROMPTS = [
     "Very well. Shall I offer another word?",
     "As you wish. Would you like another word?",
     "Understood. Shall I reveal another word?",
-    "The word retreates into silence.  Shall I call forth another?",
-    "So be it.  Shall we draw again from the beyond?",
+    "The word retreats into silence. Shall I call forth another?",
+    "So be it. Shall we draw again from the beyond?",
     "Fair enough. Shall I offer you a new word?",
 ]
 
 INVALID_YN_PROMPTS = [
-    "Please choose Yes or No.",
+    "Please select Yes or No.",
     "A simple Yes or No will do.",
-    "Click Yes or No to proceed.",
+    "Select Yes or No to proceed.",
     "Yes opens the door, no keeps it shut.",
     "A single Yes or No will guide us forward.",
 ]
 
 INVALID_YNE_PROMPTS = [
-    "Please choose Yes, No, or End session.",
-    "Click Yes, No, or End session.",
+    "Please select Yes, No, or End session.",
+    "Select Yes, No, or End session.",
     "Choose Yes, No, or End session to continue.",
     "Yes, No, or End session — your call.",
-    "The veil awaits: Yes, No, or End Session.",
+    "The veil awaits: Yes, No, or End session.",
 ]
 
 CONTINUE_Q_VARIANTS = [
@@ -109,7 +110,7 @@ CLUSTERS = [
         "title": "Antipathy → Vilify → Annihilate",
         "intro_line": "Your word is “antipathy.”\n\n",
         "continue_q": "Shall we journey further with this word?",
-        "script": """Antipathy means distate. A strong dislike.
+        "script": """Antipathy means distaste. A strong dislike.
 Antipathy is what the rooster felt toward his alarm clock.
 
 I see another word. Vilify — Defame. To attack someone’s reputation.
@@ -179,7 +180,7 @@ The aggregate of the day’s sales had the calculator singing ka-ching, ka-ching
 I see another word. Plethora -- An excess. More than enough.
 A plethora of lettuce-eating rabbits made the hungry groundhog hopping mad.
 
-A final word. Prodigious -- Extraordinary large.
+A final word. Prodigious -- extraordinarily large.
 Having drunk a prodigious amount of water, the athlete thirsted for a restroom.
 
 Aggregate. Plethora. Prodigious.
@@ -474,7 +475,7 @@ Blatant. Salient. Ostentatious.
 Your fortune: Drawing attention to yourself isn’t always the advantage you think it is.""",
     },
     {
-        "title": "Steadfast → Tenacious  → Dogmatic",
+        "title": "Steadfast → Tenacious → Dogmatic",
         "intro_line": "Your word is “steadfast.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Steadfast means unwaveringly loyal and faithful.
@@ -490,7 +491,7 @@ Steadfast. Tenacious. Dogmatic.
 Your fortune: Determination can be a strong ally –- if it listens as well as it pushes.""",
     },
     {
-        "title": "Capricious → Metamorphous  → Mercurial",
+        "title": "Capricious → Metamorphous → Mercurial",
         "intro_line": "Your word is “capricious.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Capricious means to be whimsical. Unpredictable.
@@ -538,10 +539,14 @@ def new_session() -> Session:
 
 def normalize(a: str) -> str:
     a = a.strip().lower()
-    if a in {"y", "yes"}: return "yes"
-    if a in {"n", "no"}:  return "no"
-    if a in {"q", "quit"}: return "quit"
-    if a in {"s", "stop", "enough", "end"}: return "stop"
+    if a in {"y", "yes"}:
+        return "yes"
+    if a in {"n", "no"}:
+        return "no"
+    if a in {"q", "quit"}:
+        return "quit"
+    if a in {"s", "stop", "enough", "end"}:
+        return "stop"
     return a
 
 def reply(st: Session, text: str, *, done: bool = False) -> Dict[str, Any]:
