@@ -307,7 +307,7 @@
 
   .radiate{
     position:absolute;
-    inset:-48%;
+    inset:-24%;
     border-radius:50%;
     pointer-events:none;
     background:
@@ -316,7 +316,7 @@
         rgba(200,150,255,.18) 18%,
         rgba(155,118,255,.10) 36%,
         rgba(155,118,255,0) 66%);
-    filter: blur(22px);
+    filter: blur(16px);
     opacity:.78;
     transition: opacity 68ms ease-out, filter 68ms ease-out;
   }
@@ -358,8 +358,8 @@
       radial-gradient(circle at 50% 16%,
         rgba(8,6,18,.74) 0%,
         rgba(14,10,30,.48) 28%,
-        rgba(92,110,210,.26) 58%,
-        rgba(190,160,255,.50) 82%,
+        rgba(160,110,255,.36) 58%,
+        rgba(210,170,255,.65) 82%,
         rgba(230,215,255,.20) 100%),
       radial-gradient(circle at 50% 92%,
         rgba(245,235,255,.78) 0%,
@@ -1353,7 +1353,7 @@ const API = "https://word-psychic-web.onrender.com";
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const IS_MOBILE_LAYOUT = window.matchMedia("(max-width: 768px)").matches || IS_IOS;
 const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-const USE_FALLBACK_BEATS = true;
+const USE_FALLBACK_BEATS = false;
 
 const WHOOSH_MS = 1900;
 const WHOOSH_BUFFER_MS = 560;
@@ -1457,8 +1457,13 @@ function showStopButton(show){
 }
 
 function paceFactor(){
+
   const v = speedSel.value;
-  return v === "slow" ? 1.28 : v === "fast" ? 0.76 : 1.0;
+
+  if (v === "slow") return 1.55;
+  if (v === "fast") return 0.60;
+
+  return 1.0;
 }
 
 function getTypingProfile(){
@@ -1481,19 +1486,19 @@ function charDelay(ch){
   if (/[.!?:]/.test(ch)) return p.punct;
   if (/[,;]/.test(ch)) return p.comma;
   if (/\s/.test(ch)) return p.space;
-  return p.char;
+  return p.char * paceFactor();
 }
 
 function leadBeforeVoiceMs(){
+
+  if (IS_MOBILE_LAYOUT) return 0;
+
   const v = speedSel.value;
 
-  if (IS_MOBILE_LAYOUT){
-    return v === "slow" ? 380 : v === "fast" ? 170 : 265;
-  }
-  if (IS_SAFARI){
-    return v === "slow" ? 360 : v === "fast" ? 175 : 255;
-  }
-  return v === "slow" ? 320 : v === "fast" ? 150 : 230;
+  if (v === "slow") return 70;
+  if (v === "fast") return 20;
+
+  return 40;
 }
 
 function baseSpeechRate(){
@@ -1536,7 +1541,7 @@ function hardPulseOff(){
 }
 
 function triggerBeat(strength = 1){
-  const maxStrength = IS_MOBILE_LAYOUT ? 1.34 : 1.30;
+  const maxStrength = IS_MOBILE_LAYOUT ? 1.45 : 1.40;
   const s = Math.max(0.86, Math.min(maxStrength, strength));
   const scale = IS_MOBILE_LAYOUT
     ? (1.0020 + (s - 1) * 0.0040)
@@ -2072,6 +2077,7 @@ async function speakClauseList(clauses, token){
     if (!isTokenLive(token)) return;
     if (!speakWhileTyping.checked || !voiceReady || !chosenVoice) return;
 
+    try { speechSynthesis.cancel(); } catch(e){}
     const speech = speakUtterance(clause);
     const maxWait = estimateSpeechMs(clause, speech.rateUsed) + 900;
 
@@ -2101,7 +2107,7 @@ async function typeChunkSmooth(chunk, token){
       const next = chunk[i + 1];
       const plainA = /[A-Za-z0-9]/.test(ch);
       const plainB = /[A-Za-z0-9]/.test(next);
-      if (plainA && plainB) steps = 2;
+      if (plainA && plainB) steps = 3;
     }
 
     for (let s = 0; s < steps && i < chunk.length; s++){
