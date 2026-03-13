@@ -296,7 +296,7 @@
     margin: 0 auto;
     z-index: 2;
     filter: drop-shadow(0 46px 110px rgba(0,0,0,.72));
-    --beatScale: 1.0013;
+    --beatScale: 1.0012;
     isolation: isolate;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
@@ -307,45 +307,45 @@
 
   .radiate{
     position:absolute;
-    inset:-48%;
+    inset:-44%;
     border-radius:50%;
     pointer-events:none;
     background:
       radial-gradient(circle at 50% 54%,
-        rgba(232,198,255,.28) 0%,
-        rgba(200,150,255,.18) 18%,
-        rgba(155,118,255,.10) 36%,
-        rgba(155,118,255,0) 66%);
-    filter: blur(22px);
-    opacity:.78;
-    transition: opacity 68ms ease-out, filter 68ms ease-out;
+        rgba(236,206,255,.26) 0%,
+        rgba(198,152,255,.17) 18%,
+        rgba(150,116,255,.09) 36%,
+        rgba(150,116,255,0) 64%);
+    filter: blur(20px);
+    opacity:.72;
+    transition: opacity 62ms ease-out, filter 62ms ease-out;
   }
 
   .aura{
     position:absolute;
-    inset:-26%;
+    inset:-24%;
     border-radius:50%;
     pointer-events:none;
     background: radial-gradient(circle,
-      rgba(220,175,255,.34) 0%,
-      rgba(175,145,255,.16) 34%,
+      rgba(222,180,255,.30) 0%,
+      rgba(175,145,255,.14) 34%,
       rgba(175,145,255,0) 72%);
-    filter: blur(18px);
-    opacity:.72;
-    transition: opacity 68ms ease-out, filter 68ms ease-out;
+    filter: blur(16px);
+    opacity:.66;
+    transition: opacity 62ms ease-out, filter 62ms ease-out;
   }
 
   .aura2{
     position:absolute;
-    inset:-16%;
+    inset:-14%;
     border-radius:50%;
     pointer-events:none;
     background: radial-gradient(circle at 50% 58%,
-      rgba(198,152,255,.28) 0%,
+      rgba(198,152,255,.24) 0%,
       rgba(198,152,255,0) 68%);
-    filter: blur(26px);
-    opacity:.58;
-    transition: opacity 68ms ease-out, filter 68ms ease-out;
+    filter: blur(22px);
+    opacity:.50;
+    transition: opacity 62ms ease-out, filter 62ms ease-out;
   }
 
   .ball{
@@ -362,21 +362,21 @@
         rgba(190,160,255,.50) 82%,
         rgba(230,215,255,.20) 100%),
       radial-gradient(circle at 50% 92%,
-        rgba(245,235,255,.78) 0%,
-        rgba(190,160,255,.20) 34%,
+        rgba(245,235,255,.80) 0%,
+        rgba(190,160,255,.22) 34%,
         rgba(30,22,60,.14) 74%,
         rgba(0,0,0,0) 100%);
     box-shadow:
       0 0 0 1px rgba(240,255,255,.11),
-      0 0 60px rgba(180,245,255,.20),
-      0 0 150px rgba(160,240,255,.14),
-      inset 0 0 130px rgba(255,255,255,.12),
-      inset 0 -145px 280px rgba(0,0,0,.20),
+      0 0 62px rgba(180,245,255,.20),
+      0 0 158px rgba(160,240,255,.15),
+      inset 0 0 132px rgba(255,255,255,.12),
+      inset 0 -150px 290px rgba(0,0,0,.22),
       inset 0 0 0 1px rgba(235,215,255,.12);
     transform-origin: 50% 102%;
     transform: scale(var(--beatScale)) translateZ(0);
     -webkit-transform: scale(var(--beatScale)) translateZ(0);
-    transition: transform 66ms ease-out;
+    transition: transform 56ms ease-out;
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
@@ -412,10 +412,10 @@
     pointer-events:none;
     background:
       radial-gradient(circle at 50% 94%,
-        rgba(245,255,255,.72) 0%,
-        rgba(170,245,255,.20) 26%,
+        rgba(245,255,255,.74) 0%,
+        rgba(170,245,255,.22) 26%,
         rgba(170,245,255,0) 60%);
-    opacity:.88;
+    opacity:.90;
   }
 
   .contactFade{
@@ -451,8 +451,8 @@
         rgba(255,255,255,0) 71.3%);
     mix-blend-mode: screen;
     opacity: .56;
-    filter: blur(.30px);
-    transition: opacity 68ms ease-out, filter 68ms ease-out;
+    filter: blur(.28px);
+    transition: opacity 62ms ease-out, filter 62ms ease-out;
   }
 
   .rimInner{
@@ -468,8 +468,8 @@
         rgba(255,255,255,0) 71.2%);
     mix-blend-mode: screen;
     opacity: .42;
-    filter: blur(.5px);
-    transition: opacity 68ms ease-out, filter 68ms ease-out;
+    filter: blur(.46px);
+    transition: opacity 62ms ease-out, filter 62ms ease-out;
   }
 
   .sparkles{
@@ -480,7 +480,7 @@
     mix-blend-mode: screen;
     opacity: .06;
     filter: blur(.15px);
-    transition: opacity 90ms ease, filter 90ms ease;
+    transition: opacity 80ms ease, filter 80ms ease;
     background:
       radial-gradient(circle at 18% 32%, rgba(255,255,255,.95) 0 1px, rgba(255,255,255,0) 3px),
       radial-gradient(circle at 28% 18%, rgba(210,255,255,.70) 0 1px, rgba(255,255,255,0) 3px),
@@ -705,26 +705,26 @@
     opacity:.92;
   }
 
-  #ballWrap.idle .radiate{ opacity:.28; filter: blur(24px); }
-  #ballWrap.idle .aura{ opacity:.22; filter: blur(18px); }
-  #ballWrap.idle .aura2{ opacity:.16; filter: blur(28px); }
-  #ballWrap.idle .rimHard{ opacity:.48; }
-  #ballWrap.idle .rimInner{ opacity:.35; }
-  #ballWrap.idle .sparkles{ opacity:.04; }
+  #ballWrap.idle .radiate{ opacity:.26; filter: blur(22px); }
+  #ballWrap.idle .aura{ opacity:.20; filter: blur(16px); }
+  #ballWrap.idle .aura2{ opacity:.14; filter: blur(22px); }
+  #ballWrap.idle .rimHard{ opacity:.46; }
+  #ballWrap.idle .rimInner{ opacity:.34; }
+  #ballWrap.idle .sparkles{ opacity:.03; }
 
-  #ballWrap.speaking .radiate{ opacity:.90; filter: blur(18px); }
-  #ballWrap.speaking .aura{ opacity:.82; filter: blur(13px); }
-  #ballWrap.speaking .aura2{ opacity:.70; filter: blur(18px); }
-  #ballWrap.speaking .rimHard{ opacity:.82; filter: blur(.18px); }
-  #ballWrap.speaking .rimInner{ opacity:.62; filter: blur(.3px); }
-  #ballWrap.speaking .sparkles{ opacity:.18; }
+  #ballWrap.speaking .radiate{ opacity:.88; filter: blur(16px); }
+  #ballWrap.speaking .aura{ opacity:.78; filter: blur(11px); }
+  #ballWrap.speaking .aura2{ opacity:.68; filter: blur(14px); }
+  #ballWrap.speaking .rimHard{ opacity:.80; filter: blur(.16px); }
+  #ballWrap.speaking .rimInner{ opacity:.58; filter: blur(.24px); }
+  #ballWrap.speaking .sparkles{ opacity:.16; }
 
-  #ballWrap.beat .radiate{ opacity:.98; filter: blur(15px); }
-  #ballWrap.beat .aura{ opacity:.92; filter: blur(11px); }
-  #ballWrap.beat .aura2{ opacity:.82; filter: blur(14px); }
+  #ballWrap.beat .radiate{ opacity:.98; filter: blur(12px); }
+  #ballWrap.beat .aura{ opacity:.92; filter: blur(8px); }
+  #ballWrap.beat .aura2{ opacity:.82; filter: blur(10px); }
   #ballWrap.beat .rimHard{ opacity:.94; }
-  #ballWrap.beat .rimInner{ opacity:.74; }
-  #ballWrap.beat .sparkles{ opacity:.30; filter: blur(0); }
+  #ballWrap.beat .rimInner{ opacity:.72; }
+  #ballWrap.beat .sparkles{ opacity:.28; filter: blur(0); }
 
   .action-bar{
     width:min(1040px, 100%);
@@ -807,6 +807,11 @@
     height: clamp(350px, 42vh, 450px);
     min-height: 320px;
     overflow-anchor: none;
+    contain: layout paint;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .screen{
@@ -824,6 +829,10 @@
     overflow-anchor: none;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
+    contain: content;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: contents;
   }
 
   .note{
@@ -1003,17 +1012,85 @@
     }
 
     #ballWrap{
-      width: min(60vw, 248px);
-      min-width: 192px;
+      width: min(60vw, 250px);
+      min-width: 194px;
+      filter: drop-shadow(0 36px 92px rgba(0,0,0,.78));
     }
 
-    .contactFade{ width: min(70vw, 280px); height: 118px; }
-    .ground-glow{ width: min(126vw, 450px); height: 134px; bottom:-66px; opacity:.34; }
-    .seatShadow{ width: min(50vw, 195px); height: 32px; }
-    .cradle{ width: min(52vw, 200px); height: 22px; }
-    .pedestal{ width: min(68vw, 250px); height: 26px; bottom:-26px; }
-    .pedestal::before{ width: min(82vw, 300px); height: 14px; bottom:-10px; }
-    .pedestal::after{ width: min(50vw, 185px); height: 12px; }
+    .radiate{ inset:-28%; filter:blur(14px); }
+    .aura{ inset:-14%; filter:blur(10px); }
+    .aura2{ inset:-8%; filter:blur(12px); }
+
+    .ball{
+      background:
+        radial-gradient(circle at 50% 14%,
+          rgba(8,6,18,.78) 0%,
+          rgba(15,10,32,.50) 26%,
+          rgba(104,116,226,.30) 54%,
+          rgba(206,170,255,.58) 80%,
+          rgba(240,224,255,.26) 100%),
+        radial-gradient(circle at 50% 92%,
+          rgba(255,244,255,.88) 0%,
+          rgba(205,176,255,.28) 30%,
+          rgba(28,20,58,.15) 72%,
+          rgba(0,0,0,0) 100%);
+      box-shadow:
+        0 0 0 1px rgba(246,255,255,.14),
+        0 0 68px rgba(190,245,255,.28),
+        0 0 148px rgba(174,232,255,.18),
+        inset 0 0 144px rgba(255,255,255,.16),
+        inset 0 -138px 272px rgba(0,0,0,.22),
+        inset 0 0 0 1px rgba(244,224,255,.14);
+    }
+
+    .ground-glow{
+      width: min(124vw, 430px);
+      height: 132px;
+      bottom:-64px;
+      opacity:.30;
+    }
+
+    .seatShadow{
+      width: min(50vw, 196px);
+      height: 34px;
+      opacity:.96;
+    }
+
+    .cradle{
+      width: min(56vw, 212px);
+      height: 24px;
+      bottom:-10px;
+      border-color: rgba(188,246,255,.22);
+      box-shadow:
+        0 10px 22px rgba(0,0,0,.48),
+        inset 0 1px 0 rgba(255,255,255,.10),
+        0 0 20px rgba(148,228,255,.10);
+    }
+
+    .pedestal{
+      width: min(72vw, 264px);
+      height: 30px;
+      bottom:-30px;
+      border-color: rgba(210,245,255,.16);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.66),
+        inset 0 1px 0 rgba(255,255,255,.09),
+        inset 0 -14px 18px rgba(0,0,0,.54),
+        0 0 18px rgba(120,208,255,.06);
+    }
+
+    .pedestal::before{
+      width: min(88vw, 312px);
+      height: 16px;
+      bottom:-10px;
+    }
+
+    .pedestal::after{
+      width: min(52vw, 190px);
+      height: 13px;
+    }
+
+    .contactFade{ width: min(72vw, 286px); height: 120px; }
 
     .action-bar{
       margin-top: -4px;
@@ -1063,32 +1140,18 @@
       display:none;
     }
 
-    .radiate{ inset:-34%; filter:blur(18px); }
-    .aura{ inset:-18%; filter:blur(14px); }
-    .aura2{ inset:-10%; filter:blur(16px); }
-
-    .ball{
-      box-shadow:
-        0 0 0 1px rgba(240,255,255,.12),
-        0 0 52px rgba(180,245,255,.22),
-        0 0 118px rgba(160,240,255,.16),
-        inset 0 0 120px rgba(255,255,255,.13),
-        inset 0 -132px 255px rgba(0,0,0,.22),
-        inset 0 0 0 1px rgba(235,215,255,.12);
-    }
-
-    #ballWrap.idle .radiate{ opacity:.30; }
-    #ballWrap.idle .aura{ opacity:.24; }
+    #ballWrap.idle .radiate{ opacity:.32; }
+    #ballWrap.idle .aura{ opacity:.26; }
     #ballWrap.idle .aura2{ opacity:.18; }
 
-    #ballWrap.speaking .radiate{ opacity:.95; }
-    #ballWrap.speaking .aura{ opacity:.88; }
-    #ballWrap.speaking .aura2{ opacity:.76; }
+    #ballWrap.speaking .radiate{ opacity:.98; }
+    #ballWrap.speaking .aura{ opacity:.94; }
+    #ballWrap.speaking .aura2{ opacity:.84; }
 
     #ballWrap.beat .radiate{ opacity:1; }
-    #ballWrap.beat .aura{ opacity:.94; }
-    #ballWrap.beat .aura2{ opacity:.84; }
-    #ballWrap.beat .sparkles{ opacity:.30; }
+    #ballWrap.beat .aura{ opacity:.98; }
+    #ballWrap.beat .aura2{ opacity:.90; }
+    #ballWrap.beat .sparkles{ opacity:.34; }
   }
 
   @media (max-width: 560px){
@@ -1147,8 +1210,8 @@
     }
 
     #ballWrap{
-      width: min(58vw, 236px);
-      min-width: 176px;
+      width: min(58vw, 238px);
+      min-width: 178px;
     }
 
     .side-icons{
@@ -1182,8 +1245,8 @@
     }
 
     #ballWrap{
-      width: min(56vw, 214px);
-      min-width: 162px;
+      width: min(56vw, 216px);
+      min-width: 164px;
     }
 
     .controls{
@@ -1335,6 +1398,7 @@ const API = "https://word-psychic-web.onrender.com";
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const IS_MOBILE_LAYOUT = window.matchMedia("(max-width: 768px)").matches || IS_IOS;
 const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+const USE_FALLBACK_BEATS = IS_IOS || IS_SAFARI;
 
 const WHOOSH_MS = 1900;
 const WHOOSH_BUFFER_MS = 560;
@@ -1342,9 +1406,9 @@ const WHOOSH_BUFFER_MS = 560;
 const ELLIPSIS_DELAY = 1500;
 const FINAL_ELLIPSIS_DELAY = 2200;
 
-const SENTENCE_PAUSE_MS   = 220;
-const PARAGRAPH_PAUSE_MS  = 720;
-const SECTION_PAUSE_MS    = 980;
+const SENTENCE_PAUSE_MS   = 210;
+const PARAGRAPH_PAUSE_MS  = 660;
+const SECTION_PAUSE_MS    = 920;
 const INPUT_GUARD_MS      = 700;
 
 let sessionId = null;
@@ -1363,6 +1427,7 @@ let speakingCount = 0;
 let beatOffTimer = null;
 let fallbackBeatTimer = null;
 let lastActionTs = 0;
+let currentSpeechNonce = 0;
 
 function bumpRunToken(){ runToken++; return runToken; }
 function isTokenLive(t){ return t === runToken; }
@@ -1438,21 +1503,21 @@ function showStopButton(show){
 
 function paceFactor(){
   const v = speedSel.value;
-  return v === "slow" ? 1.26 : v === "fast" ? 0.78 : 1.0;
+  return v === "slow" ? 1.34 : v === "fast" ? 0.70 : 1.0;
 }
 
 function getTypingProfile(){
   const v = speedSel.value;
 
   if (IS_MOBILE_LAYOUT || IS_SAFARI){
-    if (v === "slow") return { char: 31, space: 18, punct: 135, comma: 78, line: 185 };
-    if (v === "fast") return { char: 15, space: 10, punct: 70, comma: 42, line: 110 };
-    return { char: 22, space: 13, punct: 98, comma: 58, line: 145 };
+    if (v === "slow") return { char: 32, space: 16, punct: 112, comma: 64, line: 170 };
+    if (v === "fast") return { char: 13, space: 8, punct: 46, comma: 26, line: 76 };
+    return { char: 20, space: 11, punct: 74, comma: 42, line: 118 };
   }
 
-  if (v === "slow") return { char: 27, space: 16, punct: 118, comma: 70, line: 170 };
-  if (v === "fast") return { char: 13, space: 8, punct: 60, comma: 34, line: 96 };
-  return { char: 18, space: 11, punct: 86, comma: 48, line: 128 };
+  if (v === "slow") return { char: 25, space: 14, punct: 96, comma: 56, line: 150 };
+  if (v === "fast") return { char: 11, space: 7, punct: 42, comma: 24, line: 70 };
+  return { char: 16, space: 10, punct: 66, comma: 36, line: 104 };
 }
 
 function charDelay(ch){
@@ -1468,24 +1533,24 @@ function leadBeforeVoiceMs(){
   const v = speedSel.value;
 
   if (IS_MOBILE_LAYOUT){
-    return v === "slow" ? 420 : v === "fast" ? 180 : 290;
+    return v === "slow" ? 420 : v === "fast" ? 160 : 260;
   }
   if (IS_SAFARI){
-    return v === "slow" ? 390 : v === "fast" ? 170 : 270;
+    return v === "slow" ? 400 : v === "fast" ? 160 : 255;
   }
-  return v === "slow" ? 320 : v === "fast" ? 150 : 230;
+  return v === "slow" ? 310 : v === "fast" ? 145 : 215;
 }
 
 function baseSpeechRate(){
   const v = speedSel.value;
 
   if (IS_MOBILE_LAYOUT){
-    return v === "slow" ? 0.78 : v === "fast" ? 1.08 : 0.93;
+    return v === "slow" ? 0.75 : v === "fast" ? 1.16 : 0.93;
   }
   if (IS_SAFARI){
-    return v === "slow" ? 0.79 : v === "fast" ? 1.07 : 0.92;
+    return v === "slow" ? 0.76 : v === "fast" ? 1.14 : 0.92;
   }
-  return v === "slow" ? 0.80 : v === "fast" ? 1.05 : 0.91;
+  return v === "slow" ? 0.79 : v === "fast" ? 1.10 : 0.91;
 }
 
 function syncVoiceLabel(){
@@ -1493,10 +1558,13 @@ function syncVoiceLabel(){
   if (!speakWhileTyping.checked){
     try { speechSynthesis.cancel(); } catch(e) {}
     speakingCount = 0;
+    currentSpeechNonce++;
     ballWrap.classList.remove("speaking");
+    ballWrap.classList.remove("beat");
     ballWrap.classList.add("idle");
-    ballWrap.style.setProperty("--beatScale","1.0013");
+    ballWrap.style.setProperty("--beatScale","1.0012");
     stopFallbackBeats();
+    clearTimeout(beatOffTimer);
   }
 }
 
@@ -1504,28 +1572,49 @@ function setBeatScale(scale){
   ballWrap.style.setProperty("--beatScale", String(scale));
 }
 
+function hardPulseOff(){
+  clearTimeout(beatOffTimer);
+  ballWrap.classList.remove("beat");
+  setBeatScale(ballWrap.classList.contains("speaking") ? "1.00135" : "1.0012");
+}
+
 function triggerBeat(strength = 1){
-  const s = Math.max(0.84, Math.min(1.26, strength));
-  const scale = (1.0016 + (s - 1) * 0.0031);
+  const s = Math.max(0.84, Math.min(IS_MOBILE_LAYOUT ? 1.34 : 1.24, strength));
+  const scale = IS_MOBILE_LAYOUT
+    ? (1.0020 + (s - 1) * 0.0043)
+    : (1.00145 + (s - 1) * 0.0028);
+
   ballWrap.classList.add("beat");
   setBeatScale(scale.toFixed(4));
 
   clearTimeout(beatOffTimer);
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
-    setBeatScale(ballWrap.classList.contains("speaking") ? "1.00145" : "1.0013");
-  }, 84);
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.00135" : "1.0012");
+  }, IS_MOBILE_LAYOUT ? 70 : 58);
 }
 
-function startFallbackBeats(){
+function startFallbackBeats(nonce){
+  if (!USE_FALLBACK_BEATS) return;
   stopFallbackBeats();
+
   const tick = () => {
+    if (nonce !== currentSpeechNonce) return;
     if (!ballWrap.classList.contains("speaking")) return;
-    const strength = IS_MOBILE_LAYOUT ? (0.98 + Math.random() * 0.18) : (0.94 + Math.random() * 0.14);
+
+    const strength = IS_MOBILE_LAYOUT
+      ? (1.04 + Math.random() * 0.22)
+      : (0.98 + Math.random() * 0.16);
+
     triggerBeat(strength);
-    fallbackBeatTimer = setTimeout(tick, IS_MOBILE_LAYOUT ? (96 + Math.random() * 72) : (115 + Math.random() * 84));
+
+    fallbackBeatTimer = setTimeout(
+      tick,
+      IS_MOBILE_LAYOUT ? (92 + Math.random() * 64) : (112 + Math.random() * 72)
+    );
   };
-  fallbackBeatTimer = setTimeout(tick, 120);
+
+  fallbackBeatTimer = setTimeout(tick, 110);
 }
 
 function stopFallbackBeats(){
@@ -1533,16 +1622,21 @@ function stopFallbackBeats(){
   fallbackBeatTimer = null;
 }
 
-function setSpeaking(on){
+function setSpeaking(on, nonce = currentSpeechNonce){
+  if (nonce !== currentSpeechNonce) return;
+
   speakingCount = Math.max(0, speakingCount + (on ? 1 : -1));
   const isSpeaking = speakingCount > 0;
 
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
-  setBeatScale(isSpeaking ? "1.00145" : "1.0013");
+  setBeatScale(isSpeaking ? "1.00135" : "1.0012");
 
-  if (isSpeaking) startFallbackBeats();
-  else stopFallbackBeats();
+  if (isSpeaking) startFallbackBeats(nonce);
+  else {
+    stopFallbackBeats();
+    hardPulseOff();
+  }
 }
 
 function updateSpeakingFromEngine(){
@@ -1551,13 +1645,15 @@ function updateSpeakingFromEngine(){
     if (active){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
-      setBeatScale("1.00145");
-      startFallbackBeats();
+      setBeatScale("1.00135");
+      if (USE_FALLBACK_BEATS) startFallbackBeats(currentSpeechNonce);
     }else if (speakingCount === 0){
       ballWrap.classList.remove("speaking");
+      ballWrap.classList.remove("beat");
       ballWrap.classList.add("idle");
-      setBeatScale("1.0013");
+      setBeatScale("1.0012");
       stopFallbackBeats();
+      hardPulseOff();
     }
   }catch(e){}
 }
@@ -1565,10 +1661,11 @@ function updateSpeakingFromEngine(){
 function hardStopAllAudioAndBeats(){
   try { speechSynthesis.cancel(); } catch(e){}
   speakingCount = 0;
+  currentSpeechNonce++;
   ballWrap.classList.remove("speaking");
   ballWrap.classList.remove("beat");
   ballWrap.classList.add("idle");
-  ballWrap.style.setProperty("--beatScale","1.0013");
+  ballWrap.style.setProperty("--beatScale","1.0012");
   stopFallbackBeats();
   clearTimeout(beatOffTimer);
 }
@@ -1710,11 +1807,9 @@ function scoreGenericEnglishVoice(v){
 
 function selectVoice(){
   const voices = speechSynthesis.getVoices() || [];
-  console.log("Available voices:", voices.map(v => `${v.name} [${v.lang}]`));
 
   if (!voices.length){
     chosenVoice = null;
-    console.log("Chosen voice:", "none");
     return chosenVoice;
   }
 
@@ -1726,7 +1821,6 @@ function selectVoice(){
     const exact = byExactName.get(normVoiceName(preferred));
     if (exact){
       chosenVoice = exact;
-      console.log("Chosen voice (auto):", `${chosenVoice.name} [${chosenVoice.lang}]`);
       return chosenVoice;
     }
   }
@@ -1739,7 +1833,6 @@ function selectVoice(){
     });
     if (partial){
       chosenVoice = partial;
-      console.log("Chosen voice (auto):", `${chosenVoice.name} [${chosenVoice.lang}]`);
       return chosenVoice;
     }
   }
@@ -1748,12 +1841,10 @@ function selectVoice(){
   if (englishVoices.length){
     englishVoices.sort((a, b) => scoreGenericEnglishVoice(b) - scoreGenericEnglishVoice(a));
     chosenVoice = englishVoices[0];
-    console.log("Chosen voice (fallback):", `${chosenVoice.name} [${chosenVoice.lang}]`);
     return chosenVoice;
   }
 
   chosenVoice = voices[0] || null;
-  console.log("Chosen voice:", chosenVoice ? `${chosenVoice.name} [${chosenVoice.lang}]` : "none");
   return chosenVoice;
 }
 
@@ -1809,8 +1900,7 @@ function styleParams(){
   else if (name.includes("samantha")) pitch = 0.99;
   else pitch = 0.97;
 
-  const rate = Math.max(0.70, Math.min(1.14, baseSpeechRate() * voiceSignatureBase()));
-
+  const rate = Math.max(0.70, Math.min(1.18, baseSpeechRate() * voiceSignatureBase()));
   return { pitch, rate };
 }
 
@@ -1947,6 +2037,7 @@ function speakUtterance(text){
   const part = (text || "").trim();
   if (!part) return immediate;
 
+  const nonce = ++currentSpeechNonce;
   const u = new SpeechSynthesisUtterance(part);
   const style = styleParams();
 
@@ -1958,8 +2049,11 @@ function speakUtterance(text){
 
   u.onboundary = (ev) => {
     if (!ev) return;
+    if (nonce !== currentSpeechNonce) return;
     if (ev.name === "word" || typeof ev.charIndex === "number"){
-      const jitter = IS_MOBILE_LAYOUT ? (1.00 + Math.random() * 0.14) : (0.94 + Math.random() * 0.12);
+      const jitter = IS_MOBILE_LAYOUT
+        ? (1.10 + Math.random() * 0.20)
+        : (0.96 + Math.random() * 0.12);
       triggerBeat(jitter);
     }
   };
@@ -1969,20 +2063,25 @@ function speakUtterance(text){
   const done = new Promise(r => (doneResolve = r));
 
   u.onstart = () => {
-    setSpeaking(true);
+    if (nonce !== currentSpeechNonce){ startedResolve(); doneResolve(); return; }
+    setSpeaking(true, nonce);
     updateSpeakingFromEngine();
     startedResolve();
   };
 
   u.onend = () => {
-    setSpeaking(false);
+    if (nonce !== currentSpeechNonce){ doneResolve(); return; }
+    setSpeaking(false, nonce);
     updateSpeakingFromEngine();
+    hardPulseOff();
     doneResolve();
   };
 
   u.onerror = () => {
-    setSpeaking(false);
+    if (nonce !== currentSpeechNonce){ doneResolve(); return; }
+    setSpeaking(false, nonce);
     updateSpeakingFromEngine();
+    hardPulseOff();
     doneResolve();
   };
 
@@ -2011,8 +2110,9 @@ async function speakClauseList(clauses, token){
     const maxWait = estimateSpeechMs(clause, speech.rateUsed) + 900;
 
     await Promise.race([speech.done, sleep(maxWait)]);
+    hardPulseOff();
     updateSpeakingFromEngine();
-    await sleep(45);
+    await sleep(28);
   }
 }
 
@@ -2029,12 +2129,23 @@ async function typeChunkSmooth(chunk, token){
       continue;
     }
 
-    const ch = chunk[i];
-    screenEl.textContent += ch;
-    autoScrollScreen();
-    i++;
+    let wrote = 0;
+    while (i < chunk.length && wrote < 2){
+      const ch = chunk[i];
+      screenEl.textContent += ch;
+      autoScrollScreen();
+      i++;
+      wrote++;
 
-    nextAt = now + charDelay(ch);
+      const d = charDelay(ch);
+      nextAt = now + d;
+
+      if (/[.!?:]/.test(ch) || ch === "\n") break;
+      if (IS_MOBILE_LAYOUT || IS_SAFARI){
+        if (/\s/.test(ch)) break;
+      }
+    }
+
     await nextFrame();
   }
 }
@@ -2045,6 +2156,7 @@ async function typeAndSpeakChunk(chunk, token){
 
   await typeChunkSmooth(chunk, token);
   await Promise.race([speechTask, sleep(6500)]);
+  hardPulseOff();
   updateSpeakingFromEngine();
 }
 
@@ -2057,6 +2169,7 @@ async function speakAndTypePerSentence(text, token){
     if (!isTokenLive(token)) return;
 
     if (chunk === "\n\n" || chunk === "\n\n\n"){
+      hardPulseOff();
       for (const ch of chunk){
         if (!isTokenLive(token)) return;
         screenEl.textContent += ch;
@@ -2068,6 +2181,7 @@ async function speakAndTypePerSentence(text, token){
     }
 
     if (isEllipsisOnly(chunk)){
+      hardPulseOff();
       if (speakingCount === 0) updateSpeakingFromEngine();
       const dots = (chunk.match(/[.\u2026]/g) || []).length || 3;
       for (let i = 0; i < dots; i++){
@@ -2081,10 +2195,12 @@ async function speakAndTypePerSentence(text, token){
     }
 
     await typeAndSpeakChunk(chunk, token);
+    hardPulseOff();
     updateSpeakingFromEngine();
     await sleep(SENTENCE_PAUSE_MS * paceFactor());
   }
 
+  hardPulseOff();
   updateSpeakingFromEngine();
 }
 
@@ -2201,7 +2317,9 @@ async function sendChoice(answer){
     noBtn.disabled = true;
     stopBtn.disabled = true;
     statusEl.textContent = "";
+
     quickClearScreen();
+    await nextFrame();
 
     abortInFlightFetch();
     currentFetchController = new AbortController();
