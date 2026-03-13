@@ -1353,7 +1353,7 @@ const API = "https://word-psychic-web.onrender.com";
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const IS_MOBILE_LAYOUT = window.matchMedia("(max-width: 768px)").matches || IS_IOS;
 const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-const USE_FALLBACK_BEATS = false;
+const USE_FALLBACK_BEATS = true;
 
 const WHOOSH_MS = 1900;
 const WHOOSH_BUFFER_MS = 560;
@@ -1457,13 +1457,8 @@ function showStopButton(show){
 }
 
 function paceFactor(){
-
   const v = speedSel.value;
-
-  if (v === "slow") return 1.55;
-  if (v === "fast") return 0.60;
-
-  return 1.0;
+  return v === "slow" ? 1.45 : v === "fast" ? 0.68 : 1.0;
 }
 
 function getTypingProfile(){
@@ -1482,25 +1477,28 @@ function getTypingProfile(){
 
 function charDelay(ch){
   const p = getTypingProfile();
-  if (ch === "\n") return p.line;
-  if (/[.!?:]/.test(ch)) return p.punct;
-  if (/[,;]/.test(ch)) return p.comma;
-  if (/\s/.test(ch)) return p.space;
-  return p.char * paceFactor();
+  const f = paceFactor();
+
+  if (ch === "\n") return p.line * f;
+  if (/[.!?:]/.test(ch)) return p.punct * f;
+  if (/[,;]/.test(ch)) return p.comma * f;
+  if (/\s/.test(ch)) return p.space * f;
+  return p.char * f;
 }
 
 function leadBeforeVoiceMs(){
-
-  if (IS_MOBILE_LAYOUT) return 0;
-
   const v = speedSel.value;
 
-  if (v === "slow") return 70;
-  if (v === "fast") return 20;
+  if (IS_MOBILE_LAYOUT){
+    return v === "slow" ? 120 : v === "fast" ? 35 : 70;
+  }
 
-  return 40;
+  if (IS_SAFARI){
+    return v === "slow" ? 95 : v === "fast" ? 25 : 55;
+  }
+
+  return v === "slow" ? 85 : v === "fast" ? 20 : 45;
 }
-
 function baseSpeechRate(){
   const v = speedSel.value;
 
@@ -1537,15 +1535,15 @@ function setBeatScale(scale){
 function hardPulseOff(){
   clearTimeout(beatOffTimer);
   ballWrap.classList.remove("beat");
-  setBeatScale(ballWrap.classList.contains("speaking") ? "1.00145" : "1.0013");
+  setBeatScale(ballWrap.classList.contains("speaking") ? "1.0032" : "1.0013");
 }
 
 function triggerBeat(strength = 1){
   const maxStrength = IS_MOBILE_LAYOUT ? 1.45 : 1.40;
-  const s = Math.max(0.86, Math.min(maxStrength, strength));
+  const s = Math.max(0.90, Math.min(maxStrength, strength));
   const scale = IS_MOBILE_LAYOUT
-    ? (1.0020 + (s - 1) * 0.0040)
-    : (1.00195 + (s - 1) * 0.0040);
+    ? (1.0060 + (s - 1) * 0.0100)
+    : (1.0050 + (s - 1) * 0.0090);
 
   ballWrap.classList.add("beat");
   setBeatScale(scale.toFixed(4));
@@ -1553,8 +1551,8 @@ function triggerBeat(strength = 1){
   clearTimeout(beatOffTimer);
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
-    setBeatScale(ballWrap.classList.contains("speaking") ? "1.00145" : "1.0013");
-  }, IS_MOBILE_LAYOUT ? 82 : 72);
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0032" : "1.0013");
+  }, IS_MOBILE_LAYOUT ? 120 : 95);
 }
 
 function startFallbackBeats(nonce){
@@ -1566,16 +1564,19 @@ function startFallbackBeats(nonce){
     if (!ballWrap.classList.contains("speaking")) return;
 
     const strength = IS_MOBILE_LAYOUT
-      ? (1.04 + Math.random() * 0.20)
-      : (1.03 + Math.random() * 0.16);
+      ? (1.03 + Math.random() * 0.10)
+      : (1.02 + Math.random() * 0.09);
 
     triggerBeat(strength);
 
     fallbackBeatTimer = setTimeout(
       tick,
-      IS_MOBILE_LAYOUT ? (96 + Math.random() * 68) : (126 + Math.random() * 76)
+      IS_MOBILE_LAYOUT ? (170 + Math.random() * 70) : (150 + Math.random() * 60)
     );
   };
+
+  fallbackBeatTimer = setTimeout(tick, 140);
+}
 
   fallbackBeatTimer = setTimeout(tick, 110);
 }
@@ -1593,30 +1594,32 @@ function setSpeaking(on, nonce = currentSpeechNonce){
 
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
-  setBeatScale(isSpeaking ? "1.00145" : "1.0013");
+  setBeatScale(isSpeaking ? "1.0032" : "1.0013");
 
-  if (isSpeaking) startFallbackBeats(nonce);
-  else {
+  if (isSpeaking){
+    startFallbackBeats(nonce);
+  }else{
     stopFallbackBeats();
     hardPulseOff();
+    ballWrap.classList.remove("beat");
   }
 }
-
 function updateSpeakingFromEngine(){
   try{
     const active = !!(window.speechSynthesis && speechSynthesis.speaking);
+
     if (active){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
-      setBeatScale("1.00145");
+      setBeatScale("1.0032");
       if (USE_FALLBACK_BEATS) startFallbackBeats(currentSpeechNonce);
     }else if (speakingCount === 0){
+      stopFallbackBeats();
+      clearTimeout(beatOffTimer);
       ballWrap.classList.remove("speaking");
       ballWrap.classList.remove("beat");
       ballWrap.classList.add("idle");
       setBeatScale("1.0013");
-      stopFallbackBeats();
-      hardPulseOff();
     }
   }catch(e){}
 }
@@ -2068,8 +2071,8 @@ function speakUtterance(text){
 
 async function speakClauseList(clauses, token){
   if (!clauses.length) return;
-  const lead = leadBeforeVoiceMs();
 
+  const lead = leadBeforeVoiceMs();
   await sleep(lead);
   if (!isTokenLive(token)) return;
 
@@ -2077,14 +2080,15 @@ async function speakClauseList(clauses, token){
     if (!isTokenLive(token)) return;
     if (!speakWhileTyping.checked || !voiceReady || !chosenVoice) return;
 
-    try { speechSynthesis.cancel(); } catch(e){}
     const speech = speakUtterance(clause);
-    const maxWait = estimateSpeechMs(clause, speech.rateUsed) + 900;
+    const maxWait = estimateSpeechMs(clause, speech.rateUsed) + 1200;
 
     await Promise.race([speech.done, sleep(maxWait)]);
+    if (!isTokenLive(token)) return;
+
     hardPulseOff();
     updateSpeakingFromEngine();
-    await sleep(40);
+    await sleep(70);
   }
 }
 
@@ -2102,13 +2106,16 @@ async function typeChunkSmooth(chunk, token){
     }
 
     let steps = 1;
+
     if ((IS_MOBILE_LAYOUT || IS_SAFARI) && i + 1 < chunk.length) {
       const ch = chunk[i];
       const next = chunk[i + 1];
       const plainA = /[A-Za-z0-9]/.test(ch);
       const plainB = /[A-Za-z0-9]/.test(next);
-      if (plainA && plainB) steps = 3;
+      if (plainA && plainB) steps = 2;
     }
+
+    if (IS_SAFARI && !IS_MOBILE_LAYOUT) steps = Math.max(steps, 2);
 
     for (let s = 0; s < steps && i < chunk.length; s++){
       const ch = chunk[i];
@@ -2133,7 +2140,8 @@ async function typeAndSpeakChunk(chunk, token){
   const speechTask = clauses.length ? speakClauseList(clauses, token) : Promise.resolve();
 
   await typeChunkSmooth(chunk, token);
-  await Promise.race([speechTask, sleep(6500)]);
+  await speechTask;
+
   hardPulseOff();
   updateSpeakingFromEngine();
 }
