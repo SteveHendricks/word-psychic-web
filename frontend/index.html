@@ -452,6 +452,7 @@
     mix-blend-mode: screen;
     opacity: .50;
     filter: blur(.35px);
+    transition: opacity 70ms ease-out, filter 70ms ease-out;
   }
 
   .rimInner{
@@ -468,6 +469,7 @@
     mix-blend-mode: screen;
     opacity: .38;
     filter: blur(.6px);
+    transition: opacity 70ms ease-out, filter 70ms ease-out;
   }
 
   .sparkles{
@@ -584,13 +586,12 @@
     width: 620px;
     height: 235px;
     background: radial-gradient(circle at 50% 26%,
-      rgba(200,255,255,.28) 0%,
-      rgba(140,220,255,.12) 26%,
+      rgba(200,255,255,.20) 0%,
+      rgba(140,220,255,.07) 26%,
       rgba(140,220,255,0) 74%);
     filter: blur(28px);
-    opacity:.88;
+    opacity:.42;
     pointer-events:none;
-    transition: opacity 70ms ease-out, filter 70ms ease-out;
     z-index: 0;
   }
 
@@ -704,21 +705,26 @@
     opacity:.92;
   }
 
-  #ballWrap.idle .radiate{ opacity:.20; filter: blur(34px); }
-  #ballWrap.idle .aura{    opacity:.14; filter: blur(28px); }
-  #ballWrap.idle .aura2{   opacity:.11; filter: blur(42px); }
-  #ballWrap.idle .ground-glow{ opacity:.16; filter: blur(34px); }
+  #ballWrap.idle .radiate{ opacity:.24; filter: blur(32px); }
+  #ballWrap.idle .aura{ opacity:.18; filter: blur(24px); }
+  #ballWrap.idle .aura2{ opacity:.14; filter: blur(38px); }
+  #ballWrap.idle .rimHard{ opacity:.46; }
+  #ballWrap.idle .rimInner{ opacity:.34; }
+  #ballWrap.idle .sparkles{ opacity:.04; }
 
-  #ballWrap.speaking .radiate{ opacity:.48; }
-  #ballWrap.speaking .aura{ opacity:.36; }
-  #ballWrap.speaking .aura2{ opacity:.28; }
-  #ballWrap.speaking .ground-glow{ opacity:.45; }
+  #ballWrap.speaking .radiate{ opacity:.76; filter: blur(24px); }
+  #ballWrap.speaking .aura{ opacity:.62; filter: blur(18px); }
+  #ballWrap.speaking .aura2{ opacity:.52; filter: blur(28px); }
+  #ballWrap.speaking .rimHard{ opacity:.72; filter: blur(.2px); }
+  #ballWrap.speaking .rimInner{ opacity:.54; filter: blur(.4px); }
+  #ballWrap.speaking .sparkles{ opacity:.15; }
 
-  #ballWrap.beat .radiate{ opacity:.68; filter: blur(22px); }
-  #ballWrap.beat .aura{ opacity:.58; filter: blur(17px); }
-  #ballWrap.beat .aura2{ opacity:.46; filter: blur(28px); }
-  #ballWrap.beat .ground-glow{ opacity:.66; filter: blur(19px); }
-  #ballWrap.beat .sparkles{ opacity:.10; }
+  #ballWrap.beat .radiate{ opacity:.92; filter: blur(20px); }
+  #ballWrap.beat .aura{ opacity:.78; filter: blur(15px); }
+  #ballWrap.beat .aura2{ opacity:.64; filter: blur(22px); }
+  #ballWrap.beat .rimHard{ opacity:.88; }
+  #ballWrap.beat .rimInner{ opacity:.64; }
+  #ballWrap.beat .sparkles{ opacity:.24; filter: blur(0); }
 
   .action-bar{
     width:min(1040px, 100%);
@@ -1002,7 +1008,7 @@
     }
 
     .contactFade{ width: min(70vw, 280px); height: 118px; }
-    .ground-glow{ width: min(126vw, 450px); height: 134px; bottom:-66px; }
+    .ground-glow{ width: min(126vw, 450px); height: 134px; bottom:-66px; opacity:.36; }
     .seatShadow{ width: min(50vw, 195px); height: 32px; }
     .cradle{ width: min(52vw, 200px); height: 22px; }
     .pedestal{ width: min(68vw, 250px); height: 26px; bottom:-26px; }
@@ -1056,6 +1062,19 @@
     .footer-sep{
       display:none;
     }
+
+    #ballWrap.idle .radiate{ opacity:.30; }
+    #ballWrap.idle .aura{ opacity:.24; }
+    #ballWrap.idle .aura2{ opacity:.18; }
+
+    #ballWrap.speaking .radiate{ opacity:.88; }
+    #ballWrap.speaking .aura{ opacity:.72; }
+    #ballWrap.speaking .aura2{ opacity:.62; }
+
+    #ballWrap.beat .radiate{ opacity:.98; }
+    #ballWrap.beat .aura{ opacity:.86; }
+    #ballWrap.beat .aura2{ opacity:.70; }
+    #ballWrap.beat .sparkles{ opacity:.28; }
   }
 
   @media (max-width: 560px){
@@ -1303,8 +1322,6 @@ const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const IS_MOBILE_LAYOUT = window.matchMedia("(max-width: 768px)").matches || IS_IOS;
 const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-const LIVE_SYNC = true;
-
 const WHOOSH_MS = 1900;
 const WHOOSH_BUFFER_MS = 560;
 
@@ -1312,7 +1329,7 @@ const ELLIPSIS_DELAY = 1500;
 const FINAL_ELLIPSIS_DELAY = 2200;
 
 const SENTENCE_PAUSE_MS   = 220;
-const PARAGRAPH_PAUSE_MS  = 700;
+const PARAGRAPH_PAUSE_MS  = 720;
 const SECTION_PAUSE_MS    = 980;
 
 let sessionId = null;
@@ -1327,8 +1344,14 @@ let chooseInFlight = false;
 let sessionDone = false;
 let currentFetchController = null;
 
+let speakingCount = 0;
+let beatOffTimer = null;
+let fallbackBeatTimer = null;
+
 function bumpRunToken(){ runToken++; return runToken; }
 function isTokenLive(t){ return t === runToken; }
+
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
 function abortInFlightFetch(){
   try{ currentFetchController?.abort(); }catch(e){}
@@ -1346,8 +1369,6 @@ const speakWhileTyping = document.getElementById("speakWhileTyping");
 const voiceLabel = document.getElementById("voiceLabel");
 const ballWrap = document.getElementById("ballWrap");
 const titleEl = document.getElementById("titleText");
-
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 function trimLeadingNewlines(s){ return (s ?? "").replace(/^\s*\n+/, ""); }
 
@@ -1384,16 +1405,87 @@ function quickClearScreen(){
   try { screenEl.scrollTop = 0; } catch(e){}
 }
 
-let beatOffTimer = null;
-let fallbackBeatTimer = null;
+function setButtonsEnabled(on){
+  yesBtn.disabled = noBtn.disabled = !on;
+}
+
+function setStartEnabled(on){
+  startBtn.disabled = !on;
+}
+
+function showStopButton(show){
+  stopBtn.classList.toggle("placeholder", !show);
+  stopBtn.disabled = !show;
+  stopBtn.setAttribute("aria-hidden", (!show).toString());
+}
+
+function paceFactor(){
+  const v = speedSel.value;
+  return v === "slow" ? 1.15 : v === "fast" ? 0.86 : 1.0;
+}
+
+function typeDelayClassic(ch){
+  const v = speedSel.value;
+  const isSpace = /\s/.test(ch);
+  const isPunct = /[,.!?;:]/.test(ch);
+
+  let base;
+  if (IS_MOBILE_LAYOUT){
+    base = v === "slow" ? 26 : v === "fast" ? 13 : 18;
+  }else{
+    base = v === "slow" ? 24 : v === "fast" ? 12 : 16;
+  }
+
+  if (isSpace) return Math.max(8, base - 6);
+  if (isPunct) return base + 18;
+  return base;
+}
+
+function leadBeforeVoiceMs(){
+  const v = speedSel.value;
+
+  if (IS_MOBILE_LAYOUT){
+    return v === "slow" ? 320 : v === "fast" ? 180 : 240;
+  }
+  if (IS_SAFARI){
+    return v === "slow" ? 340 : v === "fast" ? 190 : 260;
+  }
+  return v === "slow" ? 300 : v === "fast" ? 170 : 220;
+}
+
+function baseSpeechRate(){
+  const v = speedSel.value;
+
+  if (IS_MOBILE_LAYOUT){
+    return v === "slow" ? 0.90 : v === "fast" ? 1.10 : 0.98;
+  }
+
+  if (IS_SAFARI){
+    return v === "slow" ? 0.88 : v === "fast" ? 1.08 : 0.96;
+  }
+
+  return v === "slow" ? 0.86 : v === "fast" ? 1.08 : 0.95;
+}
+
+function syncVoiceLabel(){
+  voiceLabel.textContent = speakWhileTyping.checked ? "Voice On" : "Voice Off";
+  if (!speakWhileTyping.checked){
+    try { speechSynthesis.cancel(); } catch(e) {}
+    speakingCount = 0;
+    ballWrap.classList.remove("speaking");
+    ballWrap.classList.add("idle");
+    ballWrap.style.setProperty("--beatScale","1.0011");
+    stopFallbackBeats();
+  }
+}
 
 function setBeatScale(scale){
   ballWrap.style.setProperty("--beatScale", String(scale));
 }
 
 function triggerBeat(strength = 1){
-  const s = Math.max(0.78, Math.min(1.24, strength));
-  const scale = (1.00135 + (s - 1) * 0.0015);
+  const s = Math.max(0.84, Math.min(1.22, strength));
+  const scale = (1.00135 + (s - 1) * 0.0018);
   ballWrap.classList.add("beat");
   setBeatScale(scale.toFixed(4));
 
@@ -1401,19 +1493,18 @@ function triggerBeat(strength = 1){
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
     setBeatScale(ballWrap.classList.contains("speaking") ? "1.0012" : "1.0011");
-  }, 58);
+  }, 82);
 }
 
 function startFallbackBeats(){
   stopFallbackBeats();
   const tick = () => {
     if (!ballWrap.classList.contains("speaking")) return;
-    const strength = 0.90 + Math.random() * 0.16;
+    const strength = 0.93 + Math.random() * 0.12;
     triggerBeat(strength);
-    const next = 96 + Math.random() * 90;
-    fallbackBeatTimer = setTimeout(tick, next);
+    fallbackBeatTimer = setTimeout(tick, 120 + Math.random() * 90);
   };
-  fallbackBeatTimer = setTimeout(tick, 105);
+  fallbackBeatTimer = setTimeout(tick, 130);
 }
 
 function stopFallbackBeats(){
@@ -1421,14 +1512,12 @@ function stopFallbackBeats(){
   fallbackBeatTimer = null;
 }
 
-let speakingCount = 0;
 function setSpeaking(on){
   speakingCount = Math.max(0, speakingCount + (on ? 1 : -1));
   const isSpeaking = speakingCount > 0;
 
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
-
   setBeatScale(isSpeaking ? "1.0012" : "1.0011");
 
   if (isSpeaking) startFallbackBeats();
@@ -1452,65 +1541,11 @@ function updateSpeakingFromEngine(){
   }catch(e){}
 }
 
-function setButtonsEnabled(on){
-  yesBtn.disabled = noBtn.disabled = !on;
-}
-function setStartEnabled(on){
-  startBtn.disabled = !on;
-}
-
-function showStopButton(show){
-  stopBtn.classList.toggle("placeholder", !show);
-  stopBtn.disabled = !show;
-  stopBtn.setAttribute("aria-hidden", (!show).toString());
-}
-
-function paceFactor(){
-  const v = speedSel.value;
-  return v==="slow" ? 1.10 : v==="fast" ? 0.89 : 1.0;
-}
-
-function typeDelayClassic(){
-  const v = speedSel.value;
-
-  if (IS_SAFARI && IS_MOBILE_LAYOUT){
-    return v==="slow" ? 11 : v==="fast" ? 5 : 7;
-  }
-  if (IS_SAFARI){
-    return v==="slow" ? 12 : v==="fast" ? 5 : 7;
-  }
-  if (IS_MOBILE_LAYOUT){
-    return v==="slow" ? 14 : v==="fast" ? 5 : 8;
-  }
-  return v==="slow" ? 16 : v==="fast" ? 6 : 9;
-}
-
-function baseSpeechRate(){
-  const v = speedSel.value;
-
-  if (IS_MOBILE_LAYOUT){
-    return v === "slow" ? 0.94 : v === "fast" ? 1.20 : 1.04;
-  }
-
-  return v === "slow" ? 0.92 : v === "fast" ? 1.18 : 1.02;
-}
-
-function syncVoiceLabel(){
-  voiceLabel.textContent = speakWhileTyping.checked ? "Voice On" : "Voice Off";
-  if (!speakWhileTyping.checked){
-    try { speechSynthesis.cancel(); } catch(e) {}
-    speakingCount = 0;
-    ballWrap.classList.remove("speaking");
-    ballWrap.classList.add("idle");
-    setBeatScale("1.0011");
-    stopFallbackBeats();
-  }
-}
-
 function hardStopAllAudioAndBeats(){
   try { speechSynthesis.cancel(); } catch(e){}
   speakingCount = 0;
   ballWrap.classList.remove("speaking");
+  ballWrap.classList.remove("beat");
   ballWrap.classList.add("idle");
   ballWrap.style.setProperty("--beatScale","1.0011");
   stopFallbackBeats();
@@ -1578,22 +1613,16 @@ function playGhostlyWhoosh(){
 function unlockVoice(){
   try{
     speechSynthesis.cancel();
-
     const u = new SpeechSynthesisUtterance(" ");
     u.volume = 0;
     u.rate = 1;
     u.pitch = 1;
     speechSynthesis.speak(u);
-
     voiceReady = true;
     selectVoice();
-
     setTimeout(() => {
-      try{
-        speechSynthesis.cancel();
-      }catch(e){}
+      try { speechSynthesis.cancel(); } catch(e){}
     }, 60);
-
   }catch(e){
     voiceReady = false;
   }
@@ -1624,12 +1653,9 @@ const SECOND_TIER_VOICES = [
   "Microsoft Zira"
 ];
 
-const LOW_PRIORITY_VOICES = [];
-
 const ALL_PREFERRED_VOICES = [
   ...TOP_PSYCHIC_VOICES,
-  ...SECOND_TIER_VOICES,
-  ...LOW_PRIORITY_VOICES
+  ...SECOND_TIER_VOICES
 ];
 
 function normVoiceName(s){
@@ -1652,10 +1678,8 @@ function scoreGenericEnglishVoice(v){
   if (/(isha|tessa|stephanie|martha|sangeeta|fiona|karen)/i.test(name)) score += 18;
   if (/(samantha|moira|veena)/i.test(name)) score += 10;
   if (/(female|woman|aria|jenny|sonia|ava|emma|ana|zira)/i.test(name)) score += 8;
-
   if (/google/.test(name)) score += 5;
   if (/microsoft/.test(name)) score += 4;
-
   if (/en-gb/.test(lang)) score += 8;
   if (/en-au|en-ie|en-in|en-za/.test(lang)) score += 4;
   if (/en-us/.test(lang)) score += 2;
@@ -1674,9 +1698,7 @@ function selectVoice(){
   }
 
   const byExactName = new Map(
-    voices
-      .filter(v => v && v.name)
-      .map(v => [normVoiceName(v.name), v])
+    voices.filter(v => v && v.name).map(v => [normVoiceName(v.name), v])
   );
 
   for (const preferred of ALL_PREFERRED_VOICES){
@@ -1733,48 +1755,37 @@ function styleParams(){
 
   if (name.includes("google uk english female")) {
     pitch = 0.96;
-    rateMult = 0.91;
-
+    rateMult = 0.90;
   } else if (name.includes("isha")) {
     pitch = 0.98;
-    rateMult = 0.93;
-
+    rateMult = 0.92;
   } else if (name.includes("tessa")) {
     pitch = 0.95;
-    rateMult = 0.90;
-
+    rateMult = 0.89;
   } else if (name.includes("stephanie")) {
     pitch = 0.97;
-    rateMult = 0.91;
-
+    rateMult = 0.90;
   } else if (name.includes("martha")) {
     pitch = 0.96;
-    rateMult = 0.90;
-
+    rateMult = 0.89;
   } else if (name.includes("sangeeta")) {
     pitch = 0.94;
-    rateMult = 0.86;
-
+    rateMult = 0.84;
   } else if (name.includes("fiona")) {
     pitch = 0.95;
-    rateMult = 0.87;
-
+    rateMult = 0.85;
   } else if (name.includes("karen")) {
     pitch = 0.97;
-    rateMult = 0.90;
-
+    rateMult = 0.88;
   } else if (name.includes("samantha")) {
     pitch = 0.99;
-    rateMult = 0.82;
-
+    rateMult = 0.80;
   } else if (name.includes("moira")) {
     pitch = 0.97;
-    rateMult = 0.84;
-
+    rateMult = 0.82;
   } else if (name.includes("veena")) {
     pitch = 0.92;
-    rateMult = 0.80;
-
+    rateMult = 0.78;
   } else if (
     name.includes("microsoft aria") ||
     name.includes("microsoft jenny") ||
@@ -1784,19 +1795,16 @@ function styleParams(){
     name.includes("microsoft ana")
   ) {
     pitch = 0.98;
-    rateMult = 0.90;
-
+    rateMult = 0.88;
   } else if (name.includes("microsoft zira")) {
     pitch = 0.98;
-    rateMult = 0.88;
-
+    rateMult = 0.86;
   } else if (name.includes("google us english")) {
     pitch = 0.98;
-    rateMult = 0.90;
-
+    rateMult = 0.88;
   } else if (isEnglishVoice(chosenVoice)) {
     pitch = 0.98;
-    rateMult = 0.89;
+    rateMult = 0.87;
   }
 
   return {
@@ -1887,15 +1895,60 @@ function splitChunks(full){
   return out;
 }
 
-function speakSentenceWithStart(text){
+function splitSpeechClauses(text){
+  const raw = voiceSpecificSpeechText(text || "").trim();
+  if (!raw) return [];
+
+  const pieces = raw
+    .split(/(?<=[.!?])\s+|(?<=,)\s+|(?<=;)\s+|(?<=:)\s+|(?<=—)\s+|\n+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const out = [];
+  let buf = "";
+
+  for (const piece of pieces){
+    if (!buf){
+      buf = piece;
+      continue;
+    }
+
+    if ((buf + " " + piece).length <= 110){
+      buf += " " + piece;
+    }else{
+      out.push(buf);
+      buf = piece;
+    }
+  }
+
+  if (buf) out.push(buf);
+  return out;
+}
+
+function estimateSpeechMs(text, rateUsed){
+  const t = (text || "").trim();
+  if (!t) return 0;
+
+  const words = (t.match(/\S+/g) || []).length;
+  const effectiveWpm = 150 * (rateUsed || 1);
+  let ms = (words / Math.max(1, effectiveWpm)) * 60000;
+
+  const punct = (t.match(/[,.!?;:]/g) || []).length;
+  ms += punct * 90 * paceFactor();
+
+  return Math.max(300, Math.min(ms, 5200));
+}
+
+function speakUtterance(text){
   const immediate = { started: Promise.resolve(), done: Promise.resolve(), rateUsed: baseSpeechRate() };
-  if (!voiceReady) return immediate;
+  if (!voiceReady || !chosenVoice || !speakWhileTyping.checked) return immediate;
 
   const part = (text || "").trim();
   if (!part) return immediate;
 
-  const u = new SpeechSynthesisUtterance(voiceSpecificSpeechText(part));
+  const u = new SpeechSynthesisUtterance(part);
   const style = styleParams();
+
   if (chosenVoice) u.voice = chosenVoice;
   if (chosenVoice?.lang) u.lang = chosenVoice.lang;
   u.pitch = style.pitch;
@@ -1905,7 +1958,7 @@ function speakSentenceWithStart(text){
   u.onboundary = (ev) => {
     if (!ev) return;
     if (ev.name === "word" || typeof ev.charIndex === "number"){
-      const jitter = 0.90 + Math.random() * 0.14;
+      const jitter = 0.92 + Math.random() * 0.12;
       triggerBeat(jitter);
     }
   };
@@ -1914,81 +1967,52 @@ function speakSentenceWithStart(text){
   const started = new Promise(r => (startedResolve = r));
   const done = new Promise(r => (doneResolve = r));
 
-  u.onstart = () => { setSpeaking(true); updateSpeakingFromEngine(); startedResolve(); };
-  u.onend   = () => {
+  u.onstart = () => {
+    setSpeaking(true);
+    updateSpeakingFromEngine();
+    startedResolve();
+  };
+
+  u.onend = () => {
     setSpeaking(false);
     updateSpeakingFromEngine();
     doneResolve();
   };
+
   u.onerror = () => {
     setSpeaking(false);
     updateSpeakingFromEngine();
     doneResolve();
   };
 
-  try{ speechSynthesis.speak(u); }catch(e){ startedResolve(); doneResolve(); }
+  try{
+    speechSynthesis.speak(u);
+  }catch(e){
+    startedResolve();
+    doneResolve();
+  }
+
   return { started, done, rateUsed: u.rate };
 }
 
-function estimateSpeechMs(text, rateUsed){
-  const t = (text || "").trim();
-  if (!t) return 0;
+async function speakClauseList(clauses, token){
+  if (!clauses.length) return;
+  const lead = leadBeforeVoiceMs();
 
-  const words = (t.match(/\S+/g) || []).length;
-  const effectiveWpm = 165 * (rateUsed || 1);
-  let ms = (words / Math.max(1, effectiveWpm)) * 60000;
+  await sleep(lead);
+  if (!isTokenLive(token)) return;
 
-  const punct = (t.match(/[,.!?;:]/g) || []).length;
-  ms += punct * 60 * paceFactor();
+  for (const clause of clauses){
+    if (!isTokenLive(token)) return;
+    if (!speakWhileTyping.checked || !voiceReady || !chosenVoice) return;
 
-  const syncFactor = IS_MOBILE_LAYOUT ? 0.95 : 0.93;
-  ms *= syncFactor;
+    const speech = speakUtterance(clause);
+    const maxWait = estimateSpeechMs(clause, speech.rateUsed) + 900;
 
-  return Math.max(180, Math.min(ms, 7600));
-}
-
-async function typeChunkOverMs(chunk, totalMs, token){
-  const s = chunk || "";
-  const chars = Math.max(1, s.length);
-  const existingLen = screenEl.textContent.length;
-  const start = performance.now();
-  const safariLead = IS_SAFARI ? 1.08 : 1.03;
-  const adjustedMs = Math.max(140, totalMs / safariLead);
-
-  return new Promise(resolve => {
-    function step(now){
-      if (!isTokenLive(token)){
-        resolve();
-        return;
-      }
-
-      const elapsed = now - start;
-      const progress = Math.min(1, elapsed / adjustedMs);
-      const targetChars = Math.floor(progress * chars);
-
-      const wantedText = s.slice(0, targetChars);
-      const currentChunkText = screenEl.textContent.slice(existingLen);
-
-      if (currentChunkText !== wantedText){
-        screenEl.textContent = screenEl.textContent.slice(0, existingLen) + wantedText;
-        autoScrollScreen();
-      }
-
-      if (progress < 1){
-        requestAnimationFrame(step);
-      }else{
-        const fullChunkText = s;
-        const finalChunkText = screenEl.textContent.slice(existingLen);
-        if (finalChunkText !== fullChunkText){
-          screenEl.textContent = screenEl.textContent.slice(0, existingLen) + fullChunkText;
-          autoScrollScreen();
-        }
-        resolve();
-      }
-    }
-
-    requestAnimationFrame(step);
-  });
+    await Promise.race([speech.done, sleep(maxWait)]);
+    updateSpeakingFromEngine();
+    await sleep(45);
+  }
 }
 
 async function typeChunkClassic(chunk, token){
@@ -1996,8 +2020,17 @@ async function typeChunkClassic(chunk, token){
     if (!isTokenLive(token)) return;
     screenEl.textContent += ch;
     autoScrollScreen();
-    await sleep(typeDelayClassic());
+    await sleep(typeDelayClassic(ch));
   }
+}
+
+async function typeAndSpeakChunk(chunk, token){
+  const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
+  const speechTask = clauses.length ? speakClauseList(clauses, token) : Promise.resolve();
+
+  await typeChunkClassic(chunk, token);
+  await Promise.race([speechTask, sleep(6500)]);
+  updateSpeakingFromEngine();
 }
 
 async function speakAndTypePerSentence(text, token){
@@ -2007,8 +2040,6 @@ async function speakAndTypePerSentence(text, token){
 
   for (const chunk of chunks){
     if (!isTokenLive(token)) return;
-
-    const SPEAK_NOW = speakWhileTyping.checked;
 
     if (chunk === "\n\n" || chunk === "\n\n\n"){
       for (const ch of chunk){
@@ -2034,33 +2065,7 @@ async function speakAndTypePerSentence(text, token){
       continue;
     }
 
-    if (!SPEAK_NOW){
-      await typeChunkClassic(chunk, token);
-      updateSpeakingFromEngine();
-      await sleep(SENTENCE_PAUSE_MS * paceFactor());
-      continue;
-    }
-
-    const speech = speakSentenceWithStart(chunk);
-    const canSpeak = voiceReady && chosenVoice && SPEAK_NOW;
-
-    if (!LIVE_SYNC || !canSpeak){
-      await typeChunkClassic(chunk, token);
-      await Promise.race([speech.done, sleep(5000)]);
-      updateSpeakingFromEngine();
-      await sleep(SENTENCE_PAUSE_MS * paceFactor());
-      continue;
-    }
-
-    await Promise.race([speech.started, sleep(250)]);
-
-    if (IS_SAFARI){
-      await typeChunkClassic(chunk, token);
-    }else{
-      await typeChunkOverMs(chunk, estimateSpeechMs(chunk, speech.rateUsed), token);
-    }
-
-    await Promise.race([speech.done, sleep(7600)]);
+    await typeAndSpeakChunk(chunk, token);
     updateSpeakingFromEngine();
     await sleep(SENTENCE_PAUSE_MS * paceFactor());
   }
@@ -2217,6 +2222,7 @@ async function sendChoice(answer){
 }
 
 let introAnswered = false;
+
 function revealEndSessionAfterIntro(){
   if (introAnswered || sessionDone) return;
   introAnswered = true;
@@ -2292,7 +2298,6 @@ setStartEnabled(true);
 showStopButton(false);
 syncVoiceLabel();
 selectVoice();
-
 bindStartOnce();
 
 yesBtn.addEventListener("click", (e)=>{
