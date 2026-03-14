@@ -1578,8 +1578,6 @@ function startFallbackBeats(nonce){
   fallbackBeatTimer = setTimeout(tick, 140);
 }
 
-  fallbackBeatTimer = setTimeout(tick, 110);
-}
 
 function stopFallbackBeats(){
   clearTimeout(fallbackBeatTimer);
@@ -2390,7 +2388,7 @@ function bindStartOnce(){
     sessionDone = false;
     chooseInFlight = false;
 
-    introAnswered = true;
+    introAnswered = false;
 
     unlockVoice();
     await ensureVoiceSelected(700);
