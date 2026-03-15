@@ -712,19 +712,19 @@
   #ballWrap.idle .rimInner{ opacity:.35; }
   #ballWrap.idle .sparkles{ opacity:.04; }
 
-  #ballWrap.speaking .radiate{ opacity:.90; filter: blur(18px); }
-  #ballWrap.speaking .aura{ opacity:.82; filter: blur(13px); }
-  #ballWrap.speaking .aura2{ opacity:.70; filter: blur(18px); }
-  #ballWrap.speaking .rimHard{ opacity:.82; filter: blur(.18px); }
-  #ballWrap.speaking .rimInner{ opacity:.62; filter: blur(.3px); }
-  #ballWrap.speaking .sparkles{ opacity:.18; }
+  #ballWrap.speaking .radiate{ opacity:.95; filter: blur(16px); }
+  #ballWrap.speaking .aura{ opacity:.88; filter: blur(12px); }
+  #ballWrap.speaking .aura2{ opacity:.76; filter: blur(16px); }
+  #ballWrap.speaking .rimHard{ opacity:.88; filter: blur(.14px); }
+  #ballWrap.speaking .rimInner{ opacity:.68; filter: blur(.24px); }
+  #ballWrap.speaking .sparkles{ opacity:.22; }
 
-  #ballWrap.beat .radiate{ opacity:.98; filter: blur(15px); }
-  #ballWrap.beat .aura{ opacity:.92; filter: blur(11px); }
-  #ballWrap.beat .aura2{ opacity:.82; filter: blur(14px); }
-  #ballWrap.beat .rimHard{ opacity:.94; }
-  #ballWrap.beat .rimInner{ opacity:.74; }
-  #ballWrap.beat .sparkles{ opacity:.30; filter: blur(0); }
+  #ballWrap.beat .radiate{ opacity:1; filter: blur(12px); }
+  #ballWrap.beat .aura{ opacity:.98; filter: blur(9px); }
+  #ballWrap.beat .aura2{ opacity:.88; filter: blur(12px); }
+  #ballWrap.beat .rimHard{ opacity:1; }
+  #ballWrap.beat .rimInner{ opacity:.82; }
+  #ballWrap.beat .sparkles{ opacity:.38; filter: blur(0); }
 
   .action-bar{
     width:min(1040px, 100%);
@@ -1383,6 +1383,7 @@ let beatOffTimer = null;
 let fallbackBeatTimer = null;
 let lastActionTs = 0;
 let currentSpeechNonce = 0;
+let speechGeneration = 0;
 
 function bumpRunToken(){ runToken++; return runToken; }
 function isTokenLive(t){ return t === runToken; }
@@ -1499,6 +1500,7 @@ function leadBeforeVoiceMs(){
 
   return v === "slow" ? 85 : v === "fast" ? 20 : 45;
 }
+
 function baseSpeechRate(){
   const v = speedSel.value;
 
@@ -1518,6 +1520,7 @@ function syncVoiceLabel(){
   if (!speakWhileTyping.checked){
     try { speechSynthesis.cancel(); } catch(e) {}
     speakingCount = 0;
+    speechGeneration++;
     currentSpeechNonce++;
     ballWrap.classList.remove("speaking");
     ballWrap.classList.remove("beat");
@@ -1535,15 +1538,15 @@ function setBeatScale(scale){
 function hardPulseOff(){
   clearTimeout(beatOffTimer);
   ballWrap.classList.remove("beat");
-  setBeatScale(ballWrap.classList.contains("speaking") ? "1.0032" : "1.0013");
+  setBeatScale(ballWrap.classList.contains("speaking") ? "1.0040" : "1.0013");
 }
 
 function triggerBeat(strength = 1){
-  const maxStrength = IS_MOBILE_LAYOUT ? 1.45 : 1.40;
-  const s = Math.max(0.90, Math.min(maxStrength, strength));
+  const maxStrength = IS_MOBILE_LAYOUT ? 1.52 : 1.48;
+  const s = Math.max(0.92, Math.min(maxStrength, strength));
   const scale = IS_MOBILE_LAYOUT
-    ? (1.0060 + (s - 1) * 0.0100)
-    : (1.0050 + (s - 1) * 0.0090);
+    ? (1.0072 + (s - 1) * 0.0115)
+    : (1.0064 + (s - 1) * 0.0105);
 
   ballWrap.classList.add("beat");
   setBeatScale(scale.toFixed(4));
@@ -1551,67 +1554,67 @@ function triggerBeat(strength = 1){
   clearTimeout(beatOffTimer);
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
-    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0032" : "1.0013");
-  }, IS_MOBILE_LAYOUT ? 120 : 95);
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0040" : "1.0013");
+  }, IS_MOBILE_LAYOUT ? 125 : 102);
 }
 
-function startFallbackBeats(nonce){
+function startFallbackBeats(generation){
   if (!USE_FALLBACK_BEATS) return;
   stopFallbackBeats();
 
   const tick = () => {
-    if (nonce !== currentSpeechNonce) return;
+    if (generation !== speechGeneration) return;
     if (!ballWrap.classList.contains("speaking")) return;
 
     const strength = IS_MOBILE_LAYOUT
-      ? (1.03 + Math.random() * 0.10)
-      : (1.02 + Math.random() * 0.09);
+      ? (1.05 + Math.random() * 0.12)
+      : (1.04 + Math.random() * 0.11);
 
     triggerBeat(strength);
 
     fallbackBeatTimer = setTimeout(
       tick,
-      IS_MOBILE_LAYOUT ? (170 + Math.random() * 70) : (150 + Math.random() * 60)
+      IS_MOBILE_LAYOUT ? (165 + Math.random() * 65) : (145 + Math.random() * 55)
     );
   };
 
-  fallbackBeatTimer = setTimeout(tick, 140);
+  fallbackBeatTimer = setTimeout(tick, 120);
 }
-
 
 function stopFallbackBeats(){
   clearTimeout(fallbackBeatTimer);
   fallbackBeatTimer = null;
 }
 
-function setSpeaking(on, nonce = currentSpeechNonce){
-  if (nonce !== currentSpeechNonce) return;
+function setSpeaking(on, generation = speechGeneration){
+  if (generation !== speechGeneration) return;
 
   speakingCount = Math.max(0, speakingCount + (on ? 1 : -1));
   const isSpeaking = speakingCount > 0;
 
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
-  setBeatScale(isSpeaking ? "1.0032" : "1.0013");
+  setBeatScale(isSpeaking ? "1.0040" : "1.0013");
 
   if (isSpeaking){
-    startFallbackBeats(nonce);
+    startFallbackBeats(generation);
   }else{
     stopFallbackBeats();
     hardPulseOff();
     ballWrap.classList.remove("beat");
   }
 }
+
 function updateSpeakingFromEngine(){
   try{
     const active = !!(window.speechSynthesis && speechSynthesis.speaking);
 
-    if (active){
+    if (active || speakingCount > 0){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
-      setBeatScale("1.0032");
-      if (USE_FALLBACK_BEATS) startFallbackBeats(currentSpeechNonce);
-    }else if (speakingCount === 0){
+      setBeatScale("1.0040");
+      if (USE_FALLBACK_BEATS) startFallbackBeats(speechGeneration);
+    }else{
       stopFallbackBeats();
       clearTimeout(beatOffTimer);
       ballWrap.classList.remove("speaking");
@@ -1623,6 +1626,7 @@ function updateSpeakingFromEngine(){
 }
 
 function hardStopAllAudioAndBeats(){
+  speechGeneration++;
   try { speechSynthesis.cancel(); } catch(e){}
   speakingCount = 0;
   currentSpeechNonce++;
@@ -1708,6 +1712,43 @@ function unlockVoice(){
   }catch(e){
     voiceReady = false;
   }
+}
+
+async function primeSpeechEngine(){
+  if (!("speechSynthesis" in window)) return;
+
+  try{
+    speechSynthesis.resume?.();
+
+    const u = new SpeechSynthesisUtterance(".");
+    if (chosenVoice) u.voice = chosenVoice;
+    if (chosenVoice?.lang) u.lang = chosenVoice.lang;
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
+
+    await new Promise(resolve => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        resolve();
+      };
+
+      u.onend = finish;
+      u.onerror = finish;
+
+      try{
+        speechSynthesis.speak(u);
+      }catch(e){
+        finish();
+      }
+
+      setTimeout(finish, 260);
+    });
+
+    await sleep(50);
+  }catch(e){}
 }
 
 const TOP_PSYCHIC_VOICES = [
@@ -2009,6 +2050,8 @@ function speakUtterance(text){
   if (!part) return immediate;
 
   const nonce = ++currentSpeechNonce;
+  const generation = speechGeneration;
+
   const u = new SpeechSynthesisUtterance(part);
   const style = styleParams();
 
@@ -2020,11 +2063,12 @@ function speakUtterance(text){
 
   u.onboundary = (ev) => {
     if (!ev) return;
-    if (nonce !== currentSpeechNonce) return;
+    if (generation !== speechGeneration) return;
+    if (nonce !== currentSpeechNonce && speakingCount === 0) return;
     if (ev.name === "word" || typeof ev.charIndex === "number"){
       const jitter = IS_MOBILE_LAYOUT
-        ? (1.08 + Math.random() * 0.20)
-        : (1.05 + Math.random() * 0.16);
+        ? (1.10 + Math.random() * 0.22)
+        : (1.08 + Math.random() * 0.18);
       triggerBeat(jitter);
     }
   };
@@ -2034,24 +2078,37 @@ function speakUtterance(text){
   const done = new Promise(r => (doneResolve = r));
 
   u.onstart = () => {
-    if (nonce !== currentSpeechNonce){ startedResolve(); doneResolve(); return; }
-    setSpeaking(true, nonce);
-    triggerBeat(IS_MOBILE_LAYOUT ? 1.12 : 1.10);
+    if (generation !== speechGeneration){
+      startedResolve();
+      doneResolve();
+      return;
+    }
+
+    setSpeaking(true, generation);
+    triggerBeat(IS_MOBILE_LAYOUT ? 1.16 : 1.14);
     updateSpeakingFromEngine();
     startedResolve();
   };
 
   u.onend = () => {
-    if (nonce !== currentSpeechNonce){ doneResolve(); return; }
-    setSpeaking(false, nonce);
+    if (generation !== speechGeneration){
+      doneResolve();
+      return;
+    }
+
+    setSpeaking(false, generation);
     updateSpeakingFromEngine();
     hardPulseOff();
     doneResolve();
   };
 
   u.onerror = () => {
-    if (nonce !== currentSpeechNonce){ doneResolve(); return; }
-    setSpeaking(false, nonce);
+    if (generation !== speechGeneration){
+      doneResolve();
+      return;
+    }
+
+    setSpeaking(false, generation);
     updateSpeakingFromEngine();
     hardPulseOff();
     doneResolve();
@@ -2260,8 +2317,8 @@ async function startSession(token){
     sessionDone = false;
 
     setButtonsEnabled(false);
-    showStopButton(true);
-    stopBtn.disabled = false;
+    showStopButton(false);
+    stopBtn.disabled = true;
     quickClearScreen();
 
     abortInFlightFetch();
@@ -2280,12 +2337,12 @@ async function startSession(token){
 
     if (!isTokenLive(token)) return;
     setButtonsEnabled(true);
-    stopBtn.disabled = false;
+    stopBtn.disabled = true;
   }catch(err){
     if (!isTokenLive(token)) return;
     screenEl.textContent = `⚠️ Startup error\n${String(err)}`;
     setButtonsEnabled(false);
-    stopBtn.disabled = false;
+    stopBtn.disabled = true;
     setStartEnabled(true);
   }
 }
@@ -2377,8 +2434,8 @@ function bindStartOnce(){
 
     setStartEnabled(false);
     setButtonsEnabled(false);
-    showStopButton(true);
-    stopBtn.disabled = false;
+    showStopButton(false);
+    stopBtn.disabled = true;
     statusEl.textContent = "";
 
     abortInFlightFetch();
@@ -2391,7 +2448,8 @@ function bindStartOnce(){
     introAnswered = false;
 
     unlockVoice();
-    await ensureVoiceSelected(700);
+    await ensureVoiceSelected(1400);
+    await primeSpeechEngine();
 
     if (!titleShown){
       titleShown = true;
