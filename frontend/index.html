@@ -2068,10 +2068,14 @@ function splitChunks(full){
       (ch === "." || ch === "!" || ch === "?") &&
       (i + 1 >= full.length || /\s/.test(next));
 
-    const isCommaBreak = IS_IOS && (ch === "," || ch === ";") && /\s/.test(next || "");
+    const isCommaBreak =
+      IS_IOS &&
+      (ch === "," || ch === ";" || ch === ":") &&
+      /\s/.test(next || "");
+
     const isColonBreak = (ch === ":" && next === "\n");
 
-    if (isEndPunct || isColonBreak || isCommaBreak){
+    if (isEndPunct || isCommaBreak || isColonBreak){
       out.push(buf);
       buf = "";
     }
@@ -2080,7 +2084,6 @@ function splitChunks(full){
   if (buf) out.push(buf);
   return out;
 }
-
 function splitSpeechClauses(text){
   const raw = voiceSpecificSpeechText(text || "").trim();
   if (!raw) return [];
@@ -2092,7 +2095,7 @@ function splitSpeechClauses(text){
 
   const out = [];
   let buf = "";
-  const maxLen = IS_IOS ? 70 : 110;
+  const maxLen = IS_IOS ? 42 : 110;
 
   for (const piece of pieces){
     if (!buf){
@@ -2291,20 +2294,49 @@ async function typeChunkSmooth(chunk, token){
 
 async function typeAndSpeakChunk(chunk, token){
   if (IS_IOS){
-    await typeChunkSmooth(chunk, token);
-    if (!isTokenLive(token)) return;
-
     const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
-    if (clauses.length){
+
+    if (!clauses.length){
+      await typeChunkSmooth(chunk, token);
+      hardPulseOff();
+      updateSpeakingFromEngine();
+      return;
+    }
+
+    let remaining = chunk;
+
+    for (const clause of clauses){
+      if (!isTokenLive(token)) return;
+
+      const idx = remaining.toLowerCase().indexOf(clause.toLowerCase());
+      let piece;
+
+      if (idx >= 0){
+        piece = remaining.slice(0, idx + clause.length);
+        remaining = remaining.slice(idx + clause.length);
+      }else{
+        piece = remaining;
+        remaining = "";
+      }
+
+      if (piece){
+        await typeChunkSmooth(piece, token);
+        if (!isTokenLive(token)) return;
+      }
+
       const extraLead =
-        speedSel.value === "slow" ? 170 :
-        speedSel.value === "fast" ? 55 :
-        120;
+        speedSel.value === "slow" ? 95 :
+        speedSel.value === "fast" ? 18 :
+        42;
 
       await sleep(extraLead);
       if (!isTokenLive(token)) return;
 
-      await speakClauseList(clauses, token);
+      await speakClauseList([clause], token);
+    }
+
+    if (remaining){
+      await typeChunkSmooth(remaining, token);
     }
 
     hardPulseOff();
@@ -2321,50 +2353,6 @@ async function typeAndSpeakChunk(chunk, token){
   hardPulseOff();
   updateSpeakingFromEngine();
 }
-async function speakAndTypePerSentence(text, token){
-  if (!isTokenLive(token)) return;
-
-  const chunks = splitChunks(text || "");
-
-  for (const chunk of chunks){
-    if (!isTokenLive(token)) return;
-
-    if (chunk === "\n\n" || chunk === "\n\n\n"){
-      hardPulseOff();
-      for (const ch of chunk){
-        if (!isTokenLive(token)) return;
-        screenEl.textContent += ch;
-        autoScrollScreen();
-      }
-      updateSpeakingFromEngine();
-      await sleep((chunk === "\n\n\n" ? SECTION_PAUSE_MS : PARAGRAPH_PAUSE_MS) * paceFactor());
-      continue;
-    }
-
-    if (isEllipsisOnly(chunk)){
-      hardPulseOff();
-      if (speakingCount === 0) updateSpeakingFromEngine();
-      const dots = (chunk.match(/[.\u2026]/g) || []).length || 3;
-      for (let i = 0; i < dots; i++){
-        if (!isTokenLive(token)) return;
-        screenEl.textContent += "…";
-        autoScrollScreen();
-        updateSpeakingFromEngine();
-        await sleep(((i === dots - 1) ? FINAL_ELLIPSIS_DELAY : ELLIPSIS_DELAY) * paceFactor());
-      }
-      continue;
-    }
-
-    await typeAndSpeakChunk(chunk, token);
-    hardPulseOff();
-    updateSpeakingFromEngine();
-    await sleep(SENTENCE_PAUSE_MS * paceFactor());
-  }
-
-  hardPulseOff();
-  updateSpeakingFromEngine();
-}
-
 async function fetchJsonWithRetry(url, options = {}, retries = 1){
   for (let attempt = 0; attempt <= retries; attempt++){
     try{
@@ -2501,7 +2489,12 @@ async function sendChoice(answer){
 
     if (data.context?.session_id) sessionId = data.context.session_id;
 
-    if (data.text) await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.text)), token);
+    if (data.text){
+      if (IS_IOS){
+        await sleep(30);
+      }
+      await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.text)), token);
+    }
 
     if (!isTokenLive(token)) return;
 
@@ -2529,7 +2522,6 @@ async function sendChoice(answer){
     chooseInFlight = false;
   }
 }
-
 let introAnswered = false;
 
 function revealEndSessionAfterIntro(){
