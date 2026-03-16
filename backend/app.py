@@ -168,7 +168,7 @@ A final word. Insignificant — Too small or unimportant to matter.
 Looking through King Kong's wardrobe closet, Godzilla felt insignificant.
 
 Minuscule. Nominal. Insignificant.
-Your fortune: Make your voice be heard. And the world leans in.""",
+Your fortune: Make your voice be heard. And the world takes out its earplugs.""",
     },
     {
         "title": "Aggregate → Plethora → Prodigious",
