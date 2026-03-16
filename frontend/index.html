@@ -25,16 +25,16 @@
 
 <style>
   :root{
-    --bg0:#050914;
-    --bg1:#071024;
+    --bg0:#070513;
+    --bg1:#0a0820;
     --ink:#e9f3ff;
-    --muted:#a8c1dc;
-    --pill: rgba(14, 26, 54, .70);
-    --pillEdge: rgba(210,230,255,.18);
-    --panelEdge: rgba(210,230,255,.18);
-    --violetA: rgba(190,120,255,.14);
-    --violetB: rgba(140, 90,255,.10);
-    --violetC: rgba(220,140,255,.08);
+    --muted:#b4b9e7;
+    --pill: rgba(18, 15, 42, .72);
+    --pillEdge: rgba(218,210,255,.18);
+    --panelEdge: rgba(218,210,255,.18);
+    --violetA: rgba(196,112,255,.20);
+    --violetB: rgba(146, 84,255,.16);
+    --violetC: rgba(220,126,255,.12);
   }
 
   *{ box-sizing:border-box; }
@@ -51,9 +51,9 @@
     color:var(--ink);
     font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
     background:
-      radial-gradient(1200px 700px at 50% 45%, var(--violetA), rgba(0,0,0,0) 60%),
-      radial-gradient(900px  520px at 50% 55%, var(--violetB), rgba(0,0,0,0) 65%),
-      radial-gradient(1400px 900px at 50% 120%, var(--violetC), rgba(0,0,0,0) 55%),
+      radial-gradient(1200px 700px at 50% 42%, var(--violetA), rgba(0,0,0,0) 60%),
+      radial-gradient(900px  540px at 50% 56%, var(--violetB), rgba(0,0,0,0) 65%),
+      radial-gradient(1400px 940px at 50% 122%, var(--violetC), rgba(0,0,0,0) 55%),
       linear-gradient(180deg, var(--bg0), var(--bg1));
     overflow-x:hidden;
     overflow-x:clip;
@@ -186,12 +186,12 @@
     font-size: 38px;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: rgba(240,232,255,.92);
+    color: rgba(244,234,255,.94);
     opacity: 0;
     transform: translateY(-10px);
     text-shadow:
-      0 0 18px rgba(200,140,255,.30),
-      0 0 34px rgba(160,120,255,.18);
+      0 0 18px rgba(214,132,255,.34),
+      0 0 34px rgba(176,118,255,.22);
     transition: opacity 2.2s ease, transform 2.2s ease;
     user-select:none;
     text-align:center;
@@ -296,7 +296,7 @@
     margin: 0 auto;
     z-index: 2;
     filter: drop-shadow(0 46px 110px rgba(0,0,0,.72));
-    --beatScale: 1.0013;
+    --beatScale: 1.0010;
     isolation: isolate;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
@@ -307,44 +307,44 @@
 
   .radiate{
     position:absolute;
-    inset:-24%;
+    inset:-26%;
     border-radius:50%;
     pointer-events:none;
     background:
       radial-gradient(circle at 50% 54%,
-        rgba(232,198,255,.28) 0%,
-        rgba(200,150,255,.18) 18%,
-        rgba(155,118,255,.10) 36%,
+        rgba(246,208,255,.40) 0%,
+        rgba(214,156,255,.28) 18%,
+        rgba(168,118,255,.18) 36%,
         rgba(155,118,255,0) 66%);
-    filter: blur(16px);
-    opacity:.78;
+    filter: blur(18px);
+    opacity:.86;
     transition: opacity 68ms ease-out, filter 68ms ease-out;
   }
 
   .aura{
     position:absolute;
-    inset:-26%;
+    inset:-28%;
     border-radius:50%;
     pointer-events:none;
     background: radial-gradient(circle,
-      rgba(220,175,255,.34) 0%,
-      rgba(175,145,255,.16) 34%,
+      rgba(232,185,255,.42) 0%,
+      rgba(186,150,255,.22) 34%,
       rgba(175,145,255,0) 72%);
-    filter: blur(18px);
-    opacity:.72;
+    filter: blur(20px);
+    opacity:.80;
     transition: opacity 68ms ease-out, filter 68ms ease-out;
   }
 
   .aura2{
     position:absolute;
-    inset:-16%;
+    inset:-18%;
     border-radius:50%;
     pointer-events:none;
     background: radial-gradient(circle at 50% 58%,
-      rgba(198,152,255,.28) 0%,
+      rgba(214,160,255,.34) 0%,
       rgba(198,152,255,0) 68%);
-    filter: blur(26px);
-    opacity:.58;
+    filter: blur(28px);
+    opacity:.66;
     transition: opacity 68ms ease-out, filter 68ms ease-out;
   }
 
@@ -367,9 +367,9 @@
         rgba(30,22,60,.14) 74%,
         rgba(0,0,0,0) 100%);
     box-shadow:
-      0 0 0 1px rgba(240,255,255,.11),
-      0 0 60px rgba(180,245,255,.20),
-      0 0 150px rgba(160,240,255,.14),
+      0 0 0 1px rgba(246,236,255,.13),
+      0 0 74px rgba(214,168,255,.24),
+      0 0 160px rgba(170,140,255,.18),
       inset 0 0 130px rgba(255,255,255,.12),
       inset 0 -145px 280px rgba(0,0,0,.20),
       inset 0 0 0 1px rgba(235,215,255,.12);
@@ -446,12 +446,12 @@
     background:
       radial-gradient(circle at 50% 50%,
         rgba(255,255,255,0) 67.9%,
-        rgba(255,255,255,.48) 68.7%,
-        rgba(255,255,255,.09) 69.8%,
+        rgba(255,255,255,.60) 68.7%,
+        rgba(255,255,255,.12) 69.8%,
         rgba(255,255,255,0) 71.3%);
     mix-blend-mode: screen;
-    opacity: .56;
-    filter: blur(.30px);
+    opacity: .62;
+    filter: blur(.26px);
     transition: opacity 68ms ease-out, filter 68ms ease-out;
   }
 
@@ -463,12 +463,12 @@
     background:
       radial-gradient(circle at 50% 50%,
         rgba(255,255,255,0) 66.8%,
-        rgba(210,180,255,.16) 68.4%,
-        rgba(20,18,40,.12) 69.6%,
+        rgba(224,188,255,.22) 68.4%,
+        rgba(20,18,40,.10) 69.6%,
         rgba(255,255,255,0) 71.2%);
     mix-blend-mode: screen;
-    opacity: .42;
-    filter: blur(.5px);
+    opacity: .50;
+    filter: blur(.44px);
     transition: opacity 68ms ease-out, filter 68ms ease-out;
   }
 
@@ -478,7 +478,7 @@
     border-radius:50%;
     pointer-events:none;
     mix-blend-mode: screen;
-    opacity: .06;
+    opacity: .08;
     filter: blur(.15px);
     transition: opacity 90ms ease, filter 90ms ease;
     background:
@@ -505,15 +505,15 @@
   .swirlA{
     background:
       conic-gradient(from 220deg,
-        rgba(200,255,255,0) 0%,
-        rgba(200,255,255,.20) 14%,
-        rgba(200,255,255,0) 30%,
-        rgba(170,245,255,.14) 54%,
-        rgba(200,255,255,0) 74%,
-        rgba(200,255,255,.12) 90%,
-        rgba(200,255,255,0) 100%),
+        rgba(214,255,255,0) 0%,
+        rgba(214,255,255,.20) 14%,
+        rgba(214,255,255,0) 30%,
+        rgba(186,245,255,.14) 54%,
+        rgba(214,255,255,0) 74%,
+        rgba(214,255,255,.12) 90%,
+        rgba(214,255,255,0) 100%),
       radial-gradient(52% 44% at 56% 56%,
-        rgba(190,255,255,.22),
+        rgba(198,255,255,.22),
         rgba(190,255,255,0) 72%);
     animation: swirlA 10s ease-in-out infinite alternate;
   }
@@ -523,15 +523,15 @@
     filter: blur(24px);
     background:
       conic-gradient(from 40deg,
-        rgba(150,230,255,0) 0%,
-        rgba(150,230,255,.18) 18%,
-        rgba(150,230,255,0) 40%,
-        rgba(120,210,255,.14) 62%,
-        rgba(150,230,255,0) 80%,
-        rgba(150,230,255,.12) 94%,
-        rgba(150,230,255,0) 100%),
+        rgba(166,230,255,0) 0%,
+        rgba(166,230,255,.18) 18%,
+        rgba(166,230,255,0) 40%,
+        rgba(134,210,255,.14) 62%,
+        rgba(166,230,255,0) 80%,
+        rgba(166,230,255,.12) 94%,
+        rgba(166,230,255,0) 100%),
       radial-gradient(46% 38% at 44% 48%,
-        rgba(140,220,255,.18),
+        rgba(156,220,255,.18),
         rgba(140,220,255,0) 74%);
     animation: swirlB 14s ease-in-out infinite alternate;
   }
@@ -563,14 +563,14 @@
 
   .mist{
     background: radial-gradient(64% 46% at 50% 56%,
-      rgba(190,160,255,.16),
+      rgba(198,160,255,.18),
       rgba(190,160,255,0) 74%);
     animation: drift 7s ease-in-out infinite alternate;
   }
 
   .mist2{
     background: radial-gradient(60% 42% at 46% 78%,
-      rgba(170,140,255,.13),
+      rgba(182,140,255,.15),
       rgba(170,140,255,0) 76%);
     animation: drift2 9.5s ease-in-out infinite alternate;
   }
@@ -586,11 +586,11 @@
     width: 620px;
     height: 235px;
     background: radial-gradient(circle at 50% 26%,
-      rgba(200,255,255,.20) 0%,
-      rgba(140,220,255,.07) 26%,
+      rgba(216,176,255,.26) 0%,
+      rgba(166,132,255,.10) 26%,
       rgba(140,220,255,0) 74%);
-    filter: blur(28px);
-    opacity:.42;
+    filter: blur(30px);
+    opacity:.48;
     pointer-events:none;
     z-index: 0;
   }
@@ -612,7 +612,7 @@
         rgba(0,0,0,.34) 28%,
         rgba(0,0,0,0) 72%),
       radial-gradient(ellipse at 50% 15%,
-        rgba(200,255,255,.12) 0%,
+        rgba(220,180,255,.14) 0%,
         rgba(200,255,255,0) 60%);
     mix-blend-mode: multiply;
   }
@@ -628,21 +628,23 @@
     pointer-events:none;
     z-index: 4;
     background:
-      radial-gradient(ellipse at 50% 20%,
-        rgba(0,0,0,0) 0%,
+      radial-gradient(ellipse at 50% 18%,
+        rgba(255,255,255,.10) 0%,
+        rgba(255,255,255,.06) 22%,
         rgba(0,0,0,0) 52%,
-        rgba(255,255,255,.05)56%,
-        rgba(130,220,255,.12) 62%,
-        rgba(10,16,30,.88) 70%,
+        rgba(236,206,255,.12)56%,
+        rgba(170,128,255,.20) 62%,
+        rgba(18,20,44,.90) 70%,
         rgba(0,0,0,0) 78%),
       linear-gradient(180deg,
-        rgba(255,255,255,.06),
+        rgba(255,255,255,.10),
         rgba(255,255,255,0));
-    border: 1px solid rgba(170,240,255,.16);
+    border: 1px solid rgba(220,188,255,.22);
     box-shadow:
       0 10px 22px rgba(0,0,0,.40),
-      inset 0 1px 0 rgba(255,255,255,.08);
-    opacity: .95;
+      inset 0 1px 0 rgba(255,255,255,.10),
+      0 0 24px rgba(190,140,255,.10);
+    opacity: .98;
   }
 
   .pedestal{
@@ -657,16 +659,17 @@
     z-index: 2;
     background:
       radial-gradient(150px 16px at 50% 18%,
-        rgba(255,255,255,.10),
+        rgba(255,255,255,.16),
         rgba(255,255,255,0) 72%),
       linear-gradient(180deg,
-        rgba(18,34,68,.74),
-        rgba(6,10,18,.98));
-    border: 1px solid rgba(200,245,255,.12);
+        rgba(56,34,98,.88),
+        rgba(16,12,30,.98));
+    border: 1px solid rgba(224,190,255,.20);
     box-shadow:
       0 30px 80px rgba(0,0,0,.60),
-      inset 0 1px 0 rgba(255,255,255,.08),
-      inset 0 -14px 18px rgba(0,0,0,.50);
+      inset 0 1px 0 rgba(255,255,255,.10),
+      inset 0 -14px 18px rgba(0,0,0,.44),
+      0 0 30px rgba(180,120,255,.08);
   }
 
   .pedestal::before{
@@ -678,11 +681,11 @@
     width: 372px;
     height: 18px;
     border-radius: 999px;
-    background: linear-gradient(180deg, rgba(10,16,30,.86), rgba(0,0,0,.94));
-    border: 1px solid rgba(120,200,255,.08);
+    background: linear-gradient(180deg, rgba(20,12,38,.90), rgba(0,0,0,.96));
+    border: 1px solid rgba(176,126,255,.12);
     box-shadow:
       0 16px 54px rgba(0,0,0,.66),
-      inset 0 1px 0 rgba(255,255,255,.04);
+      inset 0 1px 0 rgba(255,255,255,.05);
     opacity:.98;
   }
 
@@ -700,31 +703,31 @@
         rgba(0,0,0,.58),
         rgba(0,0,0,0) 74%),
       linear-gradient(180deg,
-        rgba(255,255,255,.06),
+        rgba(255,255,255,.10),
         rgba(255,255,255,0));
-    opacity:.92;
+    opacity:.94;
   }
 
-  #ballWrap.idle .radiate{ opacity:.28; filter: blur(24px); }
-  #ballWrap.idle .aura{ opacity:.22; filter: blur(18px); }
-  #ballWrap.idle .aura2{ opacity:.16; filter: blur(28px); }
-  #ballWrap.idle .rimHard{ opacity:.48; }
-  #ballWrap.idle .rimInner{ opacity:.35; }
-  #ballWrap.idle .sparkles{ opacity:.04; }
+  #ballWrap.idle .radiate{ opacity:.38; filter: blur(24px); }
+  #ballWrap.idle .aura{ opacity:.32; filter: blur(20px); }
+  #ballWrap.idle .aura2{ opacity:.24; filter: blur(28px); }
+  #ballWrap.idle .rimHard{ opacity:.54; }
+  #ballWrap.idle .rimInner{ opacity:.40; }
+  #ballWrap.idle .sparkles{ opacity:.05; }
 
-  #ballWrap.speaking .radiate{ opacity:.95; filter: blur(16px); }
-  #ballWrap.speaking .aura{ opacity:.88; filter: blur(12px); }
-  #ballWrap.speaking .aura2{ opacity:.76; filter: blur(16px); }
-  #ballWrap.speaking .rimHard{ opacity:.88; filter: blur(.14px); }
-  #ballWrap.speaking .rimInner{ opacity:.68; filter: blur(.24px); }
-  #ballWrap.speaking .sparkles{ opacity:.22; }
+  #ballWrap.speaking .radiate{ opacity:1; filter: blur(15px); }
+  #ballWrap.speaking .aura{ opacity:.98; filter: blur(11px); }
+  #ballWrap.speaking .aura2{ opacity:.88; filter: blur(14px); }
+  #ballWrap.speaking .rimHard{ opacity:.98; filter: blur(.12px); }
+  #ballWrap.speaking .rimInner{ opacity:.80; filter: blur(.18px); }
+  #ballWrap.speaking .sparkles{ opacity:.26; }
 
-  #ballWrap.beat .radiate{ opacity:1; filter: blur(12px); }
-  #ballWrap.beat .aura{ opacity:.98; filter: blur(9px); }
-  #ballWrap.beat .aura2{ opacity:.88; filter: blur(12px); }
+  #ballWrap.beat .radiate{ opacity:1; filter: blur(10px); }
+  #ballWrap.beat .aura{ opacity:1; filter: blur(8px); }
+  #ballWrap.beat .aura2{ opacity:.94; filter: blur(10px); }
   #ballWrap.beat .rimHard{ opacity:1; }
-  #ballWrap.beat .rimInner{ opacity:.82; }
-  #ballWrap.beat .sparkles{ opacity:.38; filter: blur(0); }
+  #ballWrap.beat .rimInner{ opacity:.90; }
+  #ballWrap.beat .sparkles{ opacity:.46; filter: blur(0); }
 
   .action-bar{
     width:min(1040px, 100%);
@@ -796,8 +799,8 @@
     border-radius: 18px;
     border: 1px solid var(--panelEdge);
     background:
-      radial-gradient(900px 260px at 50% 0%, rgba(120,210,255,.10), rgba(0,0,0,0) 60%),
-      linear-gradient(180deg, rgba(10,18,36,.86), rgba(6,10,18,.90));
+      radial-gradient(900px 260px at 50% 0%, rgba(178,116,255,.12), rgba(0,0,0,0) 60%),
+      linear-gradient(180deg, rgba(14,10,34,.88), rgba(8,8,22,.92));
     box-shadow:
       inset 0 0 26px rgba(0,0,0,.58),
       0 26px 70px rgba(0,0,0,.42);
@@ -820,7 +823,7 @@
     overflow: auto;
     position: relative;
     z-index: 2;
-    color: rgba(233,243,255,.94);
+    color: rgba(239,241,255,.95);
     text-shadow: 0 1px 0 rgba(0,0,0,.35);
     background: rgba(0,0,0,.14);
     scrollbar-gutter: stable both-edges;
@@ -846,7 +849,7 @@
     padding: 10px 14px;
     border-radius: 18px;
     border: 1px solid rgba(210,230,255,.14);
-    background: rgba(8,14,28,.26);
+    background: rgba(12,10,30,.30);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-shadow:
@@ -856,14 +859,14 @@
     justify-content:center;
     gap: 14px;
     flex-wrap: wrap;
-    color: rgba(168,193,220,.92);
+    color: rgba(186,190,232,.92);
     font-size: 14px;
     letter-spacing: .01em;
     text-align:center;
   }
 
   .footerbar a{
-    color: rgba(210,230,255,.92);
+    color: rgba(226,226,255,.94);
     text-decoration: none;
     border-bottom: 1px solid rgba(210,230,255,.18);
   }
@@ -1014,7 +1017,7 @@
     }
 
     .contactFade{ width: min(70vw, 280px); height: 118px; }
-    .ground-glow{ width: min(126vw, 450px); height: 134px; bottom:-66px; opacity:.34; }
+    .ground-glow{ width: min(126vw, 450px); height: 134px; bottom:-66px; opacity:.42; }
     .seatShadow{ width: min(50vw, 195px); height: 32px; }
     .cradle{ width: min(52vw, 200px); height: 22px; }
     .pedestal{ width: min(68vw, 250px); height: 26px; bottom:-26px; }
@@ -1069,44 +1072,44 @@
       display:none;
     }
 
-    .radiate{ inset:-36%; filter:blur(18px); }
-    .aura{ inset:-20%; filter:blur(14px); }
-    .aura2{ inset:-12%; filter:blur(18px); }
+    .radiate{ inset:-38%; filter:blur(20px); }
+    .aura{ inset:-24%; filter:blur(16px); }
+    .aura2{ inset:-14%; filter:blur(20px); }
 
     .ball{
       box-shadow:
-        0 0 0 1px rgba(240,255,255,.12),
-        0 0 56px rgba(180,245,255,.24),
-        0 0 126px rgba(160,240,255,.17),
-        inset 0 0 128px rgba(255,255,255,.15),
+        0 0 0 1px rgba(246,236,255,.14),
+        0 0 72px rgba(214,170,255,.28),
+        0 0 140px rgba(174,140,255,.21),
+        inset 0 0 128px rgba(255,255,255,.16),
         inset 0 -136px 260px rgba(0,0,0,.22),
         inset 0 0 0 1px rgba(235,215,255,.13);
       background:
         radial-gradient(circle at 50% 16%,
           rgba(8,6,18,.72) 0%,
           rgba(14,10,30,.46) 28%,
-          rgba(100,118,220,.30) 58%,
-          rgba(206,175,255,.58) 82%,
+          rgba(116,98,220,.32) 58%,
+          rgba(214,176,255,.62) 82%,
           rgba(242,228,255,.24) 100%),
         radial-gradient(circle at 50% 92%,
-          rgba(248,240,255,.86) 0%,
-          rgba(205,176,255,.28) 34%,
+          rgba(248,240,255,.88) 0%,
+          rgba(210,180,255,.32) 34%,
           rgba(30,22,60,.15) 74%,
           rgba(0,0,0,0) 100%);
     }
 
-    #ballWrap.idle .radiate{ opacity:.30; }
-    #ballWrap.idle .aura{ opacity:.24; }
-    #ballWrap.idle .aura2{ opacity:.18; }
+    #ballWrap.idle .radiate{ opacity:.40; }
+    #ballWrap.idle .aura{ opacity:.34; }
+    #ballWrap.idle .aura2{ opacity:.26; }
 
-    #ballWrap.speaking .radiate{ opacity:.96; }
-    #ballWrap.speaking .aura{ opacity:.90; }
-    #ballWrap.speaking .aura2{ opacity:.80; }
+    #ballWrap.speaking .radiate{ opacity:1; }
+    #ballWrap.speaking .aura{ opacity:1; }
+    #ballWrap.speaking .aura2{ opacity:.92; }
 
     #ballWrap.beat .radiate{ opacity:1; }
-    #ballWrap.beat .aura{ opacity:.96; }
-    #ballWrap.beat .aura2{ opacity:.88; }
-    #ballWrap.beat .sparkles{ opacity:.34; }
+    #ballWrap.beat .aura{ opacity:1; }
+    #ballWrap.beat .aura2{ opacity:.96; }
+    #ballWrap.beat .sparkles{ opacity:.40; }
   }
 
   @media (max-width: 560px){
@@ -1459,11 +1462,22 @@ function showStopButton(show){
 
 function paceFactor(){
   const v = speedSel.value;
+
+  if (IS_IOS){
+    return v === "slow" ? 1.72 : v === "fast" ? 0.50 : 1.0;
+  }
+
   return v === "slow" ? 1.45 : v === "fast" ? 0.68 : 1.0;
 }
 
 function getTypingProfile(){
   const v = speedSel.value;
+
+  if (IS_IOS){
+    if (v === "slow") return { char: 38, space: 20, punct: 158, comma: 86, line: 224 };
+    if (v === "fast") return { char: 11, space: 6, punct: 44, comma: 24, line: 72 };
+    return { char: 20, space: 11, punct: 84, comma: 46, line: 126 };
+  }
 
   if (IS_MOBILE_LAYOUT || IS_SAFARI){
     if (v === "slow") return { char: 31, space: 17, punct: 118, comma: 66, line: 176 };
@@ -1490,6 +1504,10 @@ function charDelay(ch){
 function leadBeforeVoiceMs(){
   const v = speedSel.value;
 
+  if (IS_IOS){
+    return v === "slow" ? 170 : v === "fast" ? 30 : 82;
+  }
+
   if (IS_MOBILE_LAYOUT){
     return v === "slow" ? 120 : v === "fast" ? 35 : 70;
   }
@@ -1503,6 +1521,10 @@ function leadBeforeVoiceMs(){
 
 function baseSpeechRate(){
   const v = speedSel.value;
+
+  if (IS_IOS){
+    return v === "slow" ? 0.64 : v === "fast" ? 1.00 : 0.80;
+  }
 
   if (IS_MOBILE_LAYOUT){
     return v === "slow" ? 0.76 : v === "fast" ? 1.11 : 0.93;
@@ -1525,7 +1547,7 @@ function syncVoiceLabel(){
     ballWrap.classList.remove("speaking");
     ballWrap.classList.remove("beat");
     ballWrap.classList.add("idle");
-    ballWrap.style.setProperty("--beatScale","1.0013");
+    ballWrap.style.setProperty("--beatScale","1.0010");
     stopFallbackBeats();
     clearTimeout(beatOffTimer);
   }
@@ -1538,15 +1560,17 @@ function setBeatScale(scale){
 function hardPulseOff(){
   clearTimeout(beatOffTimer);
   ballWrap.classList.remove("beat");
-  setBeatScale(ballWrap.classList.contains("speaking") ? "1.0040" : "1.0013");
+  setBeatScale(ballWrap.classList.contains("speaking") ? "1.0028" : "1.0010");
 }
 
 function triggerBeat(strength = 1){
-  const maxStrength = IS_MOBILE_LAYOUT ? 1.52 : 1.48;
+  const maxStrength = IS_IOS ? 1.34 : (IS_MOBILE_LAYOUT ? 1.42 : 1.40);
   const s = Math.max(0.92, Math.min(maxStrength, strength));
-  const scale = IS_MOBILE_LAYOUT
-    ? (1.0072 + (s - 1) * 0.0115)
-    : (1.0064 + (s - 1) * 0.0105);
+  const scale = IS_IOS
+    ? (1.0038 + (s - 1) * 0.0066)
+    : IS_MOBILE_LAYOUT
+      ? (1.0052 + (s - 1) * 0.0088)
+      : (1.0050 + (s - 1) * 0.0084);
 
   ballWrap.classList.add("beat");
   setBeatScale(scale.toFixed(4));
@@ -1554,7 +1578,7 @@ function triggerBeat(strength = 1){
   clearTimeout(beatOffTimer);
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
-    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0040" : "1.0013");
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0028" : "1.0010");
   }, IS_MOBILE_LAYOUT ? 125 : 102);
 }
 
@@ -1566,15 +1590,19 @@ function startFallbackBeats(generation){
     if (generation !== speechGeneration) return;
     if (!ballWrap.classList.contains("speaking")) return;
 
-    const strength = IS_MOBILE_LAYOUT
-      ? (1.05 + Math.random() * 0.12)
-      : (1.04 + Math.random() * 0.11);
+    const strength = IS_IOS
+      ? (1.08 + Math.random() * 0.10)
+      : IS_MOBILE_LAYOUT
+        ? (1.05 + Math.random() * 0.12)
+        : (1.04 + Math.random() * 0.11);
 
     triggerBeat(strength);
 
     fallbackBeatTimer = setTimeout(
       tick,
-      IS_MOBILE_LAYOUT ? (165 + Math.random() * 65) : (145 + Math.random() * 55)
+      IS_IOS ? (182 + Math.random() * 72) :
+      IS_MOBILE_LAYOUT ? (165 + Math.random() * 65) :
+      (145 + Math.random() * 55)
     );
   };
 
@@ -1594,7 +1622,7 @@ function setSpeaking(on, generation = speechGeneration){
 
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
-  setBeatScale(isSpeaking ? "1.0040" : "1.0013");
+  setBeatScale(isSpeaking ? "1.0028" : "1.0010");
 
   if (isSpeaking){
     startFallbackBeats(generation);
@@ -1612,7 +1640,7 @@ function updateSpeakingFromEngine(){
     if (active || speakingCount > 0){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
-      setBeatScale("1.0040");
+      setBeatScale("1.0028");
       if (USE_FALLBACK_BEATS) startFallbackBeats(speechGeneration);
     }else{
       stopFallbackBeats();
@@ -1620,7 +1648,7 @@ function updateSpeakingFromEngine(){
       ballWrap.classList.remove("speaking");
       ballWrap.classList.remove("beat");
       ballWrap.classList.add("idle");
-      setBeatScale("1.0013");
+      setBeatScale("1.0010");
     }
   }catch(e){}
 }
@@ -1633,7 +1661,7 @@ function hardStopAllAudioAndBeats(){
   ballWrap.classList.remove("speaking");
   ballWrap.classList.remove("beat");
   ballWrap.classList.add("idle");
-  ballWrap.style.setProperty("--beatScale","1.0013");
+  ballWrap.style.setProperty("--beatScale","1.0010");
   stopFallbackBeats();
   clearTimeout(beatOffTimer);
 }
@@ -1872,6 +1900,8 @@ async function ensureVoiceSelected(timeoutMs = 1500){
 function voiceSignatureBase(){
   const name = normVoiceName(chosenVoice?.name || "");
 
+  if (IS_IOS && name.includes("tessa")) return 0.90;
+
   if (name.includes("google uk english female")) return 0.88;
   if (name.includes("isha")) return 0.92;
   if (name.includes("tessa")) return 0.89;
@@ -1902,7 +1932,9 @@ function styleParams(){
   const name = normVoiceName(chosenVoice?.name || "");
   let pitch = 0.98;
 
-  if (name.includes("tessa")) pitch = 0.95;
+  if (IS_IOS && name.includes("tessa")){
+    pitch = 0.88;
+  }else if (name.includes("tessa")) pitch = 0.95;
   else if (name.includes("martha")) pitch = 0.96;
   else if (name.includes("sangeeta")) pitch = 0.94;
   else if (name.includes("fiona")) pitch = 0.95;
@@ -1911,7 +1943,11 @@ function styleParams(){
   else if (name.includes("samantha")) pitch = 0.99;
   else pitch = 0.97;
 
-  const rate = Math.max(0.70, Math.min(1.14, baseSpeechRate() * voiceSignatureBase()));
+  let rate = Math.max(0.62, Math.min(1.14, baseSpeechRate() * voiceSignatureBase()));
+
+  if (IS_IOS && name.includes("tessa")){
+    rate = Math.max(0.60, Math.min(0.96, rate - 0.03));
+  }
 
   return { pitch, rate };
 }
@@ -1935,16 +1971,27 @@ function voiceSpecificSpeechText(text){
     name.includes("moira") ||
     name.includes("samantha") ||
     name.includes("sangeeta") ||
-    name.includes("fiona")
+    name.includes("fiona") ||
+    (IS_IOS && name.includes("tessa"))
   ){
     t = t
       .replace(/—/g, ". ")
       .replace(/\s+-\s+/g, ". ")
       .replace(/;/g, ". ")
       .replace(/:\s+/g, ". ")
-      .replace(/,\s+(especially|because|although|though|while|when|if)\b/gi, ". $1")
+      .replace(/,\s+(especially|because|although|though|while|when|if|since|as|but)\b/gi, ". $1")
       .replace(/\s{2,}/g, " ")
       .trim();
+  }
+
+  if (IS_IOS && name.includes("tessa")){
+    t = t
+      .replace(/\bvery well\b/gi, "Very well")
+      .replace(/\bjourney further\b/gi, "go further")
+      .replace(/\breveal another word\b/gi, "show another word")
+      .replace(/\bshall we continue\b/gi, "shall we go on")
+      .replace(/\byou may choose\b/gi, "you may select")
+      .replace(/,\s+/g, ". ");
   }
 
   if (name.includes("veena")){
@@ -2009,6 +2056,7 @@ function splitSpeechClauses(text){
 
   const out = [];
   let buf = "";
+  const maxLen = IS_IOS ? 72 : 110;
 
   for (const piece of pieces){
     if (!buf){
@@ -2016,7 +2064,7 @@ function splitSpeechClauses(text){
       continue;
     }
 
-    if ((buf + " " + piece).length <= 110){
+    if ((buf + " " + piece).length <= maxLen){
       buf += " " + piece;
     }else{
       out.push(buf);
@@ -2033,13 +2081,13 @@ function estimateSpeechMs(text, rateUsed){
   if (!t) return 0;
 
   const words = (t.match(/\S+/g) || []).length;
-  const effectiveWpm = 150 * (rateUsed || 1);
+  const effectiveWpm = (IS_IOS ? 132 : 150) * (rateUsed || 1);
   let ms = (words / Math.max(1, effectiveWpm)) * 60000;
 
   const punct = (t.match(/[,.!?;:]/g) || []).length;
-  ms += punct * 90 * paceFactor();
+  ms += punct * (IS_IOS ? 120 : 90) * paceFactor();
 
-  return Math.max(300, Math.min(ms, 5200));
+  return Math.max(340, Math.min(ms, 5600));
 }
 
 function speakUtterance(text){
@@ -2066,9 +2114,11 @@ function speakUtterance(text){
     if (generation !== speechGeneration) return;
     if (nonce !== currentSpeechNonce && speakingCount === 0) return;
     if (ev.name === "word" || typeof ev.charIndex === "number"){
-      const jitter = IS_MOBILE_LAYOUT
-        ? (1.10 + Math.random() * 0.22)
-        : (1.08 + Math.random() * 0.18);
+      const jitter = IS_IOS
+        ? (1.10 + Math.random() * 0.12)
+        : IS_MOBILE_LAYOUT
+          ? (1.10 + Math.random() * 0.22)
+          : (1.08 + Math.random() * 0.18);
       triggerBeat(jitter);
     }
   };
@@ -2085,7 +2135,7 @@ function speakUtterance(text){
     }
 
     setSpeaking(true, generation);
-    triggerBeat(IS_MOBILE_LAYOUT ? 1.16 : 1.14);
+    triggerBeat(IS_IOS ? 1.14 : (IS_MOBILE_LAYOUT ? 1.16 : 1.14));
     updateSpeakingFromEngine();
     startedResolve();
   };
@@ -2143,7 +2193,7 @@ async function speakClauseList(clauses, token){
 
     hardPulseOff();
     updateSpeakingFromEngine();
-    await sleep(70);
+    await sleep(IS_IOS ? 95 : 70);
   }
 }
 
@@ -2162,7 +2212,16 @@ async function typeChunkSmooth(chunk, token){
 
     let steps = 1;
 
-    if ((IS_MOBILE_LAYOUT || IS_SAFARI) && i + 1 < chunk.length) {
+    if (IS_IOS && i + 2 < chunk.length){
+      const ch1 = chunk[i];
+      const ch2 = chunk[i + 1];
+      const ch3 = chunk[i + 2];
+      const plain1 = /[A-Za-z0-9]/.test(ch1);
+      const plain2 = /[A-Za-z0-9]/.test(ch2);
+      const plain3 = /[A-Za-z0-9]/.test(ch3);
+      if (plain1 && plain2 && plain3) steps = 3;
+      else if (plain1 && plain2) steps = 2;
+    } else if ((IS_MOBILE_LAYOUT || IS_SAFARI) && i + 1 < chunk.length) {
       const ch = chunk[i];
       const next = chunk[i + 1];
       const plainA = /[A-Za-z0-9]/.test(ch);
@@ -2526,6 +2585,14 @@ speedSel.addEventListener("change", () => {
     v === "slow" ? "Slow pace selected." :
     v === "fast" ? "Fast pace selected." :
     "Normal pace selected.";
+
+  if (window.speechSynthesis && speechSynthesis.speaking){
+    try { speechSynthesis.cancel(); } catch(e){}
+    speakingCount = 0;
+    speechGeneration++;
+    currentSpeechNonce++;
+    updateSpeakingFromEngine();
+  }
 });
 
 speakWhileTyping.addEventListener("change", syncVoiceLabel);
