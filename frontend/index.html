@@ -2070,12 +2070,13 @@ function splitChunks(full){
 
     const isCommaBreak =
       IS_IOS &&
-      (ch === "," || ch === ";" || ch === ":") &&
+      (ch === "," || ch === ";") &&
       /\s/.test(next || "");
 
-    const isColonBreak = (ch === ":" && next === "\n");
+    const isColonLineBreak =
+      ch === ":" && next === "\n";
 
-    if (isEndPunct || isCommaBreak || isColonBreak){
+    if (isEndPunct || isCommaBreak || isColonLineBreak){
       out.push(buf);
       buf = "";
     }
