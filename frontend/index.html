@@ -2089,33 +2089,12 @@ function splitSpeechClauses(text){
   const raw = voiceSpecificSpeechText(text || "").trim();
   if (!raw) return [];
 
-  const pieces = raw
-    .split(/(?<=[.!?])\s+|(?<=,)\s+|(?<=;)\s+|(?<=:)\s+|(?<=—)\s+|\n+/)
+  return raw
+    .split(/(?<=[.!?])\s+|(?<=,)\s+|(?<=;)\s+|(?<=:)\s+|\n+/)
     .map(s => s.trim())
     .filter(Boolean);
-
-  const out = [];
-  let buf = "";
-  const maxLen = IS_IOS ? 42 : 110;
-
-  for (const piece of pieces){
-    if (!buf){
-      buf = piece;
-      continue;
-    }
-
-    if ((buf + " " + piece).length <= maxLen){
-      buf += " " + piece;
-    }else{
-      out.push(buf);
-      buf = piece;
-    }
-  }
-
-  if (buf) out.push(buf);
-  return out;
 }
-
+  
 function estimateSpeechMs(text, rateUsed){
   const t = (text || "").trim();
   if (!t) return 0;
@@ -2294,65 +2273,44 @@ async function typeChunkSmooth(chunk, token){
 }
 
 async function typeAndSpeakChunk(chunk, token){
-  if (IS_IOS){
-    const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
 
-    if (!clauses.length){
-      await typeChunkSmooth(chunk, token);
-      hardPulseOff();
-      updateSpeakingFromEngine();
-      return;
-    }
+  const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
 
-    let remaining = chunk;
-
-    for (const clause of clauses){
-      if (!isTokenLive(token)) return;
-
-      const idx = remaining.toLowerCase().indexOf(clause.toLowerCase());
-      let piece;
-
-      if (idx >= 0){
-        piece = remaining.slice(0, idx + clause.length);
-        remaining = remaining.slice(idx + clause.length);
-      }else{
-        piece = remaining;
-        remaining = "";
-      }
-
-      if (piece){
-        await typeChunkSmooth(piece, token);
-        if (!isTokenLive(token)) return;
-      }
-
-      const extraLead =
-        speedSel.value === "slow" ? 95 :
-        speedSel.value === "fast" ? 18 :
-        42;
-
-      await sleep(extraLead);
-      if (!isTokenLive(token)) return;
-
-      await speakClauseList([clause], token);
-    }
-
-    if (remaining){
-      await typeChunkSmooth(remaining, token);
-    }
-
-    hardPulseOff();
-    updateSpeakingFromEngine();
+  if (!clauses.length){
+    await typeChunkSmooth(chunk, token);
     return;
   }
 
-  const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
-  const speechTask = clauses.length ? speakClauseList(clauses, token) : Promise.resolve();
+  let remaining = chunk;
 
-  await typeChunkSmooth(chunk, token);
-  await speechTask;
+  for (const clause of clauses){
 
-  hardPulseOff();
-  updateSpeakingFromEngine();
+    if (!isTokenLive(token)) return;
+
+    const idx = remaining.toLowerCase().indexOf(clause.toLowerCase());
+
+    let piece;
+
+    if (idx >= 0){
+      piece = remaining.slice(0, idx + clause.length);
+      remaining = remaining.slice(idx + clause.length);
+    } else {
+      piece = remaining;
+      remaining = "";
+    }
+
+    if (piece){
+      await typeChunkSmooth(piece, token);
+    }
+
+    await sleep(40);
+
+    await speakClauseList([clause], token);
+  }
+
+  if (remaining){
+    await typeChunkSmooth(remaining, token);
+  }
 }
 
 async function speakAndTypePerSentence(text, token){
@@ -2501,43 +2459,40 @@ async function startSession(token){
 }
 
 async function sendChoice(answer){
+
   if (chooseInFlight) return;
   if (sessionDone) return;
   if (!guardAction()) return;
 
   chooseInFlight = true;
+
   const token = runToken;
 
   try{
+
     setButtonsEnabled(false);
-    yesBtn.disabled = true;
-    noBtn.disabled = true;
-    showStopButton(true);
-    stopBtn.disabled = false;
-    statusEl.textContent = "";
+
     quickClearScreen();
 
     abortInFlightFetch();
     currentFetchController = new AbortController();
 
-    const data = await fetchJsonWithRetry(`${API}/choose`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const data = await fetchJsonWithRetry(`${API}/choose`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
         answer,
-        context: { session_id: sessionId }
+        context:{ session_id:sessionId }
       }),
-      signal: currentFetchController.signal
-    }, 1);
+      signal:currentFetchController.signal
+    },1);
 
     if (!isTokenLive(token)) return;
 
     if (data.context?.session_id) sessionId = data.context.session_id;
 
     if (data.text){
-      if (IS_IOS){
-        await sleep(30);
-      }
+      await sleep(20);
       await speakAndTypePerSentence(normalizeCTA(trimLeadingNewlines(data.text)), token);
     }
 
@@ -2556,13 +2511,18 @@ async function sendChoice(answer){
       setButtonsEnabled(true);
       stopBtn.disabled = false;
     }
+
   }catch(err){
+
     if (!isTokenLive(runToken)) return;
+
     screenEl.textContent = `⚠️ Request error\n${String(err)}`;
+
     if (!sessionDone){
       setButtonsEnabled(true);
       stopBtn.disabled = false;
     }
+
   }finally{
     chooseInFlight = false;
   }
