@@ -1493,7 +1493,7 @@ function paceFactor(){
   const v = speedSel.value;
 
   if (IS_IOS){
-    return v === "slow" ? 1.90 : v === "fast" ? 0.56 : 1.0;
+    return v === "slow" ? 1.55 : v === "fast" ? 0.72 : 1.0;
   }
 
   return v === "slow" ? 1.45 : v === "fast" ? 0.68 : 1.0;
@@ -1503,9 +1503,9 @@ function getTypingProfile(){
   const v = speedSel.value;
 
   if (IS_IOS){
-    if (v === "slow") return { char: 36, space: 20, punct: 176, comma: 94, line: 226 };
-    if (v === "fast") return { char: 14, space: 8, punct: 52, comma: 28, line: 82 };
-    return { char: 24, space: 14, punct: 102, comma: 54, line: 146 };
+    if (v === "slow") return { char: 22, space: 12, punct: 110, comma: 62, line: 150 };
+    if (v === "fast") return { char: 12, space: 7, punct: 58, comma: 34, line: 86 };
+    return { char: 16, space: 9, punct: 78, comma: 44, line: 114 };
   }
 
   if (IS_MOBILE_LAYOUT || IS_SAFARI){
@@ -1534,7 +1534,7 @@ function leadBeforeVoiceMs(){
   const v = speedSel.value;
 
   if (IS_IOS){
-    return v === "slow" ? 170 : v === "fast" ? 18 : 62;
+    return v === "slow" ? 90 : v === "fast" ? 20 : 42;
   }
 
   if (IS_MOBILE_LAYOUT){
@@ -1552,7 +1552,7 @@ function baseSpeechRate(){
   const v = speedSel.value;
 
   if (IS_IOS){
-    return v === "slow" ? 0.56 : v === "fast" ? 1.10 : 0.86;
+    return v === "slow" ? 0.66 : v === "fast" ? 1.14 : 0.96;
   }
 
   if (IS_MOBILE_LAYOUT){
@@ -1589,14 +1589,14 @@ function setBeatScale(scale){
 function hardPulseOff(){
   clearTimeout(beatOffTimer);
   ballWrap.classList.remove("beat");
-  setBeatScale(ballWrap.classList.contains("speaking") ? "1.0024" : "1.0010");
+  setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
 }
 
 function triggerBeat(strength = 1){
-  const maxStrength = IS_IOS ? 1.42 : (IS_MOBILE_LAYOUT ? 1.42 : 1.40);
+  const maxStrength = IS_IOS ? 1.36 : (IS_MOBILE_LAYOUT ? 1.42 : 1.40);
   const s = Math.max(0.92, Math.min(maxStrength, strength));
   const scale = IS_IOS
-    ? (1.0024 + (s - 1) * 0.0036)
+    ? (1.0022 + (s - 1) * 0.0030)
     : IS_MOBILE_LAYOUT
       ? (1.0052 + (s - 1) * 0.0088)
       : (1.0050 + (s - 1) * 0.0084);
@@ -1607,42 +1607,33 @@ function triggerBeat(strength = 1){
   clearTimeout(beatOffTimer);
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
-    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0024" : "1.0010");
-  }, IS_IOS ? 136 : (IS_MOBILE_LAYOUT ? 125 : 102));
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
+  }, IS_IOS ? 118 : (IS_MOBILE_LAYOUT ? 125 : 102));
 }
 
 function startFallbackBeats(generation){
   if (!USE_FALLBACK_BEATS) return;
   stopFallbackBeats();
 
-  const initialDelay = IS_IOS ? 260 : 120;
+  if (IS_IOS) return;
 
   const tick = () => {
     if (generation !== speechGeneration) return;
     if (!ballWrap.classList.contains("speaking")) return;
 
-    if (IS_IOS && performance.now() - speechStartTs < 220){
-      fallbackBeatTimer = setTimeout(tick, 48);
-      return;
-    }
-
-    const strength = IS_IOS
-      ? (1.12 + Math.random() * 0.14)
-      : IS_MOBILE_LAYOUT
-        ? (1.05 + Math.random() * 0.12)
-        : (1.04 + Math.random() * 0.11);
+    const strength = IS_MOBILE_LAYOUT
+      ? (1.05 + Math.random() * 0.12)
+      : (1.04 + Math.random() * 0.11);
 
     triggerBeat(strength);
 
     fallbackBeatTimer = setTimeout(
       tick,
-      IS_IOS ? (142 + Math.random() * 62) :
-      IS_MOBILE_LAYOUT ? (165 + Math.random() * 65) :
-      (145 + Math.random() * 55)
+      IS_MOBILE_LAYOUT ? (165 + Math.random() * 65) : (145 + Math.random() * 55)
     );
   };
 
-  fallbackBeatTimer = setTimeout(tick, initialDelay);
+  fallbackBeatTimer = setTimeout(tick, 120);
 }
 
 function stopFallbackBeats(){
@@ -1658,7 +1649,7 @@ function setSpeaking(on, generation = speechGeneration){
 
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
-  setBeatScale(isSpeaking ? "1.0024" : "1.0010");
+  setBeatScale(isSpeaking ? "1.0022" : "1.0010");
 
   if (isSpeaking){
     speechStartTs = performance.now();
@@ -1677,7 +1668,7 @@ function updateSpeakingFromEngine(){
     if (active || speakingCount > 0){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
-      setBeatScale("1.0024");
+      setBeatScale("1.0022");
       if (USE_FALLBACK_BEATS) startFallbackBeats(speechGeneration);
     }else{
       stopFallbackBeats();
@@ -1719,7 +1710,7 @@ function playGhostlyWhoosh(){
     const data = buf.getChannelData(0);
     for (let i = 0; i < frames; i++){
       const white = (Math.random()*2-1);
-      const low   = (i ? data[i-1] * 0.90 : 0);
+      const low = (i ? data[i-1] * 0.90 : 0);
       data[i] = (white * 0.55) + (low * 0.45);
     }
 
@@ -1937,7 +1928,7 @@ async function ensureVoiceSelected(timeoutMs = 1500){
 function voiceSignatureBase(){
   const name = normVoiceName(chosenVoice?.name || "");
 
-  if (IS_IOS && name.includes("tessa")) return 0.92;
+  if (IS_IOS && name.includes("tessa")) return 0.94;
 
   if (name.includes("google uk english female")) return 0.88;
   if (name.includes("isha")) return 0.92;
@@ -1972,14 +1963,14 @@ function styleParams(){
 
   if (IS_IOS && name.includes("tessa")){
     pitch =
-      speedSel.value === "slow" ? 0.85 :
+      speedSel.value === "slow" ? 0.86 :
       speedSel.value === "fast" ? 0.92 :
       0.89;
 
     rate =
-      speedSel.value === "slow" ? 0.58 :
-      speedSel.value === "fast" ? 1.08 :
-      0.84;
+      speedSel.value === "slow" ? 0.70 :
+      speedSel.value === "fast" ? 1.12 :
+      0.96;
 
     return { pitch, rate };
   }
@@ -2101,7 +2092,7 @@ function splitSpeechClauses(text){
 
   const out = [];
   let buf = "";
-  const maxLen = IS_IOS ? 60 : 110;
+  const maxLen = IS_IOS ? 70 : 110;
 
   for (const piece of pieces){
     if (!buf){
@@ -2126,13 +2117,13 @@ function estimateSpeechMs(text, rateUsed){
   if (!t) return 0;
 
   const words = (t.match(/\S+/g) || []).length;
-  const effectiveWpm = (IS_IOS ? 136 : 150) * (rateUsed || 1);
+  const effectiveWpm = (IS_IOS ? 142 : 150) * (rateUsed || 1);
   let ms = (words / Math.max(1, effectiveWpm)) * 60000;
 
   const punct = (t.match(/[,.!?;:]/g) || []).length;
-  ms += punct * (IS_IOS ? 120 : 90) * paceFactor();
+  ms += punct * (IS_IOS ? 110 : 90) * paceFactor();
 
-  return Math.max(340, Math.min(ms, 5600));
+  return Math.max(300, Math.min(ms, 5200));
 }
 
 function speakUtterance(text){
@@ -2160,7 +2151,7 @@ function speakUtterance(text){
     if (nonce !== currentSpeechNonce && speakingCount === 0) return;
     if (ev.name === "word" || typeof ev.charIndex === "number"){
       const jitter = IS_IOS
-        ? (1.08 + Math.random() * 0.10)
+        ? (1.06 + Math.random() * 0.08)
         : IS_MOBILE_LAYOUT
           ? (1.10 + Math.random() * 0.22)
           : (1.08 + Math.random() * 0.18);
@@ -2181,6 +2172,7 @@ function speakUtterance(text){
 
     setSpeaking(true, generation);
     speechStartTs = performance.now();
+    triggerBeat(IS_IOS ? 1.10 : 1.14);
     updateSpeakingFromEngine();
     startedResolve();
   };
@@ -2238,7 +2230,7 @@ async function speakClauseList(clauses, token){
 
     hardPulseOff();
     updateSpeakingFromEngine();
-    await sleep(IS_IOS ? 85 : 70);
+    await sleep(IS_IOS ? 55 : 70);
   }
 }
 
@@ -2266,7 +2258,7 @@ async function typeChunkSmooth(chunk, token){
       const plainB = /[A-Za-z0-9]/.test(b);
       const plainC = /[A-Za-z0-9]/.test(c);
 
-      if (plainA && plainB && plainC) steps = 2;
+      if (plainA && plainB && plainC) steps = 3;
       else if (plainA && plainB) steps = 2;
       else steps = 1;
     } else if ((IS_MOBILE_LAYOUT || IS_SAFARI) && i + 1 < chunk.length) {
@@ -2298,6 +2290,22 @@ async function typeChunkSmooth(chunk, token){
 }
 
 async function typeAndSpeakChunk(chunk, token){
+  if (IS_IOS){
+    await typeChunkSmooth(chunk, token);
+    if (!isTokenLive(token)) return;
+
+    const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
+    if (clauses.length){
+      await sleep(leadBeforeVoiceMs());
+      if (!isTokenLive(token)) return;
+      await speakClauseList(clauses, token);
+    }
+
+    hardPulseOff();
+    updateSpeakingFromEngine();
+    return;
+  }
+
   const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
   const speechTask = clauses.length ? speakClauseList(clauses, token) : Promise.resolve();
 
