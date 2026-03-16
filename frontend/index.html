@@ -2281,29 +2281,35 @@ async function typeAndSpeakChunk(chunk, token){
     return;
   }
 
-  let pos = 0;
+  let remaining = chunk;
 
   for (const clause of clauses){
 
     if (!isTokenLive(token)) return;
 
-    const idx = chunk.toLowerCase().indexOf(clause.toLowerCase(), pos);
+    const idx = remaining.toLowerCase().indexOf(clause.toLowerCase());
 
-    if (idx === -1) continue;
+    let piece;
 
-    const piece = chunk.slice(pos, idx + clause.length);
+    if (idx >= 0){
+      piece = remaining.slice(0, idx + clause.length);
+      remaining = remaining.slice(idx + clause.length);
+    } else {
+      piece = remaining;
+      remaining = "";
+    }
 
-    const speakPromise = speakClauseList([clause], token);
+    if (piece){
+      await typeChunkSmooth(piece, token);
+    }
 
-    await typeChunkSmooth(piece, token);
+    await sleep(40);
 
-    await speakPromise;
-
-    pos = idx + clause.length;
+    await speakClauseList([clause], token);
   }
 
-  if (pos < chunk.length){
-    await typeChunkSmooth(chunk.slice(pos), token);
+  if (remaining){
+    await typeChunkSmooth(remaining, token);
   }
 }
 async function speakAndTypePerSentence(text, token){
