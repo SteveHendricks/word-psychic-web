@@ -2068,15 +2068,10 @@ function splitChunks(full){
       (ch === "." || ch === "!" || ch === "?") &&
       (i + 1 >= full.length || /\s/.test(next));
 
-    const isCommaBreak =
-      IS_IOS &&
-      (ch === "," || ch === ";") &&
-      /\s/.test(next || "");
-
     const isColonLineBreak =
       ch === ":" && next === "\n";
 
-    if (isEndPunct || isCommaBreak || isColonLineBreak){
+    if (isEndPunct || isColonLineBreak){
       out.push(buf);
       buf = "";
     }
