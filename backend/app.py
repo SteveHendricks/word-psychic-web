@@ -74,7 +74,7 @@ INVALID_YNE_PROMPTS = [
 ]
 
 CONTINUE_Q_VARIANTS = [
-    "Shall we journeyfurther with this word?",
+    "Shall we journey further with this word?",
     "Do you want to go deeper with this word?",
     "Would you like to explore this word a little further?",
     "Shall we go further with this word?",
