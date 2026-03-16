@@ -2090,7 +2090,7 @@ function splitSpeechClauses(text){
   if (!raw) return [];
 
   return raw
-    .split(/(?<=[.!?])\s+|(?<=,)\s+|(?<=;)\s+|(?<=:)\s+|\n+/)
+    .split(/(?<=[.!?])\s+|\n+/)
     .map(s => s.trim())
     .filter(Boolean);
 }
