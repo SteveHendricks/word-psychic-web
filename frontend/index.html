@@ -1503,9 +1503,9 @@ function getTypingProfile(){
   const v = speedSel.value;
 
   if (IS_IOS){
-    if (v === "slow") return { char: 22, space: 12, punct: 110, comma: 62, line: 150 };
-    if (v === "fast") return { char: 12, space: 7, punct: 58, comma: 34, line: 86 };
-    return { char: 16, space: 9, punct: 78, comma: 44, line: 114 };
+    if (v === "slow") return { char: 28, space: 16, punct: 138, comma: 78, line: 190 };
+    if (v === "fast") return { char: 16, space: 9, punct: 78, comma: 44, line: 110 };
+    return { char: 21, space: 12, punct: 102, comma: 58, line: 146 };
   }
 
   if (IS_MOBILE_LAYOUT || IS_SAFARI){
@@ -2296,8 +2296,14 @@ async function typeAndSpeakChunk(chunk, token){
 
     const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
     if (clauses.length){
-      await sleep(leadBeforeVoiceMs());
+      const extraLead =
+        speedSel.value === "slow" ? 170 :
+        speedSel.value === "fast" ? 55 :
+        120;
+
+      await sleep(extraLead);
       if (!isTokenLive(token)) return;
+
       await speakClauseList(clauses, token);
     }
 
@@ -2315,7 +2321,6 @@ async function typeAndSpeakChunk(chunk, token){
   hardPulseOff();
   updateSpeakingFromEngine();
 }
-
 async function speakAndTypePerSentence(text, token){
   if (!isTokenLive(token)) return;
 
