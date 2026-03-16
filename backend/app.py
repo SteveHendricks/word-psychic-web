@@ -421,7 +421,7 @@ I see another word. Complicity — Participation in wrongdoing.
 The raccoon denied complicity, but he did allow the cheese store robbers to lay low in his den for some cheddar.
 
 A final word. Collusion — Secret cooperation.
-In collusion, the basketball cheerleaders cheered “offense” when they should have cheered “defense” to confuse the home team.
+In collusion, the basketball cheerleaders cheered “offense,” when they should have cheered “defense,” to confuse the home team.
 
 Charisma. Complicity. Collusion.
 Your fortune: Manipulation thrives in secrecy, but loses its power when caught with its pants down.""",
