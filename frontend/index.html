@@ -1384,6 +1384,7 @@ const API = "https://word-psychic-web.onrender.com";
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const IS_MOBILE_LAYOUT = window.matchMedia("(max-width: 768px)").matches || IS_IOS;
 const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+const IS_DESKTOP_SAFARI = IS_SAFARI && !IS_MOBILE_LAYOUT;
 const USE_FALLBACK_BEATS = true;
 
 const WHOOSH_MS = 1900;
@@ -1589,17 +1590,29 @@ function setBeatScale(scale){
 function hardPulseOff(){
   clearTimeout(beatOffTimer);
   ballWrap.classList.remove("beat");
-  setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
+
+  if (IS_DESKTOP_SAFARI){
+    setBeatScale("1.0010");
+  }else{
+    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
+  }
 }
 
 function triggerBeat(strength = 1){
   const maxStrength = IS_IOS ? 1.36 : (IS_MOBILE_LAYOUT ? 1.42 : 1.40);
   const s = Math.max(0.92, Math.min(maxStrength, strength));
-  const scale = IS_IOS
-    ? (1.0022 + (s - 1) * 0.0030)
-    : IS_MOBILE_LAYOUT
-      ? (1.0052 + (s - 1) * 0.0088)
-      : (1.0050 + (s - 1) * 0.0084);
+
+  let scale;
+
+  if (IS_DESKTOP_SAFARI){
+    scale = 1.0010;
+  }else if (IS_IOS){
+    scale = 1.0022 + (s - 1) * 0.0030;
+  }else if (IS_MOBILE_LAYOUT){
+    scale = 1.0052 + (s - 1) * 0.0088;
+  }else{
+    scale = 1.0050 + (s - 1) * 0.0084;
+  }
 
   ballWrap.classList.add("beat");
   setBeatScale(scale.toFixed(4));
@@ -1607,7 +1620,12 @@ function triggerBeat(strength = 1){
   clearTimeout(beatOffTimer);
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
-    setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
+
+    if (IS_DESKTOP_SAFARI){
+      setBeatScale("1.0010");
+    }else{
+      setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
+    }
   }, IS_IOS ? 118 : (IS_MOBILE_LAYOUT ? 125 : 102));
 }
 
@@ -1649,7 +1667,12 @@ function setSpeaking(on, generation = speechGeneration){
 
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
-  setBeatScale(isSpeaking ? "1.0022" : "1.0010");
+
+  if (IS_DESKTOP_SAFARI){
+    setBeatScale("1.0010");
+  }else{
+    setBeatScale(isSpeaking ? "1.0022" : "1.0010");
+  }
 
   if (isSpeaking){
     speechStartTs = performance.now();
@@ -1668,7 +1691,13 @@ function updateSpeakingFromEngine(){
     if (active || speakingCount > 0){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
-      setBeatScale("1.0022");
+
+      if (IS_DESKTOP_SAFARI){
+        setBeatScale("1.0010");
+      }else{
+        setBeatScale("1.0022");
+      }
+
       if (USE_FALLBACK_BEATS) startFallbackBeats(speechGeneration);
     }else{
       stopFallbackBeats();
@@ -1929,6 +1958,7 @@ function voiceSignatureBase(){
   const name = normVoiceName(chosenVoice?.name || "");
 
   if (IS_IOS && name.includes("tessa")) return 0.94;
+  if (IS_DESKTOP_SAFARI && name.includes("tessa")) return 0.84;
 
   if (name.includes("google uk english female")) return 0.88;
   if (name.includes("isha")) return 0.92;
@@ -1971,6 +2001,20 @@ function styleParams(){
       speedSel.value === "slow" ? 0.70 :
       speedSel.value === "fast" ? 1.12 :
       0.96;
+
+    return { pitch, rate };
+  }
+
+  if (IS_DESKTOP_SAFARI && name.includes("tessa")){
+    pitch =
+      speedSel.value === "slow" ? 0.88 :
+      speedSel.value === "fast" ? 0.93 :
+      0.90;
+
+    rate =
+      speedSel.value === "slow" ? 0.72 :
+      speedSel.value === "fast" ? 0.98 :
+      0.84;
 
     return { pitch, rate };
   }
@@ -2080,6 +2124,7 @@ function splitChunks(full){
   if (buf) out.push(buf);
   return out;
 }
+
 function splitSpeechClauses(text){
   const raw = voiceSpecificSpeechText(text || "").trim();
   if (!raw) return [];
@@ -2268,7 +2313,6 @@ async function typeChunkSmooth(chunk, token){
 }
 
 async function typeAndSpeakChunk(chunk, token){
-
   const clauses = speakWhileTyping.checked ? splitSpeechClauses(chunk) : [];
 
   if (!clauses.length){
@@ -2279,7 +2323,6 @@ async function typeAndSpeakChunk(chunk, token){
   let remaining = chunk;
 
   for (const clause of clauses){
-
     if (!isTokenLive(token)) return;
 
     const idx = remaining.toLowerCase().indexOf(clause.toLowerCase());
@@ -2307,6 +2350,7 @@ async function typeAndSpeakChunk(chunk, token){
     await typeChunkSmooth(remaining, token);
   }
 }
+
 async function speakAndTypePerSentence(text, token){
   if (!isTokenLive(token)) return;
 
@@ -2350,6 +2394,7 @@ async function speakAndTypePerSentence(text, token){
   hardPulseOff();
   updateSpeakingFromEngine();
 }
+
 async function fetchJsonWithRetry(url, options = {}, retries = 1){
   for (let attempt = 0; attempt <= retries; attempt++){
     try{
@@ -2453,7 +2498,6 @@ async function startSession(token){
 }
 
 async function sendChoice(answer){
-
   if (chooseInFlight) return;
   if (sessionDone) return;
   if (!guardAction()) return;
@@ -2463,7 +2507,6 @@ async function sendChoice(answer){
   const token = runToken;
 
   try{
-
     setButtonsEnabled(false);
 
     quickClearScreen();
@@ -2507,7 +2550,6 @@ async function sendChoice(answer){
     }
 
   }catch(err){
-
     if (!isTokenLive(runToken)) return;
 
     screenEl.textContent = `⚠️ Request error\n${String(err)}`;
@@ -2521,6 +2563,7 @@ async function sendChoice(answer){
     chooseInFlight = false;
   }
 }
+
 let introAnswered = false;
 
 function revealEndSessionAfterIntro(){
