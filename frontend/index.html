@@ -1494,30 +1494,29 @@ function paceFactor(){
   const v = speedSel.value;
 
   if (IS_IOS){
-    return v === "slow" ? 1.55 : v === "fast" ? 0.72 : 1.0;
+    return v === "slow" ? 1.00 : v === "fast" ? 0.60 : 0.72;
   }
 
-  return v === "slow" ? 1.45 : v === "fast" ? 0.68 : 1.0;
+  return v === "slow" ? 1.00 : v === "fast" ? 0.58 : 0.68;
 }
-
 function getTypingProfile(){
   const v = speedSel.value;
 
   if (IS_IOS){
-    if (v === "slow") return { char: 28, space: 16, punct: 138, comma: 78, line: 190 };
-    if (v === "fast") return { char: 16, space: 9, punct: 78, comma: 44, line: 110 };
-    return { char: 21, space: 12, punct: 102, comma: 58, line: 146 };
+    if (v === "slow") return { char: 21, space: 12, punct: 102, comma: 58, line: 146 };
+    if (v === "fast") return { char: 13, space: 7, punct: 64, comma: 36, line: 92 };
+    return { char: 16, space: 9, punct: 78, comma: 44, line: 110 };
   }
 
   if (IS_MOBILE_LAYOUT || IS_SAFARI){
-    if (v === "slow") return { char: 31, space: 17, punct: 118, comma: 66, line: 176 };
-    if (v === "fast") return { char: 14, space: 8, punct: 52, comma: 30, line: 86 };
-    return { char: 21, space: 12, punct: 82, comma: 46, line: 126 };
+    if (v === "slow") return { char: 21, space: 12, punct: 82, comma: 46, line: 126 };
+    if (v === "fast") return { char: 11, space: 6, punct: 42, comma: 24, line: 72 };
+    return { char: 14, space: 8, punct: 52, comma: 30, line: 86 };
   }
 
-  if (v === "slow") return { char: 27, space: 16, punct: 118, comma: 70, line: 170 };
-  if (v === "fast") return { char: 13, space: 8, punct: 60, comma: 34, line: 96 };
-  return { char: 18, space: 11, punct: 86, comma: 48, line: 128 };
+  if (v === "slow") return { char: 18, space: 11, punct: 86, comma: 48, line: 128 };
+  if (v === "fast") return { char: 10, space: 6, punct: 46, comma: 26, line: 76 };
+  return { char: 13, space: 8, punct: 60, comma: 34, line: 96 };
 }
 
 function charDelay(ch){
@@ -1553,18 +1552,18 @@ function baseSpeechRate(){
   const v = speedSel.value;
 
   if (IS_IOS){
-    return v === "slow" ? 0.66 : v === "fast" ? 1.14 : 0.96;
+    return v === "slow" ? 0.96 : v === "fast" ? 1.22 : 1.14;
   }
 
   if (IS_MOBILE_LAYOUT){
-    return v === "slow" ? 0.76 : v === "fast" ? 1.11 : 0.93;
+    return v === "slow" ? 0.93 : v === "fast" ? 1.18 : 1.11;
   }
 
   if (IS_SAFARI){
-    return v === "slow" ? 0.77 : v === "fast" ? 1.10 : 0.92;
+    return v === "slow" ? 0.92 : v === "fast" ? 1.18 : 1.10;
   }
 
-  return v === "slow" ? 0.80 : v === "fast" ? 1.05 : 0.91;
+  return v === "slow" ? 0.91 : v === "fast" ? 1.12 : 1.05;
 }
 
 function syncVoiceLabel(){
