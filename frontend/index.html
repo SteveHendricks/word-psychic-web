@@ -1754,17 +1754,17 @@ function playGhostlyWhoosh(){
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
-    const peakGain = IS_IOS ? 0.62 : 0.50;
-    const tailGain = IS_IOS ? 0.22 : 0.17;
+    const peakGain = IS_IOS ? 0.78 : 0.64;
+    const tailGain = IS_IOS ? 0.30 : 0.24;
 
-    filter.frequency.setValueAtTime(260, now);
-    filter.frequency.exponentialRampToValueAtTime(1550, now + dur*0.62);
-    filter.frequency.exponentialRampToValueAtTime(520,  now + dur);
+    filter.frequency.setValueAtTime(180, now);
+    filter.frequency.exponentialRampToValueAtTime(1750, now + dur*0.68);
+    filter.frequency.exponentialRampToValueAtTime(420, now + dur);
 
-    filter2.frequency.setValueAtTime(320, now);
-    filter2.frequency.exponentialRampToValueAtTime(920, now + dur*0.70);
-    filter2.frequency.exponentialRampToValueAtTime(420, now + dur);
-
+    filter2.frequency.setValueAtTime(240, now);
+    filter2.frequency.exponentialRampToValueAtTime(1100, now + dur*0.74);
+    filter2.frequency.exponentialRampToValueAtTime(320, now + dur);
+    
     gain.gain.setValueAtTime(0.0001, now);
     gain.gain.exponentialRampToValueAtTime(peakGain, now + dur*0.22);
     gain.gain.exponentialRampToValueAtTime(tailGain, now + dur*0.78);
@@ -2005,18 +2005,18 @@ function styleParams(){
   }
 
   if (IS_DESKTOP_SAFARI && name.includes("tessa")){
-    pitch =
-      speedSel.value === "slow" ? 0.88 :
-      speedSel.value === "fast" ? 0.93 :
-      0.90;
+  pitch =
+    speedSel.value === "slow" ? 0.88 :
+    speedSel.value === "fast" ? 0.93 :
+    0.90;
 
-    rate =
-      speedSel.value === "slow" ? 0.72 :
-      speedSel.value === "fast" ? 0.98 :
-      0.84;
+  rate =
+  speedSel.value === "slow" ? 0.72 :
+  speedSel.value === "fast" ? 1.18 :
+  0.92;
 
-    return { pitch, rate };
-  }
+  return { pitch, rate };
+}
 
   if (name.includes("tessa")) pitch = 0.95;
   else if (name.includes("martha")) pitch = 0.96;
