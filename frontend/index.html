@@ -1754,8 +1754,8 @@ function playGhostlyWhoosh(){
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
-    const peakGain = IS_IOS ? 0.78 : 0.64;
-    const tailGain = IS_IOS ? 0.30 : 0.24;
+    const peakGain = IS_IOS ? 0.62 : 0.50;
+    const tailGain = IS_IOS ? 0.22 : 0.17;
 
     filter.frequency.setValueAtTime(180, now);
     filter.frequency.exponentialRampToValueAtTime(1750, now + dur*0.68);
