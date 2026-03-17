@@ -1387,7 +1387,7 @@ const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const IS_DESKTOP_SAFARI = IS_SAFARI && !IS_MOBILE_LAYOUT;
 const USE_FALLBACK_BEATS = true;
 
-const WHOOSH_MS = 1900;
+const WHOOSH_MS = 2400;
 const WHOOSH_BUFFER_MS = 560;
 
 const ELLIPSIS_DELAY = 1500;
@@ -1560,10 +1560,10 @@ function baseSpeechRate(){
   }
 
   if (IS_SAFARI){
-    return v === "slow" ? 0.92 : v === "fast" ? 1.18 : 1.10;
+    return v === "slow" ? 0.92 : v === "fast" ? 1.30 : 1.10;
   }
 
-  return v === "slow" ? 0.91 : v === "fast" ? 1.12 : 1.05;
+  return v === "slow" ? 0.91 : v === "fast" ? 1.22 : 1.05;
 }
 
 function syncVoiceLabel(){
@@ -1754,8 +1754,8 @@ function playGhostlyWhoosh(){
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
-    const peakGain = IS_IOS ? 0.48 : 0.38;
-    const tailGain = IS_IOS ? 0.16 : 0.12;
+    const peakGain = IS_IOS ? 0.62 : 0.50;
+    const tailGain = IS_IOS ? 0.22 : 0.17;
 
     filter.frequency.setValueAtTime(260, now);
     filter.frequency.exponentialRampToValueAtTime(1550, now + dur*0.62);
