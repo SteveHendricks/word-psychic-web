@@ -1419,6 +1419,8 @@ let lastActionTs = 0;
 let currentSpeechNonce = 0;
 let speechGeneration = 0;
 let speechStartTs = 0;
+let orbKillVersion = 0;
+let orbKillTimers = [];
 
 function bumpRunToken(){ runToken++; return runToken; }
 function isTokenLive(t){ return t === runToken; }
@@ -1576,6 +1578,7 @@ function syncVoiceLabel(){
     speakingCount = 0;
     speechGeneration++;
     currentSpeechNonce++;
+    clearOrbKillTimers();
     ballWrap.classList.remove("speaking");
     ballWrap.classList.remove("beat");
     ballWrap.classList.add("idle");
@@ -1587,6 +1590,50 @@ function syncVoiceLabel(){
 
 function setBeatScale(scale){
   ballWrap.style.setProperty("--beatScale", String(scale));
+}
+
+function clearOrbKillTimers(){
+  for (const id of orbKillTimers) clearTimeout(id);
+  orbKillTimers = [];
+}
+
+function forceOrbOffNow(){
+  clearOrbKillTimers();
+  speakingCount = 0;
+  ballWrap.classList.remove("beat");
+  ballWrap.classList.remove("speaking");
+  ballWrap.classList.add("idle");
+  setBeatScale("1.0010");
+}
+
+function forceOrbOffHard(){
+  const myKill = ++orbKillVersion;
+
+  stopFallbackBeats();
+  clearTimeout(beatOffTimer);
+
+  forceOrbOffNow();
+
+  const killAgain = () => {
+    if (myKill !== orbKillVersion) return;
+    stopFallbackBeats();
+    clearTimeout(beatOffTimer);
+    forceOrbOffNow();
+  };
+
+  orbKillTimers.push(setTimeout(killAgain, 0));
+  orbKillTimers.push(setTimeout(killAgain, 40));
+  orbKillTimers.push(setTimeout(killAgain, 90));
+  orbKillTimers.push(setTimeout(killAgain, 160));
+
+  requestAnimationFrame(() => {
+    if (myKill !== orbKillVersion) return;
+    killAgain();
+    requestAnimationFrame(() => {
+      if (myKill !== orbKillVersion) return;
+      killAgain();
+    });
+  });
 }
 
 function hardPulseOff(){
@@ -1601,20 +1648,14 @@ function hardPulseOff(){
 }
 
 function hardStopOrbVisuals(){
-  stopFallbackBeats();
-  clearTimeout(beatOffTimer);
-
-  speakingCount = 0;
   currentSpeechNonce++;
   speechGeneration++;
-
-  ballWrap.classList.remove("beat");
-  ballWrap.classList.remove("speaking");
-  ballWrap.classList.add("idle");
-  setBeatScale("1.0010");
+  forceOrbOffHard();
 }
 
 function triggerBeat(strength = 1){
+  if (!ballWrap.classList.contains("speaking")) return;
+
   const maxStrength = IS_IOS ? 1.36 : (IS_MOBILE_LAYOUT ? 1.42 : 1.40);
   const s = Math.max(0.92, Math.min(maxStrength, strength));
 
@@ -1745,15 +1786,9 @@ function updateSpeakingFromEngine(){
 
 function hardStopAllAudioAndBeats(){
   speechGeneration++;
-  try { speechSynthesis.cancel(); } catch(e){}
-  speakingCount = 0;
   currentSpeechNonce++;
-  ballWrap.classList.remove("speaking");
-  ballWrap.classList.remove("beat");
-  ballWrap.classList.add("idle");
-  ballWrap.style.setProperty("--beatScale","1.0010");
-  stopFallbackBeats();
-  clearTimeout(beatOffTimer);
+  try { speechSynthesis.cancel(); } catch(e){}
+  forceOrbOffHard();
 }
 
 function playGhostlyWhoosh(){
@@ -2205,6 +2240,7 @@ function speakUtterance(text){
     if (!ev) return;
     if (generation !== speechGeneration) return;
     if (nonce !== currentSpeechNonce && speakingCount === 0) return;
+    if (!ballWrap.classList.contains("speaking")) return;
 
     if (ev.name === "word" || typeof ev.charIndex === "number"){
       const jitter = IS_DESKTOP_CHROME
@@ -2223,24 +2259,12 @@ function speakUtterance(text){
   const started = new Promise(r => (startedResolve = r));
   const done = new Promise(r => (doneResolve = r));
 
-  const myNonce = nonce;
   let finished = false;
 
   function finishUtterance(){
     if (finished) return;
     finished = true;
-
-    if (myNonce === currentSpeechNonce){
-      stopFallbackBeats();
-      clearTimeout(beatOffTimer);
-
-      speakingCount = 0;
-      ballWrap.classList.remove("beat");
-      ballWrap.classList.remove("speaking");
-      ballWrap.classList.add("idle");
-      setBeatScale("1.0010");
-    }
-
+    forceOrbOffHard();
     doneResolve();
   }
 
@@ -2250,6 +2274,8 @@ function speakUtterance(text){
       doneResolve();
       return;
     }
+
+    clearOrbKillTimers();
 
     speakingCount = 1;
     ballWrap.classList.add("speaking");
@@ -2726,10 +2752,7 @@ speedSel.addEventListener("change", () => {
 
   if (window.speechSynthesis && speechSynthesis.speaking){
     try { speechSynthesis.cancel(); } catch(e){}
-    speakingCount = 0;
-    speechGeneration++;
-    currentSpeechNonce++;
-    updateSpeakingFromEngine();
+    hardStopAllAudioAndBeats();
   }
 });
 
