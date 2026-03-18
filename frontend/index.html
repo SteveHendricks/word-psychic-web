@@ -1385,6 +1385,8 @@ const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const IS_MOBILE_LAYOUT = window.matchMedia("(max-width: 768px)").matches || IS_IOS;
 const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const IS_DESKTOP_SAFARI = IS_SAFARI && !IS_MOBILE_LAYOUT;
+const IS_CHROME = /chrome|crios|chromium/i.test(navigator.userAgent) && !/edg|opr|opera/i.test(navigator.userAgent);
+const IS_DESKTOP_CHROME = IS_CHROME && !IS_MOBILE_LAYOUT && !IS_IOS;
 const USE_FALLBACK_BEATS = true;
 
 const WHOOSH_MS = 2400;
@@ -1499,6 +1501,7 @@ function paceFactor(){
 
   return v === "slow" ? 1.00 : v === "fast" ? 0.58 : 0.68;
 }
+
 function getTypingProfile(){
   const v = speedSel.value;
 
@@ -1590,7 +1593,7 @@ function hardPulseOff(){
   clearTimeout(beatOffTimer);
   ballWrap.classList.remove("beat");
 
-  if (IS_DESKTOP_SAFARI){
+  if (IS_DESKTOP_SAFARI || IS_DESKTOP_CHROME){
     setBeatScale("1.0010");
   }else{
     setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
@@ -1603,7 +1606,7 @@ function triggerBeat(strength = 1){
 
   let scale;
 
-  if (IS_DESKTOP_SAFARI){
+  if (IS_DESKTOP_SAFARI || IS_DESKTOP_CHROME){
     scale = 1.0010;
   }else if (IS_IOS){
     scale = 1.0022 + (s - 1) * 0.0030;
@@ -1620,19 +1623,19 @@ function triggerBeat(strength = 1){
   beatOffTimer = setTimeout(() => {
     ballWrap.classList.remove("beat");
 
-    if (IS_DESKTOP_SAFARI){
+    if (IS_DESKTOP_SAFARI || IS_DESKTOP_CHROME){
       setBeatScale("1.0010");
     }else{
       setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
     }
-  }, IS_IOS ? 118 : (IS_MOBILE_LAYOUT ? 125 : 102));
+  }, IS_DESKTOP_CHROME ? 46 : (IS_IOS ? 118 : (IS_MOBILE_LAYOUT ? 125 : 102)));
 }
 
 function startFallbackBeats(generation){
   if (!USE_FALLBACK_BEATS) return;
   stopFallbackBeats();
 
-  if (IS_IOS) return;
+  if (IS_IOS || IS_DESKTOP_CHROME) return;
 
   const tick = () => {
     if (generation !== speechGeneration) return;
@@ -1667,7 +1670,7 @@ function setSpeaking(on, generation = speechGeneration){
   ballWrap.classList.toggle("speaking", isSpeaking);
   ballWrap.classList.toggle("idle", !isSpeaking);
 
-  if (IS_DESKTOP_SAFARI){
+  if (IS_DESKTOP_SAFARI || IS_DESKTOP_CHROME){
     setBeatScale("1.0010");
   }else{
     setBeatScale(isSpeaking ? "1.0022" : "1.0010");
@@ -1678,8 +1681,9 @@ function setSpeaking(on, generation = speechGeneration){
     startFallbackBeats(generation);
   }else{
     stopFallbackBeats();
-    hardPulseOff();
+    clearTimeout(beatOffTimer);
     ballWrap.classList.remove("beat");
+    setBeatScale("1.0010");
   }
 }
 
@@ -1691,7 +1695,7 @@ function updateSpeakingFromEngine(){
       ballWrap.classList.add("speaking");
       ballWrap.classList.remove("idle");
 
-      if (IS_DESKTOP_SAFARI){
+      if (IS_DESKTOP_SAFARI || IS_DESKTOP_CHROME){
         setBeatScale("1.0010");
       }else{
         setBeatScale("1.0022");
@@ -1754,17 +1758,17 @@ function playGhostlyWhoosh(){
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
-    const peakGain = IS_IOS ? 0.62 : 0.50;
-    const tailGain = IS_IOS ? 0.22 : 0.17;
+    const peakGain = IS_IOS ? 0.50 : 0.40;
+    const tailGain = IS_IOS ? 0.18 : 0.14;
 
-    filter.frequency.setValueAtTime(180, now);
-    filter.frequency.exponentialRampToValueAtTime(1750, now + dur*0.68);
-    filter.frequency.exponentialRampToValueAtTime(420, now + dur);
+    filter.frequency.setValueAtTime(260, now);
+    filter.frequency.exponentialRampToValueAtTime(1550, now + dur*0.62);
+    filter.frequency.exponentialRampToValueAtTime(520,  now + dur);
 
-    filter2.frequency.setValueAtTime(240, now);
-    filter2.frequency.exponentialRampToValueAtTime(1100, now + dur*0.74);
-    filter2.frequency.exponentialRampToValueAtTime(320, now + dur);
-    
+    filter2.frequency.setValueAtTime(320, now);
+    filter2.frequency.exponentialRampToValueAtTime(920, now + dur*0.70);
+    filter2.frequency.exponentialRampToValueAtTime(420, now + dur);
+
     gain.gain.setValueAtTime(0.0001, now);
     gain.gain.exponentialRampToValueAtTime(peakGain, now + dur*0.22);
     gain.gain.exponentialRampToValueAtTime(tailGain, now + dur*0.78);
@@ -2005,18 +2009,18 @@ function styleParams(){
   }
 
   if (IS_DESKTOP_SAFARI && name.includes("tessa")){
-  pitch =
-    speedSel.value === "slow" ? 0.88 :
-    speedSel.value === "fast" ? 0.93 :
-    1.00;
+    pitch =
+      speedSel.value === "slow" ? 0.88 :
+      speedSel.value === "fast" ? 0.93 :
+      0.90;
 
-  rate =
-  speedSel.value === "slow" ? 0.72 :
-  speedSel.value === "fast" ? 1.06 :
-  1.02;
+    rate =
+      speedSel.value === "slow" ? 0.72 :
+      speedSel.value === "fast" ? 1.08 :
+      1.00;
 
-  return { pitch, rate };
-}
+    return { pitch, rate };
+  }
 
   if (name.includes("tessa")) pitch = 0.95;
   else if (name.includes("martha")) pitch = 0.96;
@@ -2205,6 +2209,10 @@ function speakUtterance(text){
       return;
     }
 
+    stopFallbackBeats();
+    clearTimeout(beatOffTimer);
+    ballWrap.classList.remove("beat");
+
     setSpeaking(false, generation);
     updateSpeakingFromEngine();
     hardPulseOff();
@@ -2216,6 +2224,10 @@ function speakUtterance(text){
       doneResolve();
       return;
     }
+
+    stopFallbackBeats();
+    clearTimeout(beatOffTimer);
+    ballWrap.classList.remove("beat");
 
     setSpeaking(false, generation);
     updateSpeakingFromEngine();
