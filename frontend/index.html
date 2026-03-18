@@ -1422,8 +1422,8 @@ let speechStartTs = 0;
 let orbKillVersion = 0;
 let orbKillTimers = [];
 let activeUtterance = null;
-let chromePulseTimer = null;
-let chromePulseNonce = 0;
+let speechEndWatchTimer = null;
+let speechEndWatchNonce = 0;
 
 function bumpRunToken(){ runToken++; return runToken; }
 function isTokenLive(t){ return t === runToken; }
@@ -1584,7 +1584,7 @@ function syncVoiceLabel(){
     currentSpeechNonce++;
     clearOrbKillTimers();
     stopFallbackBeats();
-    stopChromePulseLoop();
+    stopSpeechEndWatch();
     ballWrap.classList.remove("speaking");
     ballWrap.classList.remove("beat");
     ballWrap.classList.add("idle");
@@ -1605,7 +1605,7 @@ function clearOrbKillTimers(){
 function forceOrbOffNow(){
   clearOrbKillTimers();
   stopFallbackBeats();
-  stopChromePulseLoop();
+  stopSpeechEndWatch();
   speakingCount = 0;
   ballWrap.classList.remove("beat");
   ballWrap.classList.remove("speaking");
@@ -1617,14 +1617,14 @@ function forceOrbOffHard(){
   const myKill = ++orbKillVersion;
 
   stopFallbackBeats();
-  stopChromePulseLoop();
+  stopSpeechEndWatch();
   clearTimeout(beatOffTimer);
   forceOrbOffNow();
 
   const killAgain = () => {
     if (myKill !== orbKillVersion) return;
     stopFallbackBeats();
-    stopChromePulseLoop();
+    stopSpeechEndWatch();
     clearTimeout(beatOffTimer);
     speakingCount = 0;
     ballWrap.classList.remove("beat");
@@ -1663,7 +1663,7 @@ function hardStopOrbVisuals(){
   currentSpeechNonce++;
   activeUtterance = null;
   stopFallbackBeats();
-  stopChromePulseLoop();
+  stopSpeechEndWatch();
   forceOrbOffHard();
 }
 
@@ -1705,34 +1705,38 @@ function startFallbackBeats(generation){
   stopFallbackBeats();
 
   if (IS_IOS) return;
-  if (IS_DESKTOP_CHROME) return;
 
   let active = true;
-  const baseDelay = IS_MOBILE_LAYOUT ? 140 : 120;
-  const variance = IS_MOBILE_LAYOUT ? 120 : 90;
 
-  function loop(){
+  const phrasePulse = () => {
     if (!active) return;
     if (generation !== speechGeneration) return;
     if (!ballWrap.classList.contains("speaking")) return;
 
-    const delay = baseDelay + (Math.random() * variance);
+    let pulses = 2 + Math.floor(Math.random() * 3);
 
-    fallbackBeatTimer = setTimeout(() => {
+    const doPulse = () => {
       if (!active) return;
       if (generation !== speechGeneration) return;
       if (!ballWrap.classList.contains("speaking")) return;
 
-      const strength = IS_MOBILE_LAYOUT
-        ? (1.08 + Math.random() * 0.18)
-        : (1.10 + Math.random() * 0.14);
+      triggerBeat(1.12);
+      pulses--;
 
-      triggerBeat(strength);
-      loop();
-    }, delay);
-  }
+      if (pulses > 0){
+        fallbackBeatTimer = setTimeout(doPulse, 90 + Math.random() * 55);
+      }else{
+        fallbackBeatTimer = setTimeout(phrasePulse, 150 + Math.random() * 110);
+      }
+    };
 
-  loop();
+    doPulse();
+  };
+
+  fallbackBeatTimer = setTimeout(
+    phrasePulse,
+    IS_DESKTOP_CHROME ? 85 : 120
+  );
 }
 
 function stopFallbackBeats(){
@@ -1740,33 +1744,51 @@ function stopFallbackBeats(){
   fallbackBeatTimer = null;
 }
 
-function stopChromePulseLoop(){
-  chromePulseNonce++;
-  clearTimeout(chromePulseTimer);
-  chromePulseTimer = null;
+function stopSpeechEndWatch(){
+  speechEndWatchNonce++;
+  clearTimeout(speechEndWatchTimer);
+  speechEndWatchTimer = null;
 }
 
-function startChromePulseLoop(generation, utterNonce){
-  if (!IS_DESKTOP_CHROME) return;
+function startSpeechEndWatch(generation, utterNonce, utterRef){
+  stopSpeechEndWatch();
+  const myWatch = ++speechEndWatchNonce;
+  let silentCount = 0;
 
-  stopChromePulseLoop();
-  const myPulse = ++chromePulseNonce;
-
-  function loop(){
-    if (myPulse !== chromePulseNonce) return;
+  function tick(){
+    if (myWatch !== speechEndWatchNonce) return;
     if (generation !== speechGeneration) return;
     if (utterNonce !== currentSpeechNonce) return;
-    if (!ballWrap.classList.contains("speaking")) return;
+    if (activeUtterance !== utterRef) return;
 
-    triggerBeat(1.11);
+    let engineSpeaking = false;
+    try{
+      engineSpeaking = !!speechSynthesis.speaking;
+    }catch(e){
+      engineSpeaking = false;
+    }
 
-    chromePulseTimer = setTimeout(
-      loop,
-      105 + Math.random() * 85
-    );
+    if (engineSpeaking){
+      silentCount = 0;
+    }else{
+      silentCount++;
+    }
+
+    if (silentCount >= 2){
+      stopFallbackBeats();
+      clearTimeout(beatOffTimer);
+      speakingCount = 0;
+      ballWrap.classList.remove("beat");
+      ballWrap.classList.remove("speaking");
+      ballWrap.classList.add("idle");
+      setBeatScale("1.0010");
+      return;
+    }
+
+    speechEndWatchTimer = setTimeout(tick, 35);
   }
 
-  chromePulseTimer = setTimeout(loop, 70);
+  speechEndWatchTimer = setTimeout(tick, 35);
 }
 
 function setSpeaking(on, generation = speechGeneration){
@@ -1789,7 +1811,7 @@ function setSpeaking(on, generation = speechGeneration){
     startFallbackBeats(generation);
   }else{
     stopFallbackBeats();
-    stopChromePulseLoop();
+    stopSpeechEndWatch();
     clearTimeout(beatOffTimer);
     ballWrap.classList.remove("beat");
     ballWrap.classList.remove("speaking");
@@ -1812,10 +1834,10 @@ function updateSpeakingFromEngine(){
         setBeatScale("1.0022");
       }
 
-      if (USE_FALLBACK_BEATS && !IS_DESKTOP_CHROME) startFallbackBeats(speechGeneration);
+      if (USE_FALLBACK_BEATS) startFallbackBeats(speechGeneration);
     }else{
       stopFallbackBeats();
-      stopChromePulseLoop();
+      stopSpeechEndWatch();
       clearTimeout(beatOffTimer);
       ballWrap.classList.remove("speaking");
       ballWrap.classList.remove("beat");
@@ -1835,7 +1857,7 @@ function hardStopAllAudioAndBeats(){
 
   activeUtterance = null;
   stopFallbackBeats();
-  stopChromePulseLoop();
+  stopSpeechEndWatch();
   forceOrbOffHard();
 }
 
@@ -2305,21 +2327,20 @@ function speakUtterance(text){
     cleanup();
     currentSpeechNonce++;
     stopFallbackBeats();
-    stopChromePulseLoop();
+    stopSpeechEndWatch();
     forceOrbOffHard();
-    ballWrap.classList.remove("speaking");
     doneResolve();
   }
 
   u.onboundary = (ev) => {
     if (!ev) return;
     if (generation !== speechGeneration) return;
-    if (nonce !== currentSpeechNonce) return;
+    if (nonce !== currentSpeechNonce && speakingCount === 0) return;
     if (!ballWrap.classList.contains("speaking")) return;
 
     if (ev.name === "word" || typeof ev.charIndex === "number"){
       const jitter = IS_DESKTOP_CHROME
-        ? 1.12
+        ? 1.14
         : IS_IOS
           ? (1.06 + Math.random() * 0.08)
           : IS_MOBILE_LAYOUT
@@ -2340,7 +2361,7 @@ function speakUtterance(text){
 
     clearOrbKillTimers();
     stopFallbackBeats();
-    stopChromePulseLoop();
+    stopSpeechEndWatch();
 
     speakingCount = 1;
     ballWrap.classList.add("speaking");
@@ -2350,13 +2371,9 @@ function speakUtterance(text){
 
     speechStartTs = performance.now();
 
-    triggerBeat(IS_DESKTOP_CHROME ? 1.10 : (IS_IOS ? 1.10 : 1.14));
-
-    if (IS_DESKTOP_CHROME){
-      startChromePulseLoop(generation, nonce);
-    }else{
-      startFallbackBeats(generation);
-    }
+    triggerBeat(IS_DESKTOP_CHROME ? 1.14 : (IS_IOS ? 1.10 : 1.14));
+    startFallbackBeats(generation);
+    startSpeechEndWatch(generation, nonce, u);
 
     startedResolve();
 
@@ -2397,7 +2414,9 @@ async function speakClauseList(clauses, token){
     if (!speakWhileTyping.checked || !voiceReady || !chosenVoice) return;
 
     const speech = speakUtterance(clause);
-    await speech.done;
+    const maxWait = estimateSpeechMs(clause, speech.rateUsed) + 1200;
+
+    await Promise.race([speech.done, sleep(maxWait)]);
     if (!isTokenLive(token)) return;
 
     hardPulseOff();
