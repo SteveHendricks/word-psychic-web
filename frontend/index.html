@@ -472,7 +472,9 @@
     transition: opacity 68ms ease-out, filter 68ms ease-out;
   }
 
-  .sparkles{ display:none; }
+  .sparkles{
+    display:none;
+  }
 
   .swirlA,.swirlB,.swirlC{
     position:absolute;
@@ -1077,7 +1079,9 @@
       border-radius: 14px;
     }
 
-    .footer-sep{ display:none; }
+    .footer-sep{
+      display:none;
+    }
 
     .radiate{ inset:-40%; filter:blur(22px); }
     .aura{ inset:-26%; filter:blur(18px); }
@@ -1205,7 +1209,9 @@
       grid-template-columns: 1fr 1fr 1fr;
     }
 
-    #stopBtn{ grid-column: auto; }
+    #stopBtn{
+      grid-column: auto;
+    }
 
     .console{
       min-height: 180px;
@@ -1229,9 +1235,13 @@
       min-width: 162px;
     }
 
-    .controls{ gap: 8px; }
+    .controls{
+      gap: 8px;
+    }
 
-    .controls label{ font-size: 13px; }
+    .controls label{
+      font-size: 13px;
+    }
 
     .controls select{
       min-width: 86px;
@@ -1244,7 +1254,9 @@
       padding: 8px 14px;
     }
 
-    .icon-link{ width: 74px; }
+    .icon-link{
+      width: 74px;
+    }
 
     .icon-btn{
       width: 46px;
@@ -1260,7 +1272,9 @@
       grid-template-columns: 1fr;
     }
 
-    button.action{ grid-column: auto; }
+    button.action{
+      grid-column: auto;
+    }
 
     .console{
       min-height: 175px;
@@ -1373,9 +1387,7 @@ const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const IS_DESKTOP_SAFARI = IS_SAFARI && !IS_MOBILE_LAYOUT;
 const IS_CHROME = /chrome|crios|chromium/i.test(navigator.userAgent) && !/edg|opr|opera/i.test(navigator.userAgent);
 const IS_DESKTOP_CHROME = IS_CHROME && !IS_MOBILE_LAYOUT && !IS_IOS;
-
-/* Chrome desktop now runs boundary-only, no fallback beats */
-const USE_FALLBACK_BEATS = !IS_DESKTOP_CHROME;
+const USE_FALLBACK_BEATS = true;
 
 const WHOOSH_MS = 2400;
 const WHOOSH_BUFFER_MS = 560;
@@ -1410,6 +1422,8 @@ let speechStartTs = 0;
 let orbKillVersion = 0;
 let orbKillTimers = [];
 let activeUtterance = null;
+let chromePulseTimer = null;
+let chromePulseNonce = 0;
 
 function bumpRunToken(){ runToken++; return runToken; }
 function isTokenLive(t){ return t === runToken; }
@@ -1569,11 +1583,12 @@ function syncVoiceLabel(){
     speechGeneration++;
     currentSpeechNonce++;
     clearOrbKillTimers();
+    stopFallbackBeats();
+    stopChromePulseLoop();
     ballWrap.classList.remove("speaking");
     ballWrap.classList.remove("beat");
     ballWrap.classList.add("idle");
     ballWrap.style.setProperty("--beatScale","1.0010");
-    stopFallbackBeats();
     clearTimeout(beatOffTimer);
   }
 }
@@ -1589,6 +1604,8 @@ function clearOrbKillTimers(){
 
 function forceOrbOffNow(){
   clearOrbKillTimers();
+  stopFallbackBeats();
+  stopChromePulseLoop();
   speakingCount = 0;
   ballWrap.classList.remove("beat");
   ballWrap.classList.remove("speaking");
@@ -1600,12 +1617,14 @@ function forceOrbOffHard(){
   const myKill = ++orbKillVersion;
 
   stopFallbackBeats();
+  stopChromePulseLoop();
   clearTimeout(beatOffTimer);
   forceOrbOffNow();
 
   const killAgain = () => {
     if (myKill !== orbKillVersion) return;
     stopFallbackBeats();
+    stopChromePulseLoop();
     clearTimeout(beatOffTimer);
     speakingCount = 0;
     ballWrap.classList.remove("beat");
@@ -1643,6 +1662,8 @@ function hardPulseOff(){
 function hardStopOrbVisuals(){
   currentSpeechNonce++;
   activeUtterance = null;
+  stopFallbackBeats();
+  stopChromePulseLoop();
   forceOrbOffHard();
 }
 
@@ -1681,10 +1702,10 @@ function triggerBeat(strength = 1){
 
 function startFallbackBeats(generation){
   if (!USE_FALLBACK_BEATS) return;
-  if (IS_DESKTOP_CHROME) return;
-
   stopFallbackBeats();
+
   if (IS_IOS) return;
+  if (IS_DESKTOP_CHROME) return;
 
   let active = true;
   const baseDelay = IS_MOBILE_LAYOUT ? 140 : 120;
@@ -1719,6 +1740,35 @@ function stopFallbackBeats(){
   fallbackBeatTimer = null;
 }
 
+function stopChromePulseLoop(){
+  chromePulseNonce++;
+  clearTimeout(chromePulseTimer);
+  chromePulseTimer = null;
+}
+
+function startChromePulseLoop(generation, utterNonce){
+  if (!IS_DESKTOP_CHROME) return;
+
+  stopChromePulseLoop();
+  const myPulse = ++chromePulseNonce;
+
+  function loop(){
+    if (myPulse !== chromePulseNonce) return;
+    if (generation !== speechGeneration) return;
+    if (utterNonce !== currentSpeechNonce) return;
+    if (!ballWrap.classList.contains("speaking")) return;
+
+    triggerBeat(1.11);
+
+    chromePulseTimer = setTimeout(
+      loop,
+      105 + Math.random() * 85
+    );
+  }
+
+  chromePulseTimer = setTimeout(loop, 70);
+}
+
 function setSpeaking(on, generation = speechGeneration){
   if (generation !== speechGeneration) return;
 
@@ -1736,9 +1786,10 @@ function setSpeaking(on, generation = speechGeneration){
 
   if (isSpeaking){
     speechStartTs = performance.now();
-    if (!IS_DESKTOP_CHROME) startFallbackBeats(generation);
+    startFallbackBeats(generation);
   }else{
     stopFallbackBeats();
+    stopChromePulseLoop();
     clearTimeout(beatOffTimer);
     ballWrap.classList.remove("beat");
     ballWrap.classList.remove("speaking");
@@ -1764,6 +1815,7 @@ function updateSpeakingFromEngine(){
       if (USE_FALLBACK_BEATS && !IS_DESKTOP_CHROME) startFallbackBeats(speechGeneration);
     }else{
       stopFallbackBeats();
+      stopChromePulseLoop();
       clearTimeout(beatOffTimer);
       ballWrap.classList.remove("speaking");
       ballWrap.classList.remove("beat");
@@ -1782,6 +1834,8 @@ function hardStopAllAudioAndBeats(){
   }catch(e){}
 
   activeUtterance = null;
+  stopFallbackBeats();
+  stopChromePulseLoop();
   forceOrbOffHard();
 }
 
@@ -2196,7 +2250,7 @@ function splitSpeechClauses(text){
     .map(s => s.trim())
     .filter(Boolean);
 }
-
+  
 function estimateSpeechMs(text, rateUsed){
   const t = (text || "").trim();
   if (!t) return 0;
@@ -2250,6 +2304,8 @@ function speakUtterance(text){
 
     cleanup();
     currentSpeechNonce++;
+    stopFallbackBeats();
+    stopChromePulseLoop();
     forceOrbOffHard();
     ballWrap.classList.remove("speaking");
     doneResolve();
@@ -2263,7 +2319,7 @@ function speakUtterance(text){
 
     if (ev.name === "word" || typeof ev.charIndex === "number"){
       const jitter = IS_DESKTOP_CHROME
-        ? 1.10
+        ? 1.12
         : IS_IOS
           ? (1.06 + Math.random() * 0.08)
           : IS_MOBILE_LAYOUT
@@ -2283,6 +2339,8 @@ function speakUtterance(text){
     }
 
     clearOrbKillTimers();
+    stopFallbackBeats();
+    stopChromePulseLoop();
 
     speakingCount = 1;
     ballWrap.classList.add("speaking");
@@ -2294,7 +2352,9 @@ function speakUtterance(text){
 
     triggerBeat(IS_DESKTOP_CHROME ? 1.10 : (IS_IOS ? 1.10 : 1.14));
 
-    if (!IS_DESKTOP_CHROME){
+    if (IS_DESKTOP_CHROME){
+      startChromePulseLoop(generation, nonce);
+    }else{
       startFallbackBeats(generation);
     }
 
@@ -2430,6 +2490,7 @@ async function typeAndSpeakChunk(chunk, token){
     }
 
     await sleep(40);
+
     await speakClauseList([clause], token);
   }
 
@@ -2680,6 +2741,7 @@ function bindStartOnce(){
     sessionId = null;
     sessionDone = false;
     chooseInFlight = false;
+
     introAnswered = false;
 
     unlockVoice();
@@ -2696,6 +2758,7 @@ function bindStartOnce(){
     if (!isTokenLive(token)){ startInFlight = false; return; }
 
     await startSession(token);
+
     startInFlight = false;
   });
 }
