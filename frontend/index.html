@@ -472,9 +472,7 @@
     transition: opacity 68ms ease-out, filter 68ms ease-out;
   }
 
-  .sparkles{
-    display:none;
-  }
+  .sparkles{ display:none; }
 
   .swirlA,.swirlB,.swirlC{
     position:absolute;
@@ -1079,9 +1077,7 @@
       border-radius: 14px;
     }
 
-    .footer-sep{
-      display:none;
-    }
+    .footer-sep{ display:none; }
 
     .radiate{ inset:-40%; filter:blur(22px); }
     .aura{ inset:-26%; filter:blur(18px); }
@@ -1209,9 +1205,7 @@
       grid-template-columns: 1fr 1fr 1fr;
     }
 
-    #stopBtn{
-      grid-column: auto;
-    }
+    #stopBtn{ grid-column: auto; }
 
     .console{
       min-height: 180px;
@@ -1235,13 +1229,9 @@
       min-width: 162px;
     }
 
-    .controls{
-      gap: 8px;
-    }
+    .controls{ gap: 8px; }
 
-    .controls label{
-      font-size: 13px;
-    }
+    .controls label{ font-size: 13px; }
 
     .controls select{
       min-width: 86px;
@@ -1254,9 +1244,7 @@
       padding: 8px 14px;
     }
 
-    .icon-link{
-      width: 74px;
-    }
+    .icon-link{ width: 74px; }
 
     .icon-btn{
       width: 46px;
@@ -1272,9 +1260,7 @@
       grid-template-columns: 1fr;
     }
 
-    button.action{
-      grid-column: auto;
-    }
+    button.action{ grid-column: auto; }
 
     .console{
       min-height: 175px;
@@ -1387,7 +1373,9 @@ const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const IS_DESKTOP_SAFARI = IS_SAFARI && !IS_MOBILE_LAYOUT;
 const IS_CHROME = /chrome|crios|chromium/i.test(navigator.userAgent) && !/edg|opr|opera/i.test(navigator.userAgent);
 const IS_DESKTOP_CHROME = IS_CHROME && !IS_MOBILE_LAYOUT && !IS_IOS;
-const USE_FALLBACK_BEATS = true;
+
+/* Chrome desktop now runs boundary-only, no fallback beats */
+const USE_FALLBACK_BEATS = !IS_DESKTOP_CHROME;
 
 const WHOOSH_MS = 2400;
 const WHOOSH_BUFFER_MS = 560;
@@ -1693,41 +1681,37 @@ function triggerBeat(strength = 1){
 
 function startFallbackBeats(generation){
   if (!USE_FALLBACK_BEATS) return;
-  stopFallbackBeats();
+  if (IS_DESKTOP_CHROME) return;
 
+  stopFallbackBeats();
   if (IS_IOS) return;
 
   let active = true;
+  const baseDelay = IS_MOBILE_LAYOUT ? 140 : 120;
+  const variance = IS_MOBILE_LAYOUT ? 120 : 90;
 
-  const phrasePulse = () => {
+  function loop(){
     if (!active) return;
     if (generation !== speechGeneration) return;
     if (!ballWrap.classList.contains("speaking")) return;
 
-    let pulses = 2 + Math.floor(Math.random() * 3);
+    const delay = baseDelay + (Math.random() * variance);
 
-    const doPulse = () => {
+    fallbackBeatTimer = setTimeout(() => {
       if (!active) return;
       if (generation !== speechGeneration) return;
       if (!ballWrap.classList.contains("speaking")) return;
 
-      triggerBeat(1.12);
-      pulses--;
+      const strength = IS_MOBILE_LAYOUT
+        ? (1.08 + Math.random() * 0.18)
+        : (1.10 + Math.random() * 0.14);
 
-      if (pulses > 0){
-        fallbackBeatTimer = setTimeout(doPulse, 90 + Math.random() * 55);
-      }else{
-        fallbackBeatTimer = setTimeout(phrasePulse, 150 + Math.random() * 110);
-      }
-    };
+      triggerBeat(strength);
+      loop();
+    }, delay);
+  }
 
-    doPulse();
-  };
-
-  fallbackBeatTimer = setTimeout(
-    phrasePulse,
-    IS_DESKTOP_CHROME ? 85 : 120
-  );
+  loop();
 }
 
 function stopFallbackBeats(){
@@ -1752,7 +1736,7 @@ function setSpeaking(on, generation = speechGeneration){
 
   if (isSpeaking){
     speechStartTs = performance.now();
-    startFallbackBeats(generation);
+    if (!IS_DESKTOP_CHROME) startFallbackBeats(generation);
   }else{
     stopFallbackBeats();
     clearTimeout(beatOffTimer);
@@ -1777,7 +1761,7 @@ function updateSpeakingFromEngine(){
         setBeatScale("1.0022");
       }
 
-      if (USE_FALLBACK_BEATS) startFallbackBeats(speechGeneration);
+      if (USE_FALLBACK_BEATS && !IS_DESKTOP_CHROME) startFallbackBeats(speechGeneration);
     }else{
       stopFallbackBeats();
       clearTimeout(beatOffTimer);
@@ -1793,10 +1777,9 @@ function hardStopAllAudioAndBeats(){
   speechGeneration++;
   currentSpeechNonce++;
 
-  try {
-    if (activeUtterance) speechSynthesis.cancel();
-    else speechSynthesis.cancel();
-  } catch(e){}
+  try{
+    speechSynthesis.cancel();
+  }catch(e){}
 
   activeUtterance = null;
   forceOrbOffHard();
@@ -2213,7 +2196,7 @@ function splitSpeechClauses(text){
     .map(s => s.trim())
     .filter(Boolean);
 }
-  
+
 function estimateSpeechMs(text, rateUsed){
   const t = (text || "").trim();
   if (!t) return 0;
@@ -2268,6 +2251,7 @@ function speakUtterance(text){
     cleanup();
     currentSpeechNonce++;
     forceOrbOffHard();
+    ballWrap.classList.remove("speaking");
     doneResolve();
   }
 
@@ -2279,7 +2263,7 @@ function speakUtterance(text){
 
     if (ev.name === "word" || typeof ev.charIndex === "number"){
       const jitter = IS_DESKTOP_CHROME
-        ? 1.14
+        ? 1.10
         : IS_IOS
           ? (1.06 + Math.random() * 0.08)
           : IS_MOBILE_LAYOUT
@@ -2308,8 +2292,11 @@ function speakUtterance(text){
 
     speechStartTs = performance.now();
 
-    triggerBeat(IS_DESKTOP_CHROME ? 1.14 : (IS_IOS ? 1.10 : 1.14));
-    startFallbackBeats(generation);
+    triggerBeat(IS_DESKTOP_CHROME ? 1.10 : (IS_IOS ? 1.10 : 1.14));
+
+    if (!IS_DESKTOP_CHROME){
+      startFallbackBeats(generation);
+    }
 
     startedResolve();
 
@@ -2350,7 +2337,6 @@ async function speakClauseList(clauses, token){
     if (!speakWhileTyping.checked || !voiceReady || !chosenVoice) return;
 
     const speech = speakUtterance(clause);
-
     await speech.done;
     if (!isTokenLive(token)) return;
 
