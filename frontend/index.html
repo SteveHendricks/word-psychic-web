@@ -1635,7 +1635,7 @@ function startFallbackBeats(generation){
   if (!USE_FALLBACK_BEATS) return;
   stopFallbackBeats();
 
-  if (IS_IOS || IS_DESKTOP_CHROME) return;
+  if (IS_IOS) return;
 
   const tick = () => {
     if (generation !== speechGeneration) return;
@@ -1644,7 +1644,10 @@ function startFallbackBeats(generation){
     let strength;
     let delay;
 
-    if (IS_MOBILE_LAYOUT){
+    if (IS_DESKTOP_CHROME){
+      strength = 1.12;
+      delay = 150;
+    }else if (IS_MOBILE_LAYOUT){
       strength = 1.05 + Math.random() * 0.12;
       delay = 165 + Math.random() * 65;
     }else{
@@ -1656,7 +1659,7 @@ function startFallbackBeats(generation){
     fallbackBeatTimer = setTimeout(tick, delay);
   };
 
-  fallbackBeatTimer = setTimeout(tick, 120);
+  fallbackBeatTimer = setTimeout(tick, IS_DESKTOP_CHROME ? 110 : 120);
 }
 
 function stopFallbackBeats(){
@@ -2183,7 +2186,7 @@ function speakUtterance(text){
 
     if (ev.name === "word" || typeof ev.charIndex === "number"){
       const jitter = IS_DESKTOP_CHROME
-        ? 1.16
+        ? 1.14
         : IS_IOS
           ? (1.06 + Math.random() * 0.08)
           : IS_MOBILE_LAYOUT
