@@ -1628,14 +1628,14 @@ function triggerBeat(strength = 1){
     }else{
       setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
     }
-  }, IS_DESKTOP_CHROME ? 86 : (IS_IOS ? 118 : (IS_MOBILE_LAYOUT ? 125 : 102)));
+  }, IS_DESKTOP_CHROME ? 120 : (IS_IOS ? 118 : (IS_MOBILE_LAYOUT ? 125 : 102)));
 }
 
 function startFallbackBeats(generation){
   if (!USE_FALLBACK_BEATS) return;
   stopFallbackBeats();
 
-  if (IS_IOS) return;
+  if (IS_IOS || IS_DESKTOP_CHROME) return;
 
   const tick = () => {
     if (generation !== speechGeneration) return;
@@ -1644,10 +1644,7 @@ function startFallbackBeats(generation){
     let strength;
     let delay;
 
-    if (IS_DESKTOP_CHROME){
-      strength = 1.10 + Math.random() * 0.12;
-      delay = 118 + Math.random() * 42;
-    }else if (IS_MOBILE_LAYOUT){
+    if (IS_MOBILE_LAYOUT){
       strength = 1.05 + Math.random() * 0.12;
       delay = 165 + Math.random() * 65;
     }else{
@@ -1659,7 +1656,7 @@ function startFallbackBeats(generation){
     fallbackBeatTimer = setTimeout(tick, delay);
   };
 
-  fallbackBeatTimer = setTimeout(tick, IS_DESKTOP_CHROME ? 90 : 120);
+  fallbackBeatTimer = setTimeout(tick, 120);
 }
 
 function stopFallbackBeats(){
@@ -2183,12 +2180,16 @@ function speakUtterance(text){
     if (!ev) return;
     if (generation !== speechGeneration) return;
     if (nonce !== currentSpeechNonce && speakingCount === 0) return;
+
     if (ev.name === "word" || typeof ev.charIndex === "number"){
-      const jitter = IS_IOS
-        ? (1.06 + Math.random() * 0.08)
-        : IS_MOBILE_LAYOUT
-          ? (1.10 + Math.random() * 0.22)
-          : (1.08 + Math.random() * 0.18);
+      const jitter = IS_DESKTOP_CHROME
+        ? 1.16
+        : IS_IOS
+          ? (1.06 + Math.random() * 0.08)
+          : IS_MOBILE_LAYOUT
+            ? (1.10 + Math.random() * 0.22)
+            : (1.08 + Math.random() * 0.18);
+
       triggerBeat(jitter);
     }
   };
@@ -2220,10 +2221,11 @@ function speakUtterance(text){
     stopFallbackBeats();
     clearTimeout(beatOffTimer);
     ballWrap.classList.remove("beat");
+    ballWrap.classList.remove("speaking");
+    ballWrap.classList.add("idle");
+    setBeatScale("1.0010");
 
-    setSpeaking(false, generation);
-    updateSpeakingFromEngine();
-    hardPulseOff();
+    speakingCount = 0;
     doneResolve();
   };
 
@@ -2236,10 +2238,11 @@ function speakUtterance(text){
     stopFallbackBeats();
     clearTimeout(beatOffTimer);
     ballWrap.classList.remove("beat");
+    ballWrap.classList.remove("speaking");
+    ballWrap.classList.add("idle");
+    setBeatScale("1.0010");
 
-    setSpeaking(false, generation);
-    updateSpeakingFromEngine();
-    hardPulseOff();
+    speakingCount = 0;
     doneResolve();
   };
 
