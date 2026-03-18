@@ -1628,32 +1628,38 @@ function triggerBeat(strength = 1){
     }else{
       setBeatScale(ballWrap.classList.contains("speaking") ? "1.0022" : "1.0010");
     }
-  }, IS_DESKTOP_CHROME ? 46 : (IS_IOS ? 118 : (IS_MOBILE_LAYOUT ? 125 : 102)));
+  }, IS_DESKTOP_CHROME ? 86 : (IS_IOS ? 118 : (IS_MOBILE_LAYOUT ? 125 : 102)));
 }
 
 function startFallbackBeats(generation){
   if (!USE_FALLBACK_BEATS) return;
   stopFallbackBeats();
 
-  if (IS_IOS || IS_DESKTOP_CHROME) return;
+  if (IS_IOS) return;
 
   const tick = () => {
     if (generation !== speechGeneration) return;
     if (!ballWrap.classList.contains("speaking")) return;
 
-    const strength = IS_MOBILE_LAYOUT
-      ? (1.05 + Math.random() * 0.12)
-      : (1.04 + Math.random() * 0.11);
+    let strength;
+    let delay;
+
+    if (IS_DESKTOP_CHROME){
+      strength = 1.10 + Math.random() * 0.12;
+      delay = 118 + Math.random() * 42;
+    }else if (IS_MOBILE_LAYOUT){
+      strength = 1.05 + Math.random() * 0.12;
+      delay = 165 + Math.random() * 65;
+    }else{
+      strength = 1.04 + Math.random() * 0.11;
+      delay = 145 + Math.random() * 55;
+    }
 
     triggerBeat(strength);
-
-    fallbackBeatTimer = setTimeout(
-      tick,
-      IS_MOBILE_LAYOUT ? (165 + Math.random() * 65) : (145 + Math.random() * 55)
-    );
+    fallbackBeatTimer = setTimeout(tick, delay);
   };
 
-  fallbackBeatTimer = setTimeout(tick, 120);
+  fallbackBeatTimer = setTimeout(tick, IS_DESKTOP_CHROME ? 90 : 120);
 }
 
 function stopFallbackBeats(){
@@ -1683,6 +1689,8 @@ function setSpeaking(on, generation = speechGeneration){
     stopFallbackBeats();
     clearTimeout(beatOffTimer);
     ballWrap.classList.remove("beat");
+    ballWrap.classList.remove("speaking");
+    ballWrap.classList.add("idle");
     setBeatScale("1.0010");
   }
 }
