@@ -1600,6 +1600,20 @@ function hardPulseOff(){
   }
 }
 
+function hardStopOrbVisuals(){
+  stopFallbackBeats();
+  clearTimeout(beatOffTimer);
+
+  speakingCount = 0;
+  currentSpeechNonce++;
+  speechGeneration++;
+
+  ballWrap.classList.remove("beat");
+  ballWrap.classList.remove("speaking");
+  ballWrap.classList.add("idle");
+  setBeatScale("1.0010");
+}
+
 function triggerBeat(strength = 1){
   const maxStrength = IS_IOS ? 1.36 : (IS_MOBILE_LAYOUT ? 1.42 : 1.40);
   const s = Math.max(0.92, Math.min(maxStrength, strength));
@@ -2209,62 +2223,56 @@ function speakUtterance(text){
   const started = new Promise(r => (startedResolve = r));
   const done = new Promise(r => (doneResolve = r));
 
+  const myNonce = nonce;
+  let finished = false;
+
+  function finishUtterance(){
+    if (finished) return;
+    finished = true;
+
+    if (myNonce === currentSpeechNonce){
+      stopFallbackBeats();
+      clearTimeout(beatOffTimer);
+
+      speakingCount = 0;
+      ballWrap.classList.remove("beat");
+      ballWrap.classList.remove("speaking");
+      ballWrap.classList.add("idle");
+      setBeatScale("1.0010");
+    }
+
+    doneResolve();
+  }
+
   u.onstart = () => {
-  if (generation !== speechGeneration){
+    if (generation !== speechGeneration){
+      startedResolve();
+      doneResolve();
+      return;
+    }
+
+    speakingCount = 1;
+    ballWrap.classList.add("speaking");
+    ballWrap.classList.remove("idle");
+    ballWrap.classList.remove("beat");
+    setBeatScale("1.0010");
+
+    speechStartTs = performance.now();
+
+    triggerBeat(IS_DESKTOP_CHROME ? 1.14 : (IS_IOS ? 1.10 : 1.14));
+    startFallbackBeats(generation);
+
     startedResolve();
-    doneResolve();
-    return;
-  }
+  };
 
-  speakingCount = 1;
-  ballWrap.classList.add("speaking");
-  ballWrap.classList.remove("idle");
-  ballWrap.classList.remove("beat");
-  setBeatScale("1.0010");
+  u.onend = () => {
+    finishUtterance();
+  };
 
-  speechStartTs = performance.now();
+  u.onerror = () => {
+    finishUtterance();
+  };
 
-  triggerBeat(IS_DESKTOP_CHROME ? 1.14 : (IS_IOS ? 1.10 : 1.14));
-  startFallbackBeats(generation);
-
-  startedResolve();
-};
-
-u.onend = () => {
-  if (generation !== speechGeneration){
-    doneResolve();
-    return;
-  }
-
-  stopFallbackBeats();
-  clearTimeout(beatOffTimer);
-
-  speakingCount = 0;
-  ballWrap.classList.remove("beat");
-  ballWrap.classList.remove("speaking");
-  ballWrap.classList.add("idle");
-  setBeatScale("1.0010");
-
-  doneResolve();
-};
-
-u.onerror = () => {
-  if (generation !== speechGeneration){
-    doneResolve();
-    return;
-  }
-
-  stopFallbackBeats();
-  clearTimeout(beatOffTimer);
-
-  speakingCount = 0;
-  ballWrap.classList.remove("beat");
-  ballWrap.classList.remove("speaking");
-  ballWrap.classList.add("idle");
-  setBeatScale("1.0010");
-
-  doneResolve();
-};
   try{
     speechSynthesis.speak(u);
   }catch(e){
@@ -2293,7 +2301,6 @@ async function speakClauseList(clauses, token){
     if (!isTokenLive(token)) return;
 
     hardPulseOff();
-    updateSpeakingFromEngine();
     await sleep(IS_IOS ? 55 : 70);
   }
 }
@@ -2407,20 +2414,17 @@ async function speakAndTypePerSentence(text, token){
         screenEl.textContent += ch;
         autoScrollScreen();
       }
-      updateSpeakingFromEngine();
       await sleep((chunk === "\n\n\n" ? SECTION_PAUSE_MS : PARAGRAPH_PAUSE_MS) * paceFactor());
       continue;
     }
 
     if (isEllipsisOnly(chunk)){
       hardPulseOff();
-      if (speakingCount === 0) updateSpeakingFromEngine();
       const dots = (chunk.match(/[.\u2026]/g) || []).length || 3;
       for (let i = 0; i < dots; i++){
         if (!isTokenLive(token)) return;
         screenEl.textContent += "…";
         autoScrollScreen();
-        updateSpeakingFromEngine();
         await sleep(((i === dots - 1) ? FINAL_ELLIPSIS_DELAY : ELLIPSIS_DELAY) * paceFactor());
       }
       continue;
@@ -2428,12 +2432,10 @@ async function speakAndTypePerSentence(text, token){
 
     await typeAndSpeakChunk(chunk, token);
     hardPulseOff();
-    updateSpeakingFromEngine();
     await sleep(SENTENCE_PAUSE_MS * paceFactor());
   }
 
-  hardPulseOff();
-  updateSpeakingFromEngine();
+  hardStopOrbVisuals();
 }
 
 async function fetchJsonWithRetry(url, options = {}, retries = 1){
