@@ -1637,29 +1637,37 @@ function startFallbackBeats(generation){
 
   if (IS_IOS) return;
 
-  const tick = () => {
+  let active = true;
+
+  const phrasePulse = () => {
+    if (!active) return;
     if (generation !== speechGeneration) return;
     if (!ballWrap.classList.contains("speaking")) return;
 
-    let strength;
-    let delay;
+    let pulses = 2 + Math.floor(Math.random() * 3);
 
-    if (IS_DESKTOP_CHROME){
-      strength = 1.12;
-      delay = 150;
-    }else if (IS_MOBILE_LAYOUT){
-      strength = 1.05 + Math.random() * 0.12;
-      delay = 165 + Math.random() * 65;
-    }else{
-      strength = 1.04 + Math.random() * 0.11;
-      delay = 145 + Math.random() * 55;
-    }
+    const doPulse = () => {
+      if (!active) return;
+      if (generation !== speechGeneration) return;
+      if (!ballWrap.classList.contains("speaking")) return;
 
-    triggerBeat(strength);
-    fallbackBeatTimer = setTimeout(tick, delay);
+      triggerBeat(1.12);
+      pulses--;
+
+      if (pulses > 0){
+        fallbackBeatTimer = setTimeout(doPulse, 90 + Math.random() * 55);
+      }else{
+        fallbackBeatTimer = setTimeout(phrasePulse, 150 + Math.random() * 110);
+      }
+    };
+
+    doPulse();
   };
 
-  fallbackBeatTimer = setTimeout(tick, IS_DESKTOP_CHROME ? 110 : 120);
+  fallbackBeatTimer = setTimeout(
+    phrasePulse,
+    IS_DESKTOP_CHROME ? 85 : 120
+  );
 }
 
 function stopFallbackBeats(){
@@ -2202,53 +2210,61 @@ function speakUtterance(text){
   const done = new Promise(r => (doneResolve = r));
 
   u.onstart = () => {
-    if (generation !== speechGeneration){
-      startedResolve();
-      doneResolve();
-      return;
-    }
-
-    setSpeaking(true, generation);
-    speechStartTs = performance.now();
-    triggerBeat(IS_IOS ? 1.10 : 1.14);
-    updateSpeakingFromEngine();
+  if (generation !== speechGeneration){
     startedResolve();
-  };
-
-  u.onend = () => {
-    if (generation !== speechGeneration){
-      doneResolve();
-      return;
-    }
-
-    stopFallbackBeats();
-    clearTimeout(beatOffTimer);
-    ballWrap.classList.remove("beat");
-    ballWrap.classList.remove("speaking");
-    ballWrap.classList.add("idle");
-    setBeatScale("1.0010");
-
-    speakingCount = 0;
     doneResolve();
-  };
+    return;
+  }
 
-  u.onerror = () => {
-    if (generation !== speechGeneration){
-      doneResolve();
-      return;
-    }
+  speakingCount = 1;
+  ballWrap.classList.add("speaking");
+  ballWrap.classList.remove("idle");
+  ballWrap.classList.remove("beat");
+  setBeatScale("1.0010");
 
-    stopFallbackBeats();
-    clearTimeout(beatOffTimer);
-    ballWrap.classList.remove("beat");
-    ballWrap.classList.remove("speaking");
-    ballWrap.classList.add("idle");
-    setBeatScale("1.0010");
+  speechStartTs = performance.now();
 
-    speakingCount = 0;
+  triggerBeat(IS_DESKTOP_CHROME ? 1.14 : (IS_IOS ? 1.10 : 1.14));
+  startFallbackBeats(generation);
+
+  startedResolve();
+};
+
+u.onend = () => {
+  if (generation !== speechGeneration){
     doneResolve();
-  };
+    return;
+  }
 
+  stopFallbackBeats();
+  clearTimeout(beatOffTimer);
+
+  speakingCount = 0;
+  ballWrap.classList.remove("beat");
+  ballWrap.classList.remove("speaking");
+  ballWrap.classList.add("idle");
+  setBeatScale("1.0010");
+
+  doneResolve();
+};
+
+u.onerror = () => {
+  if (generation !== speechGeneration){
+    doneResolve();
+    return;
+  }
+
+  stopFallbackBeats();
+  clearTimeout(beatOffTimer);
+
+  speakingCount = 0;
+  ballWrap.classList.remove("beat");
+  ballWrap.classList.remove("speaking");
+  ballWrap.classList.add("idle");
+  setBeatScale("1.0010");
+
+  doneResolve();
+};
   try{
     speechSynthesis.speak(u);
   }catch(e){
