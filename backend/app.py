@@ -136,7 +136,7 @@ A final word. Venerate — To worship. To hold as sacred due to age or character
 Because it thought its whistle sang wisdom, the frying pan venerated the old tea kettle.
 
 Prudent. Revere. Venerate.
-Your fortune: Choose carefully,and your name may be remembered on spray painted walls.""",
+Your fortune: Proceed soundly,and your name may be remembered beyond spray painted walls.""",
     },
     {
         "title": "Dearth → Paucity → Penury",
@@ -152,7 +152,7 @@ A final word. Penury — Extreme poverty.
 The novel's hero escaped penury through grit and kindness.
 
 Dearth. Paucity. Penury.
-Your fortune: Be mindful of waste, and you pockets will bulge.""",
+Your fortune: When you don't have a lot, the litte can seem big.""",
     },
     {
         "title": "Minuscule → Nominal → Insignificant",
@@ -165,7 +165,7 @@ I see another word. Nominal — Small in name or importance.
 A nominal error unbelievably ruined the mosquitoes' family chicken dinner.
 
 A final word. Insignificant — Too small or unimportant to matter.
-Looking through King Kong's wardrobe closet, Godzilla felt insignificant.
+Godzilla felt insignificant looking through King Kong's overflowing wardrobe closet.
 
 Minuscule. Nominal. Insignificant.
 Your fortune: Make your voice be heard. And the world takes out its earplugs.""",
@@ -178,7 +178,7 @@ Your fortune: Make your voice be heard. And the world takes out its earplugs."""
 The aggregate of the day’s sales had the calculator singing ka-ching, ka-ching.
 
 I see another word. Plethora — An excess. More than enough.
-A plethora of lettuce-eating rabbits made the hungry groundhog hopping mad.
+A plethora of lettuce-eating rabbits made the hungry gopher hopping mad.
 
 A final word. Prodigious — extraordinarily large.
 Having drunk a prodigious amount of water, the athlete thirsted for a restroom.
@@ -191,7 +191,7 @@ Your fortune: Excess always makes itself known. Sometimes at inconvenient moment
         "intro_line": "Your word is “benevolence.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Benevolence means kindness. Inclination to do good.
-My dog showed great benevolence — he only ate half of my sandwich on the table.
+My dog showed great benevolence — he only ate half of my sandwich that was on the table.
 
 I see another word. Philanthropy — Love of humankind as expressed by doing good deeds.
 The Three Stooges Festival fan performed his unique philanthropy on stage — belching to the song, "Pop Goes The Weasel."
@@ -216,7 +216,7 @@ A final word. Vitriolic — Nasty; Venomous. Burning like acid.
 Big Foot found the campers calling him Big Foot vitriolic — his name is “George” — they only had to ask.
 
 Insidious. Belligerent. Vitriolic.
-Your fortune: Attacks can feel good momentarily. But the damage they cause is not easily mended.""",
+Your fortune: Attacks can feel good momentarily — but the damage they cause is not easily mended.""",
     },
     {
         "title": "Laconic → Perfunctory → Concise",
@@ -226,13 +226,13 @@ Your fortune: Attacks can feel good momentarily. But the damage they cause is no
 The teenager suddenly wasn’t laconic when explaining why he needed twenty dollars.
 
 I see another word. Perfunctory — Lacking interest or enthusiasm.
-In 100-degree heat, the sled dogs grew perfunctory pulling the man eating a bologna hero up the hill.
+In 100-degree heat, the sled dogs grew perfunctory pulling the man eating a meatball hero up the hill.
 
 A final word. Concise — Brief and to the point.
 Instead of going on and on about moisturizer benefits, the pinky was concise and told the thumb, “it’s just good for you.”
 
 Laconic. Perfunctory. Concise.
-Your fortune: Interest and directness always have a welcome mat at a friend's door.""",
+Your fortune: An explanation with a few zig-zags is always welcome.""",
     },
     {
         "title": "Copious → Protract → Ponderous",
@@ -264,7 +264,7 @@ A final word. Capitulate — To give up or surrender.
 Faced with a hungry mouth, the piece of cake capitulated and said, “Farewell.”
 
 Apprehensive. Diffident. Capitulate.
-Your fortune: Fear is scary, but it's a needed fuel to get you going.""",
+Your fortune: Fear is scary, but it's a fuel that gets you going.""",
     },
     {
         "title": "Dauntless → Imperious → Demagogue",
@@ -277,7 +277,7 @@ I see another word. Imperious — Bossy and arrogantly commanding.
 The imperious mustard told the mayonnaise — "the coldest spot in the refrigerator is mine!"
 
 A final word. Demagogue — A leader who gains support by manipulating emotions or fears.
-Vote for the devil, the demagogue said, or every angel loses its wings.
+Vote for the devil, the demagogue said, or every angel could lose their wings.
 
 Dauntless. Imperious. Demagogue.
 Your fortune: Self-confidence can be admired, but bullying, not so much.""",
@@ -287,7 +287,7 @@ Your fortune: Self-confidence can be admired, but bullying, not so much.""",
         "intro_line": "Your word is “reparation.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Reparation means compensation for a wrong.
-For stealing the twinkie, the Court of Sweets ruled that the shoplifter's reparation would be a container of fudge.
+For stealing the twinkie, the Court of Sweets ruled that the shoplifter's reparation would be a tub of fudge.
 
 I see another word. Respite — A short period of rest or relief.
 The veterinarian ordered the tense turtle to take a month-long respite so he could slow down.
@@ -312,7 +312,7 @@ A final word. Anguish — Severe mental or emotional pain.
 Hearing “maybe” caused the amoeba some anguish when it was the paramecium's reply to a date.
 
 Debilitate. Subjugate. Anguish.
-Your fortune: Keep yourself strong to fight off the approaching shackles.""",
+Your fortune: Keep yourself strong and shackles will not hold you.""",
     },
     {
         "title": "Verisimilitude → Apocryphal → Spurious",
@@ -322,20 +322,20 @@ Your fortune: Keep yourself strong to fight off the approaching shackles.""",
 The anteater thought his painting of the cow had verisimilitude -- "To me, it says moo!"
 
 I see another word. Apocryphal — Of doubtful authenticity.
-A smartphone as big as a suitcase? It's apocryphal!
+The salesman's smartphone was as big as a suitcase! It's apocryphal!
 
 A final word. Spurious — False or fake.
 “Totally spurious,” replied the ice box to the toaster’s claim that it could keep pickles cold.
 
 Verisimilitude. Apocryphal. Spurious.
-Your fortune: Examine carefully. Tricks do reside up well disguised sleeves.""",
+Your fortune: Examine carefully. Tricks reside in well tailored sleeves.""",
     },
     {
         "title": "Postulate → Veracity → Precept",
         "intro_line": "Your word is “postulate.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Postulate means to assume. To consider to be true without evidence. 
-Despite the rat’s loud snoring, the scientist postulated that he was awake.
+Despite the rat’s violent tossing and turning in his sleep, the scientist postulated that the rat's dreams were sweet.
 
 I see another word. Veracity — Truthfulness or accuracy.
 George Washington’s veracity about chopping down the cherry tree is admirable, but what about that peach tree?
@@ -367,7 +367,7 @@ Your fortune: Turning onto a dirt road can pave the way for an imaginative adven
         "intro_line": "Your word is “singular.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Singular means unique. Extraordinary. Exceptional.
-His singular talent of walking barefoot on Legos with a smile amazed the parents.
+His singular talent of walking barefoot with a smile on Lego pieces amazed the parents.
 
 I see another word. Sublime — Awe-inspiring. Extremely high, lofty, and majestic.
 The sublime beaver not only built the dam, but had it produce enough hydroelectricity to power the nearby city.
@@ -389,7 +389,7 @@ I see another word. Adage — An old saying. A familiar bit of wisdom.
 The organic medicine man’s updated adage: to keep the doctor away, drink an apple smoothie a day.
 
 A final word. Renaissance — A rebirth. Revitalization.
-When the classic turntable saw there was a renaissance in vinyl records, he reminisced about the good old days when songs skipped.
+When the ancient turntable saw there was a renaissance in vinyl records, he reminisced about the good old days when songs skipped.
 
 Conventional. Adage. Renaissance.
 Your fortune: The tried-and-true way of doing things can be boring — but dependable.""",
@@ -405,7 +405,7 @@ I see another word. Unprecedented — Not done before, entirely new.
 In an unprecedented ruling, the judge ordered the litterbug to pick up after all the teenagers in Oh No County.
 
 A final word. Visionary — A dreamer. Idealistic and usually impractical.
-Seagull Stan was a visionary — composing ocean jetties out of spicy chili fries.
+Seagull Stan was a visionary — he saw all future ocean jetties constructed out of spicy chili fries.
 
 Novel. Unprecedented. Visionary.
 Your fortune: For those who benefit from it, the new is exciting. For others, not really.""",
@@ -421,7 +421,7 @@ I see another word. Complicity — Participation in wrongdoing.
 The raccoon denied complicity, but he did allow the cheese store robbers to lay low in his den for some cheddar.
 
 A final word. Collusion — Secret cooperation.
-In collusion, the basketball cheerleaders cheered “offense,” when they should have cheered “defense,” to confuse the home team.
+In collusion, to confuse the home team, the basketball cheerleaders shouted “offense” when they should have cheered “defense.” 
 
 Charisma. Complicity. Collusion.
 Your fortune: Manipulation thrives in secrecy, but loses its power when caught with its pants down.""",
@@ -479,7 +479,7 @@ Your fortune: Drawing attention to yourself isn’t always the advantage you thi
         "intro_line": "Your word is “steadfast.”\n\n",
         "continue_q": "Shall we journey further with this word?",
         "script": """Steadfast means unwaveringly loyal and faithful.
-Jimmy stayed steadfast, refusing to rat out his friend even when bribed with a Snickers bar.
+Jimmy stayed steadfast, refusing to squeal on his friend even when bribed with a Snickers bar.
 
 I see another word. Tenacious — To be persistent. To be stubborn.
 The tenacious cat kept trying to persuade the dog the floor was more comfortable than the couch.
