@@ -296,7 +296,7 @@ A final word. Salutary — Producing a beneficial or healing effect.
 Just hiding up in the attic for half-an-hour was salutary for the wife when the mother-in-law visited.
 
 Reparation. Respite. Salutary.
-Your fortune: Rest and relaxation calms the mind and soothes the body.""",
+Your fortune: Rest calms the mind and soothes the body along with putting the phone down.""",
     },
     {
         "title": "Debilitate → Subjugate → Anguish",
