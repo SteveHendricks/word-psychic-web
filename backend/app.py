@@ -453,7 +453,7 @@ I see another word. Bemused — Bewildered.  To be confused.
 Bemused, the workers had to think about the foreman’s order to work faster, not smarter.
 
 A final word. Cryptic — To be mystifying. Mysterious. Puzzling.
-Unraveling the message of the cryptic creaking door, the ghost hunter spoke, “It wants oil.”
+Unraveling the message of the cryptic creaking door, the ghost hunter spoke: “It wants oil.”
 
 Abstruse. Bemused. Cryptic.
 Your fortune: When life is puzzling, look for the missing piece. It’s out there.""",
