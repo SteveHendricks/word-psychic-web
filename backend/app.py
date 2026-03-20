@@ -328,7 +328,7 @@ A final word. Spurious — False or fake.
 “Totally spurious,” replied the ice box to the toaster’s claim that it could keep pickles cold.
 
 Verisimilitude. Apocryphal. Spurious.
-Your fortune: Examine carefully. Tricks reside in well tailored sleeves.""",
+Your fortune: Examine carefully. Tricks reside in well-tailored sleeves.""",
     },
     {
         "title": "Postulate → Veracity → Precept",
