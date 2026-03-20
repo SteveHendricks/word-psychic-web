@@ -136,7 +136,7 @@ A final word. Venerate — To worship. To hold as sacred due to age or character
 Because it thought its whistle sang wisdom, the frying pan venerated the old tea kettle.
 
 Prudent. Revere. Venerate.
-Your fortune: Proceed soundly,and your name may be remembered beyond spray painted walls.""",
+Your fortune: Proceed soundly, and your name may be remembered beyond spray painted walls.""",
     },
     {
         "title": "Dearth → Paucity → Penury",
