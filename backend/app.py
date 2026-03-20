@@ -152,7 +152,7 @@ A final word. Penury — Extreme poverty.
 The novel's hero escaped penury through grit and kindness.
 
 Dearth. Paucity. Penury.
-Your fortune: When you don't have a lot, the litte can seem big.""",
+Your fortune: Don't let wanting more devalue what you have presently.""",
     },
     {
         "title": "Minuscule → Nominal → Insignificant",
