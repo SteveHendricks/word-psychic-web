@@ -404,7 +404,7 @@ The banana’s novel idea was a genetically modified banana peel with a non-slip
 I see another word. Unprecedented — Not done before, entirely new.
 In an unprecedented ruling, the judge ordered the litterbug to pick up after all the teenagers in Oh No County.
 
-A final word. Visionary — A dreamer. Idealistic and usually impractical.
+A final word. Visionary — A dreamer. Idealistic and sometimes impractical.
 Seagull Stan was a visionary — he saw all future ocean jetties constructed out of spicy chili fries.
 
 Novel. Unprecedented. Visionary.
