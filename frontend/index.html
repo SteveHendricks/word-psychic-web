@@ -1388,6 +1388,11 @@
   </main>
 
 <script>
+  function trackEvent(eventName, params = {}) {
+  if (typeof gtag === 'function') {
+    gtag('event', eventName, params);
+  }
+}
 const API = "https://word-psychic-web.onrender.com";
 
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -2753,6 +2758,9 @@ function bindStartOnce(){
 
     if (startInFlight) return;
     if (!guardAction()) return;
+
+    trackEvent('start_session');
+    
     startInFlight = true;
 
     const token = bumpRunToken();
@@ -2819,6 +2827,9 @@ bindStartOnce();
 yesBtn.addEventListener("click", (e)=>{
   e.preventDefault();
   if (sessionDone) return;
+
+  trackEvent('answer_yes');  // ← ADD THIS LINE
+  
   revealEndSessionAfterIntro();
   sendChoice("yes");
 });
@@ -2826,6 +2837,9 @@ yesBtn.addEventListener("click", (e)=>{
 noBtn.addEventListener("click", (e)=>{
   e.preventDefault();
   if (sessionDone) return;
+
+  trackEvent('answer_no');  // ← ADD THIS LINE
+  
   revealEndSessionAfterIntro();
   sendChoice("no");
 });
@@ -2833,6 +2847,9 @@ noBtn.addEventListener("click", (e)=>{
 stopBtn.addEventListener("click", (e)=>{
   e.preventDefault();
   if (sessionDone) return;
+
+  trackEvent('end_session');  // ← ADD THIS LINE
+  
   forceEndSession();
 });
 
