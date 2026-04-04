@@ -43,7 +43,7 @@ COURTEOUS_EXIT = [
 ]
 
 # Startup is Yes/No only
-SHORT_HINT_OPENING = "Yes opens the door... no keeps it shut."
+SHORT_HINT_OPENING = "Yes opens the door, no keeps it shut."
 # Later prompts can mention End session
 SHORT_HINT = "Select Yes, No, or End session."
 
@@ -657,7 +657,7 @@ def start(response: Response):
     )
 
     guidance = (
-        "Do you wish to summon the Word Psychic... who calls forth words from the beyond... and through their meanings, reveals your fortune?\n"
+        "Do you wish to summon the Word Psychic who calls forth words from the beyond, and through their meanings, reveals your fortune?\n"
         + SHORT_HINT_OPENING
     )
     st["phase"] = "intro"
