@@ -605,9 +605,7 @@ def offer_next_word(st: Session) -> Dict[str, Any]:
             intro = cluster["intro_line"]
 
         continue_q = pick_continue_question(cluster)
-
-        g = guidance_flow(st, opening=(not st["first_offer_done"]))
-        text = f"{intro}{continue_q}" + (f"\n{g}" if g else "")
+        text = f"{intro}{continue_q}"
         return reply(st, text)
 
     if st["rejected"]:
